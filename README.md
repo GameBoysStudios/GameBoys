@@ -1,6 +1,6 @@
-# Verde Games Studio - Sitio Web Oficial
+# Game Boys Studio - Sitio Web Oficial
 
-Una página web moderna y profesional para Verde Games Studio, mostrando sus videojuegos y cómics con autenticación mediante Firebase.
+Una página web moderna y profesional para Game Boys Studios, mostrando sus videojuegos y cómics con autenticación mediante Firebase.
 
 ## 📋 Características
 
@@ -234,6 +234,6 @@ Este proyecto es de código abierto. Siéntete libre de usarlo y modificarlo.
 
 ---
 
-**Hecho con 💚 para Verde Games Studio**
+**Hecho con 💚 para Game Boys Studios**
 
 ¿Preguntas? Contacta a [tu-email@ejemplo.com]
