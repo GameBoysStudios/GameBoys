@@ -3,11 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAME BOYS STUDIOS</title>
+    <title> GAME BOYS STUDIOS | Videojuegos & Cómics</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
-    <!-- Existing content + new downloads section -->
-    <a href="#descargas">Descargar Launcher</a>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="navigateTo('home')">
+                <span class="cactus-icon">🌵</span>
+                <span class="logo-text">GAME BOYS<br><small>STUDIOS</small></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link" onclick="navigateTo('home')">Inicio</a></li>
+                <li><a href="#juegos" class="nav-link" onclick="navigateTo('juegos')">Juegos</a></li>
+                <li><a href="#comics" class="nav-link" onclick="navigateTo('comics')">Cómics</a></li>
+                <li><a href="#about" class="nav-link" onclick="navigateTo('about')">Sobre Nosotros</a></li>
+                <li><a href="#community" class="nav-link" onclick="navigateTo('community')">Comunidad</a></li>
+                <li><a href="#auth" class="nav-link" onclick="navigateTo('auth')">Cuenta</a></li>
+            </ul>
+            <div class="user-badge" id="userBadge" style="display:none;">
+                <span id="userEmail"></span>
+                <button onclick="logout()" class="logout-btn">Salir</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenedor principal -->
+    <main class="main-container">
+        <!-- PÁGINA: HOME -->
+        <section id="home-page" class="page active">
+            <div class="hero">
+                <div class="hero-content">
+                    <div class="title-wrapper">
+                        <h1 class="hero-title"> GAME BOYS STUDIOS</h1>
+                    </div>
+                    <p class="hero-subtitle">Videojuegos & Cómics Únicos</p>
+                    <p class="hero-description">
+                        Una empresa creativa dedicada a desarrollar experiencias inmersivas a través de videojuegos 
+                        de última generación y narrativas visuales en cómics. Nuestras historias te transportarán a mundos fascinantes.
+                    </p>
+                    <div class="cta-buttons">
+                        <button class="btn btn-primary" onclick="navigateTo('juegos')">Explorar Juegos</button>
+                        <button class="btn btn-secondary" onclick="navigateTo('comics')">Ver Cómics</button>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-icons">
+                        <div class="icon-item">🎮</div>
+                        <div class="icon-item">📚</div>
+                    </div>
+                    <div class="floating-particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Destacados -->
+            <section class="highlights-section">
+                <h2>Lo Más Destacado</h2>
+                <div class="highlights-grid">
+                    <div class="highlight-card featured-game">
+                        <div class="highlight-image">🌵</div>
+                        <h3>Cactus: The Videogame</h3>
+                        <p class="highlight-meta">Videojuego • Próximamente en Steam</p>
+                        <p>Vivir en un planeta diferente. Descubre artilugios robóticos y enfrenta desafíos únicos.</p>
+                        <button class="btn btn-small" onclick="navigateTo('juegos')">Ver Detalles</button>
+                    </div>
+                    <div class="highlight-card featured-comic">
+                        <div class="highlight-image">📖</div>
+                        <h3>La leyenda del caballero Shango</h3>
+                        <p class="highlight-meta">Libro • Disponible Ahora</p>
+                        <p>La historia de un chico de otro planeta. Una narrativa visual cautivadora que explora los misterios del límite.</p>
+                        <button class="btn btn-small" onclick="navigateTo('comics')">Leer Más</button>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- PÁGINA: JUEGOS -->
+        <section id="juegos-page" class="page">
+            <div class="section-header">
+                <h2>Nuestros Videojuegos</h2>
+                <p class="section-subtitle">Experiencias inmersivas diseñadas para ti</p>
+            </div>
+
+            <div class="games-grid">
+                <!-- Juego 1: Cactus -->
+                <div class="game-card">
+                    <div class="game-header cactus-theme">
+                        <div class="game-icon">🌵</div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Cactus: The Videogame</h3>
+                        <p class="game-status">
+                            <span class="badge badge-soon">Próximamente</span>
+                        </p>
+                        <p class="game-description">
+                            Un viaje épico a través de un desierto misterioso. Resuelve acertijos, enfrenta enemigos únicos y descubre la verdad sobre tu pasado.
+                        </p>
+                        <div class="game-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Género:</span> Aventura/Acción
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Plataforma:</span> PC (Steam)
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Motor:</span> Unity 6.0
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="navigateTo('cactus-detail')" disabled>Ver Más</button>
+                    </div>
+                </div>
+
+                <!-- Juego 2: Ejemplo (Puedes añadir más) -->
+                <div class="game-card">
+                    <div class="game-header mystery-theme">
+                        <div class="game-icon">🔮</div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Super Donut Royale</h3>
+                        <p class="game-status">
+                            <span class="badge badge-development">En Desarrollo</span>
+                        </p>
+                        <p class="game-description">
+                            Un thriller psicológico que cuestiona la realidad. Resuelve misterios temporales y descubre la verdad oculta en los ecos del futuro.
+                        </p>
+                        <div class="game-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Género:</span> Thriller/Puzzles
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Plataforma:</span> Multi-plataforma
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Motor:</span> Scratch
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-full">Próximamente</button>
+                    </div>
+                </div>
+
+                <!-- Juego 3: Ejemplo -->
+                <div class="game-card">
+                    <div class="game-header adventure-theme">
+                        <div class="game-icon">🏝️</div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Wasted</h3>
+                        <p class="game-status">
+                            <span class="badge badge-coming">Anunciado</span>
+                        </p>
+                        <p class="game-description">
+                            Shooter de supervivencia en un mundo post-apocalíptico. Explora, sobrevive y descubre los secretos de una isla devastada.
+                        </p>
+                        <div class="game-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Género:</span> Exploración/Shooter
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Plataforma:</span> PC/Consolas
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Motor:</span> Unreal Engine 5
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-full">Más Información</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+<!-- PÁGINA: CÓMICS -->
+<section id="comics-page" class="page">
+    <div class="section-header">
+        <h2>Nuestros Cómics</h2>
+        <p class="section-subtitle">Historias visuales cautivadoras</p>
+    </div>
+
+    <div class="comics-grid" id="comicsGrid">
+        <!-- Cómic 2 -->
+                <div class="comic-card">
+                    <div class="comic-cover">
+                        <div class="cover-icon">🔥</div>
+                        <span class="comic-status">Trending Topic</span>
+                    </div>
+                    <div class="comic-content">
+                        <h3>Cactus 1: El arbor de una aventura</h3>
+                        <p class="comic-author">Por Game Boys Studios | Autor: Alejandro Peris</p>
+                        <p class="comic-description">
+                        Una épica aventura en un desierto misterioso. Descubre secretos antiguos y enfrenta desafíos únicos junto a nuestros héroes.
+                        </p>
+                        <div class="comic-details">
+                            <span class="detail-badge">1 Volumen</span>
+                            <span class="detail-badge">20+ Páginas</span>
+                            <span class="detail-badge">Color</span>
+                        </div>
+                        <button class="btn btn-primary btn-full">Leer Ahora</button>
+                        <a href="#" class="btn-text">Ver Previsualizaciones</a>
+                    </div>
+                </div>
+
+                <!-- Cómic 3 -->
+                <div class="comic-card">
+                    <div class="comic-cover">
+                        <div class="cover-icon">⚔️</div>
+                        <span class="comic-status">Próximamente</span>
+                    </div>
+                    <div class="comic-content">
+                        <h3>La leyenda del caballero Shango</h3>
+                        <p class="comic-author">Por Game Boys Studios | Autor: Alejandro Peris</p>
+                        <p class="comic-description">
+                            La historia de un chico de otro planeta. Una narrativa visual cautivadora que explora los misterios del límite.
+                        </p>
+                        <div class="comic-details">
+                            <span class="detail-badge">1 Volumen Planeado</span>
+                            <span class="detail-badge">~70 Páginas</span>
+                            <span class="detail-badge">Color</span>
+                        </div>
+                        <button class="btn btn-secondary btn-full" disabled>Notificarme</button>
+                        <a href="#" class="btn-text" disabled>Ver Concepto</a>
+                    </div>
+    </div>
+</section>
+
+        <!-- PÁGINA: SOBRE NOSOTROS -->
+        <section id="about-page" class="page">
+            <div class="section-header">
+                <h2>Sobre Game Boys Studios</h2>
+                <p class="section-subtitle">Nuestra Misión y Visión</p>
+            </div>
+
+            <div class="about-container">
+                <div class="about-section">
+                    <h3>Quiénes Somos</h3>
+                    <p>
+                        Game Boys Studios es una empresa creativa independiente pequeña dedicada a la producción de contenido digital 
+                        de alta calidad. Combinamos la pasión por el storytelling con tecnología de vanguardia para crear 
+                        experiencias memorables en videojuegos y cómics.
+                    </p>
+                    <p>
+                        Fundada por un equipo de 2 desarrolladores y artistas apasionados, nos enfocamos en crear narrativas 
+                        únicas que resuenan con nuestra audiencia global.
+                    </p>
+                </div>
+
+                <div class="about-section">
+                    <h3>Nuestra Misión</h3>
+                    <p>
+                        Crear historias inmersivas que inspiren, entretengan y hagan reflexionar a nuestros jugadores y lectores. 
+                        Creemos que cada proyecto debe ser una obra de arte que trascienda la industria estándar.
+                    </p>
+                </div>
+
+                <div class="about-section">
+                    <h3>Valores Principales</h3>
+                    <ul class="values-list">
+                        <li><strong>Creatividad:</strong> Innovamos constantemente en narrativa y mecánicas de juego</li>
+                        <li><strong>Calidad:</strong> Cada detalle cuenta en la experiencia final</li>
+                        <li><strong>Comunidad:</strong> Escuchamos a nuestros jugadores y lectores</li>
+                        <li><strong>Sostenibilidad:</strong> Prácticas responsables en el desarrollo</li>
+                    </ul>
+                </div>
+
+                <div class="team-section">
+                    <h3>Nuestro Equipo</h3>
+                    <div class="team-grid">
+                        <div class="team-member">
+                            <div class="member-avatar">👨‍💻</div>
+                            <h4>CEO</h4>
+                            <p>Director programador con 15 años en la industria</p>
+                        </div>
+                        <div class="team-member">
+                            <div class="member-avatar">👨‍💻</div>
+                            <h4>CO-CEO</h4>
+                            <p>Director creativo con 15 años en la industria</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PÁGINA: COMUNIDAD -->
+        <section id="community-page" class="page">
+            <div class="section-header">
+                <h2>Nuestra Comunidad</h2>
+                <p class="section-subtitle">Únete a cientos de fans y creadores</p>
+            </div>
+
+            <div class="community-container">
+                <div class="community-card">
+                    <div class="community-icon">👥</div>
+                    <h3>Discord Oficial</h3>
+                    <p>Únete a nuestra comunidad para discusiones, actualizaciones y eventos exclusivos.</p>
+                    <a href="https://discord.gg/b8F9XAaT8a" target="_blank" class="btn btn-outline">Ir a Discord</a>
+                </div>
+                <div class="community-card">
+                    <div class="community-icon">📺</div>
+                    <h3>YouTube</h3>
+                    <p>Mira gameplay, tutoriales, detrás de cámaras y tráilers.</p>
+                    <a href="https://www.youtube.com/channel/UCzpzKxcMGj8rDplhZzBddjw" target="_blank" class="btn btn-outline">Ver Canal</a>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h3>Nuestras Comunidades</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-number">10</div>
+                        <div class="stat-label">Miembros en Discord</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">7</div>
+                        <div class="stat-label">Seguidores en Redes</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">50</div>
+                        <div class="stat-label">Jugadores Registrados</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PÁGINA: AUTENTICACIÓN -->
+        <section id="auth-page" class="page">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <h2 id="authTitle">Inicia Sesión</h2>
+                    <p class="auth-subtitle" id="authSubtitle">Conecta con tu cuenta para acceder a contenido exclusivo</p>
+                    
+                    <!-- Formulario de Login -->
+                    <div id="loginForm" class="auth-form">
+                        <input 
+                            type="email" 
+                            id="loginEmail" 
+                            placeholder="Tu email" 
+                            class="input-field"
+                        >
+                        <input 
+                            type="password" 
+                            id="loginPassword" 
+                            placeholder="Tu contraseña" 
+                            class="input-field"
+                        >
+                        <button onclick="loginWithEmail()" class="btn btn-primary btn-full">
+                            Iniciar Sesión
+                        </button>
+                        <p class="form-toggle">
+                            ¿No tienes cuenta? 
+                            <a onclick="toggleAuthForm()">Regístrate aquí</a>
+                        </p>
+                    </div>
+
+                    <!-- Formulario de Registro -->
+                    <div id="signupForm" class="auth-form" style="display:none;">
+                        <input 
+                            type="email" 
+                            id="signupEmail" 
+                            placeholder="Tu email" 
+                            class="input-field"
+                        >
+                        <input 
+                            type="password" 
+                            id="signupPassword" 
+                            placeholder="Tu contraseña (mín. 6 caracteres)" 
+                            class="input-field"
+                        >
+                        <input 
+                            type="password" 
+                            id="signupPasswordConfirm" 
+                            placeholder="Confirma tu contraseña" 
+                            class="input-field"
+                        >
+                        <button onclick="signupWithEmail()" class="btn btn-primary btn-full">
+                            Crear Cuenta
+                        </button>
+                        <p class="form-toggle">
+                            ¿Ya tienes cuenta? 
+                            <a onclick="toggleAuthForm()">Inicia sesión aquí</a>
+                        </p>
+                    </div>
+
+                    <div class="divider">O</div>
+
+                    <button onclick="loginWithGoogle()" class="btn btn-secondary btn-full">
+                        🔵 Iniciar con Google
+                    </button>
+
+                    <div id="authMessage" class="auth-message" style="display:none;"></div>
+                </div>
+
+                <!-- Panel de Usuario Autenticado -->
+                <div id="userPanel" class="user-panel" style="display:none;">
+                    <h2>¡Bienvenido!</h2>
+                    <div class="user-info">
+                        <p><strong>Email:</strong> <span id="userPanelEmail"></span></p>
+                        <p><strong>Estado:</strong> <span class="status-badge">Miembro Registrado</span></p>
+                    </div>
+                    <div class="exclusive-content">
+                        <h3>Contenido Exclusivo</h3>
+                        <p>Accede a:</p>
+                        <ul>
+                            <li>✓ Noticias tempranas sobre lanzamientos</li>
+                            <li>✓ Descuentos especiales en pre-orden</li>
+                            <li>✓ Acceso a beta privada</li>
+                            <li>✓ Comunidad exclusiva de miembros</li>
+                        </ul>
+                    </div>
+                    <button onclick="logout()" class="btn btn-secondary btn-full">
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </section>
+    <!-- MODAL LECTOR DE CÓMIC -->
+    <div id="comicReaderModal" class="modal" style="display:none;">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Cargando cómic...</h3>
+            <button onclick="closeReader()" class="close-btn">✕</button>
+        </div>
+        <iframe id="pdfViewer" width="100%" height="700px" frameborder="0"></iframe>
+        
+        <div id="readerNotice" class="reader-notice" style="display:none;">
+            ✅ Estás leyendo la versión **COMPLETA** como usuario registrado
+        </div>
+        </div>
+    </div>
+    </main>
+
+    <!-- MODAL LECTOR DE CÓMIC -->
+    <div id="comicReaderModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Cargando cómic...</h3>
+                <button onclick="closeReader()" class="close-btn">✕</button>
+            </div>
+            <iframe id="pdfViewer" width="100%" height="700px" frameborder="0"></iframe>
+            <div id="readerNotice" class="reader-notice" style="display:none;">
+                ✅ Estás leyendo la versión <strong>COMPLETA</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Game Boys Studios</h4>
+                <p>© 2024 Game Boys Studios. Todos los derechos reservados.</p>
+                <p class="footer-tagline">Creando experiencias únicas en videojuegos y cómics.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Navega</h4>
+                <ul>
+                    <li><a href="#" onclick="navigateTo('juegos')">Videojuegos</a></li>
+                    <li><a href="#" onclick="navigateTo('comics')">Cómics</a></li>
+                    <li><a href="#" onclick="navigateTo('about')">Sobre Nosotros</a></li>
+                    <li><a href="#" onclick="navigateTo('community')">Comunidad</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Síguenos</h4>
+                <div class="social-links">
+                    <a href="https://discord.gg/b8F9XAaT8a" target="_blank">Discord</a>
+                    <a href="https://www.youtube.com/channel/UCzpzKxcMGj8rDplhZzBddjw" target="_blank">YouTube</a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Información</h4>
+                <ul>
+                    <li><a href="#">Política de Privacidad</a></li>
+                    <li><a href="#">Términos de Servicio</a></li>
+                    <li><a href="#">Contacto</a></li>
+                    <li><a href="#">Prensa</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Made by Game Boys Studios</p>
+        </div>
+    </footer>
+
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
