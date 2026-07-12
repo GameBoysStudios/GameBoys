@@ -81,6 +81,103 @@ function logout() {
     auth.signOut().then(() => showMessage('Sesión cerrada', 'success'));
 }
 
+// ==================== SISTEMA DE PELÍCULAS ====================
+const movies = [
+    {
+        id: "misioncasiposible",
+        title: "Misión Casi Imposible",
+        description: "El comandante Yakolev Yak reune un equipo liderado por el mismisimo Kingsman para conseguir recuperar unos codigos nucleares perdidos en un pueblo revelde. Lo que no se esperan es que el pueblo les tiene una sorpresa preparada...",
+        cover: "🔫",
+        image: "movies/portada%20mision%20casi%20posible.png",
+        preview: "movies/MISIÓN_CASI_POSIBLE-TRAILER.mp4",
+        full: "https://github.com/GameBoysStudios/GameBoys/releases/download/movie/MISION_CASI_POSIBLE.mp4"
+    },
+    {
+        id: "misioncasiposible2",
+        title: "Misión Casi Imposible: 2",
+        description: "Tras escapar de la entidad y neutralizarla el comandante Yakolev y Kingsman se ven obligados a huir a San Francisco, el mundo se pone patas arriba y aparece una nueva entidad que no les pondra facil la supervivencia.",
+        cover: "🔥",
+        image: "movies/portada%20mision%20casi%20posible2.png",
+        preview: "movies/MISIÓN_CASI_POSIBLE2-TRAILER.mp4",
+        full: "movies/MISIÓN_CASI_POSIBLE2.mp4"
+    }
+];
+
+function renderMovies() {
+    const grid = document.getElementById('movieGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    movies.forEach(movieItem => {
+        const card = document.createElement('div');
+        card.className = 'movie-card';
+        card.innerHTML = `
+            <div class="movie-cover">
+                ${movieItem.image ? `<img src="${movieItem.image}" alt="${movieItem.title}">` : `<div class="cover-icon">${movieItem.cover}</div>`}
+            </div>
+            <div class="movie-content">
+                <h3>${movieItem.title}</h3>
+                <p class="movie-description">${movieItem.description}</p>
+                <button class="btn btn-primary btn-full" onclick="openMoviePlayer('${movieItem.id}', false)">Ver Trailer</button>
+                <button class="btn btn-outline btn-full" onclick="openMoviePlayer('${movieItem.id}', true)">Ver Completo</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function openMoviePlayer(id, isFull) {
+    const selectedMovie = movies.find(m => m.id === id);
+    if (!selectedMovie) return;
+
+    const user = firebase.auth().currentUser;
+    let url = selectedMovie.preview || selectedMovie.full;
+
+    if (isFull) {
+        if (!user) {
+            showMessage("Inicia sesión para ver la película completa", "error");
+            return;
+        }
+        url = selectedMovie.full;
+    }
+
+    if (!url) {
+        showMessage("Este contenido aún no está disponible", "error");
+        return;
+    }
+
+    const modal = document.getElementById('moviePlayerModal');
+    const titleEl = document.getElementById('movieModalTitle');
+    const subtitleEl = document.getElementById('movieModalSubtitle');
+    const videoEl = document.getElementById('moviePlayer');
+
+    if (!modal || !titleEl || !subtitleEl || !videoEl) return;
+
+    titleEl.textContent = selectedMovie.title;
+    subtitleEl.textContent = isFull ? 'Película completa' : 'Trailer';
+    videoEl.src = url;
+    videoEl.load();
+    modal.style.display = 'flex';
+
+    videoEl.play().catch(() => {});
+}
+
+function closeMoviePlayer() {
+    const modal = document.getElementById('moviePlayerModal');
+    const videoEl = document.getElementById('moviePlayer');
+
+    if (modal) {
+        modal.style.display = 'none';
+    }
+
+    if (videoEl) {
+        videoEl.pause();
+        videoEl.removeAttribute('src');
+        videoEl.load();
+    }
+}
+
 // ==================== SISTEMA DE CÓMICS ====================
 const comics = [
     {
@@ -144,4 +241,5 @@ function readComic(id, isFull) {
 // ==================== INICIALIZACIÓN ====================
 document.addEventListener('DOMContentLoaded', () => {
     renderComics();
+    renderMovies();
 });

@@ -22,6 +22,7 @@
                 <li><a href="#home" class="nav-link" onclick="navigateTo('home')">Inicio</a></li>
                 <li><a href="#juegos" class="nav-link" onclick="navigateTo('juegos')">Juegos</a></li>
                 <li><a href="#comics" class="nav-link" onclick="navigateTo('comics')">Cómics</a></li>
+                <li><a href="#movie" class="nav-link" onclick="navigateTo('movie')">Películas</a></li>
                 <li><a href="#about" class="nav-link" onclick="navigateTo('about')">Sobre Nosotros</a></li>
                 <li><a href="#community" class="nav-link" onclick="navigateTo('community')">Comunidad</a></li>
                 <li><a href="#auth" class="nav-link" onclick="navigateTo('auth')">Cuenta</a></li>
@@ -48,9 +49,6 @@
                         de última generación y narrativas visuales en cómics. Nuestras historias te transportarán a mundos fascinantes.
                     </p>
                     <div class="cta-buttons">
-                        <a href="https://github.com/GameBoysStudios/GameBoys/releases/download/v1.0/Launcher-GameBoys.zip" target="_blank">
-                              <button class="btn btn-primary">Descargar el Launcher</button>
-                        </a>
                         <button class="btn btn-primary" onclick="navigateTo('juegos')">Explorar Juegos</button>
                         <button class="btn btn-secondary" onclick="navigateTo('comics')">Ver Cómics</button>
                     </div>
@@ -235,6 +233,59 @@
                         </div>
                         <button class="btn btn-secondary btn-full" disabled>Notificarme</button>
                         <a href="#" class="btn-text" disabled>Ver Concepto</a>
+                    </div>
+    </div>
+</section>
+
+        <!-- PÁGINA: PELICULAS -->
+<section id="movie-page" class="page">
+    <div class="section-header">
+        <h2>Nuestras Películas</h2>
+        <p class="section-subtitle">Experiencias cinematográficas únicas</p>
+    </div>
+
+    <div class="movie-grid" id="movieGrid">
+        <!-- Movies 2 -->
+                <div class="movie-card">
+                    <div class="movie-cover">
+                        <div class="cover-icon">🔫</div>
+                        <span class="movie-status">Trending Topic</span>
+                    </div>
+                    <div class="movie-content">
+                        <h3>Misión Casi Posible</h3>
+                        <p class="movie-author">Por Wild Company | Director: Alejandro Peris</p>
+                        <p class="movie-description">
+                        El comandante Yakolev Yak reune un equipo liderado por el mismisimo Kingsman para conseguir recuperar unos codigos nucleares perdidos en un pueblo revelde. Lo que no se esperan es que el pueblo les tiene una sorpresa preparada...
+                        </p>
+                        <div class="movie-details">
+                            <span class="detail-badge">Duración: 11:47 minutos</span>
+                            <span class="detail-badge">Año: 2026</span>
+                            <span class="detail-badge">4K</span>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="openMoviePlayer('misioncasiposible', false)">Ver Trailer</button>
+                        <button class="btn btn-outline btn-full" onclick="openMoviePlayer('misioncasiposible', true)">Ver Completo</button>
+                    </div>
+                </div>
+
+                <!-- Movies 3 -->
+                <div class="movie-card">
+                    <div class="movie-cover">
+                        <div class="cover-icon">⚔️</div>
+                        <span class="movie-status">Anunciada</span>
+                    </div>
+                    <div class="movie-content">
+                        <h3>Misión Casi Posible: 2</h3>
+                        <p class="movie-author">Por Wild Company | Director: Alejandro Peris</p>
+                        <p class="movie-description">
+                            Tras escapar de la entidad y neutralizarla el comandante Yakolev y Kingsman se ven obligados a huir a San Francisco, el mundo se pone patas arriba y aparece una nueva entidad que no les pondra facil la supervivencia.
+                        </p>
+                        <div class="movie-details">
+                            <span class="detail-badge">Duración: desconocida</span>
+                            <span class="detail-badge">Año: 2026</span>
+                            <span class="detail-badge">IMAX Extended</span>
+                        </div>
+                        <button class="btn btn-secondary btn-full" onclick="openMoviePlayer('misioncasiposible2', false)">Ver Trailer</button>
+                        <button class="btn btn-outline btn-full" onclick="openMoviePlayer('misioncasiposible2', true)">Ver Completo</button>
                     </div>
     </div>
 </section>
@@ -442,6 +493,19 @@
         </div>
     </div>
     </main>
+
+    <div id="moviePlayerModal" class="movie-modal" style="display:none;">
+        <div class="movie-modal-content">
+            <button class="movie-modal-close" onclick="closeMoviePlayer()" aria-label="Cerrar reproductor">✕</button>
+            <div class="movie-modal-header">
+                <h3 id="movieModalTitle">Reproduciendo</h3>
+                <p id="movieModalSubtitle">Contenido disponible en la web</p>
+            </div>
+            <video id="moviePlayer" class="movie-player" controls autoplay playsinline preload="metadata">
+                <source src="" type="video/mp4">
+            </video>
+        </div>
+    </div>
 
     <!-- MODAL LECTOR DE CÓMIC -->
     <div id="comicReaderModal" class="modal" style="display:none;">
