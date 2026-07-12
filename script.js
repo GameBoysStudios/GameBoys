@@ -185,7 +185,7 @@ const comics = [
         title: "La leyenda del caballero Shango",
         description: "La historia de un chico de otro planeta. Una narrativa visual cautivadora que explora los misterios del límite.",
         cover: "📖",
-        preview: "comics/shango-preview.pdf",
+        preview: "https://raw.githubusercontent.com/GameBoysStudios/GameBoys/main/comics/shango-preview.pdf",
         full: "comics/shango-full.pdf"
     },
     {
