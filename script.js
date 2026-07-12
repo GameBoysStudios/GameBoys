@@ -238,8 +238,20 @@ function readComic(id, isFull) {
     window.open(url, '_blank');
 }
 
+function setupMoviePlayerProtection() {
+    const videoEl = document.getElementById('moviePlayer');
+    if (!videoEl) return;
+
+    videoEl.addEventListener('contextmenu', (event) => event.preventDefault());
+    videoEl.addEventListener('keydown', (event) => {
+        const isSaveShortcut = (event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 'S' || event.key === 'p' || event.key === 'P');
+        if (isSaveShortcut) event.preventDefault();
+    });
+}
+
 // ==================== INICIALIZACIÓN ====================
 document.addEventListener('DOMContentLoaded', () => {
     renderComics();
     renderMovies();
+    setupMoviePlayerProtection();
 });
