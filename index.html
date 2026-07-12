@@ -76,7 +76,7 @@
                         <h3>Cactus: The Videogame</h3>
                         <p class="highlight-meta">Videojuego • Próximamente en Steam</p>
                         <p>Vivir en un planeta diferente. Descubre artilugios robóticos y enfrenta desafíos únicos.</p>
-                        <button class="btn btn-small" onclick="navigateTo('juegos')">Ver Detalles</button>
+                        <button class="btn btn-small" onclick="openCactusMenu()">Ver Detalles</button>
                     </div>
                     <div class="highlight-card featured-comic">
                         <div class="highlight-image">📖</div>
@@ -121,7 +121,7 @@
                                 <span class="detail-label">Motor:</span> Unity 6.0
                             </div>
                         </div>
-                        <button class="btn btn-primary btn-full" onclick="navigateTo('cactus-detail')" disabled>Ver Más</button>
+                        <button class="btn btn-primary btn-full" onclick="openCactusMenu()">Ver Más</button>
                     </div>
                 </div>
 
@@ -504,6 +504,34 @@
             <video id="moviePlayer" class="movie-player" controls autoplay playsinline preload="metadata" controlsList="nodownload noplaybackrate" disablePictureInPicture>
                 <source src="" type="video/mp4">
             </video>
+        </div>
+    </div>
+    <!-- MODAL MENÚ CACTUS (GTA-V STYLE) -->
+    <div id="cactusMenuModal" class="cactus-menu-modal" style="display:none;">
+        <div class="cactus-menu-content">
+            <button class="cactus-menu-close" onclick="closeCactusMenu()" aria-label="Cerrar menú">✕</button>
+            <div class="cactus-menu-header">
+                <h2>Cactus: The Videogame</h2>
+                <p class="subtitle">Próximamente — Noticias, trailers y acceso anticipado</p>
+            </div>
+            <div class="cactus-menu-body">
+                <div class="left-panel">
+                    <div class="big-cover">🌵</div>
+                    <div class="menu-options">
+                        <button class="menu-btn active" data-tab="overview" onclick="switchCactusTab(event)">Información</button>
+                        <button class="menu-btn" data-tab="trailers" onclick="switchCactusTab(event)">Tráilers</button>
+                        <button class="menu-btn" data-tab="screenshots" onclick="switchCactusTab(event)">Capturas de pantalla y Artwork</button>
+                        <button class="menu-btn" data-tab="features" onclick="switchCactusTab(event)">Funcionalidades</button>
+                        <button class="menu-btn" data-tab="preorder" onclick="switchCactusTab(event)">Pre-order</button>
+                    </div>
+                </div>
+                <div class="right-panel" id="cactusTabContent">
+                    <!-- Contenido dinámico -->
+                </div>
+            </div>
+            <div class="cactus-menu-footer">
+                <button class="btn btn-outline" onclick="notifyCactus()">Notificarme</button>
+            </div>
         </div>
     </div>
 

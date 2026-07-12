@@ -11,6 +11,132 @@
     --transition: all 0.3s ease;
 }
 
+/* ==================== CACTUS MENU (GTA-V STYLE) ==================== */
+.cactus-menu-modal {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.75), rgba(4,6,12,0.85));
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 4000;
+}
+
+.cactus-menu-content {
+    width: 92%;
+    max-width: 1100px;
+    background: linear-gradient(135deg, #07102a 0%, #0b1224 100%);
+    border: 2px solid rgba(46,203,113,0.18);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 60px rgba(46,203,113,0.08) inset;
+    border-radius: 12px;
+    padding: 18px;
+    color: var(--color-light);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.cactus-menu-close {
+    position: absolute;
+    right: 14px;
+    top: 10px;
+    background: transparent;
+    border: none;
+    color: var(--color-light);
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+
+.cactus-menu-header h2 {
+    margin: 6px 0 0 6px;
+    color: var(--color-cactus);
+    font-family: var(--font-display);
+    letter-spacing: 3px;
+}
+
+.cactus-menu-header .subtitle {
+    margin: 0 0 8px 6px;
+    color: var(--color-gray);
+    font-size: 0.95rem;
+}
+
+.cactus-menu-body {
+    display: flex;
+    gap: 18px;
+    margin-top: 12px;
+}
+
+.left-panel {
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.big-cover {
+    height: 180px;
+    background: linear-gradient(135deg, rgba(46,203,113,0.06), rgba(255,107,53,0.02));
+    border: 1px solid rgba(46,203,113,0.12);
+    border-radius: 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:4rem;
+}
+
+.menu-options {
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.menu-btn {
+    background: transparent;
+    color: var(--color-light);
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 10px 12px;
+    text-align: left;
+    cursor: pointer;
+    font-weight:700;
+    letter-spacing:1px;
+    border-radius:6px;
+    transition: all 0.18s ease;
+}
+
+.menu-btn.active, .menu-btn:hover {
+    background: linear-gradient(90deg, rgba(46,203,113,0.12), rgba(46,203,113,0.06));
+    color: var(--color-cactus);
+    transform: translateX(4px);
+}
+
+.right-panel {
+    flex:1;
+    min-height: 220px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    border-radius: 8px;
+    padding: 18px;
+    overflow:auto;
+}
+
+.cactus-menu-footer {
+    display:flex;
+    gap:12px;
+    justify-content:flex-end;
+    margin-top:12px;
+}
+
+.screenshot-grid { display:flex; gap:8px; }
+.screenshot img { width:200px; height:120px; object-fit:cover; border-radius:6px; }
+
+@media (max-width: 900px) {
+    .cactus-menu-body { flex-direction: column; }
+    .left-panel { width: 100%; flex-direction:row; align-items:center; }
+    .big-cover { height:100px; font-size:2.6rem; }
+}
+
+
 * {
     margin: 0;
     padding: 0;

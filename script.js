@@ -249,9 +249,107 @@ function setupMoviePlayerProtection() {
     });
 }
 
+// ==================== MENÚ CACTUS (GTA-V STYLE) ====================
+function openCactusMenu() {
+    const modal = document.getElementById('cactusMenuModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    renderCactusTab('overview');
+}
+
+function closeCactusMenu() {
+    const modal = document.getElementById('cactusMenuModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function switchCactusTab(e) {
+    const btn = e.currentTarget;
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('#cactusMenuModal .menu-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCactusTab(tab);
+}
+
+function renderCactusTab(tab) {
+    const content = document.getElementById('cactusTabContent');
+    if (!content) return;
+    if (tab === 'overview') {
+        content.innerHTML = `
+            <h3>Overview</h3>
+            <p>Un cactus, proveniente de un desierto misterioso, se embarca en una aventura épica llena de desafíos y descubrimientos, en el centro de Hong Kong.</p>
+            <ul>
+                <li>Historia cinematográfica</li>
+                <li>Exploración abierta</li>
+                <li>Diálogo interactivo</li>
+            </ul>
+        `;
+    } else if (tab === 'trailers') {
+        content.innerHTML = `
+            <h3>Trailers</h3>
+            <p>Disfruta del tráiler oficial y avances exclusivos.</p>
+            <div class="video-wrapper-small">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/QJ0_A-3C3x8?si=UdZuWYpMO5Mxw8Rs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        `;
+    } else if (tab === 'screenshots') {
+        content.innerHTML = `
+            <h3>Screenshots</h3>
+            <div class="screenshot-grid">
+                <div class="screenshot"> <img src="games/cactus/screen1.jpg" alt="Screenshot 1" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/cactus/screen2.jpg" alt="Screenshot 2" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/cactus/screen3.jpg" alt="Screenshot 3" onerror="this.style.display='none'"> </div>
+            </div>
+        `;
+    } else if (tab === 'features') {
+        content.innerHTML = `
+            <h3>Features</h3>
+            <ul>
+                <li>Mundo abierto dinámico</li>
+                <li>Sistema de clima y día/noche</li>
+                <li>Combinación de sigilo y acción</li>
+                <li>3 Actos diferentes</li>
+                <li>Más de 20 niveles!</li>
+            </ul>
+        `;
+    } else if (tab === 'preorder') {
+        content.innerHTML = `
+            <h3>Pre-order</h3>
+            <p>Pre-order para acceder a contenido exclusivo y beta cerrada.</p>
+            <p>NO DISPONIBLE (Por Ahora...)</p>
+        `;
+    } else {
+        content.innerHTML = '';
+    }
+}
+
+function preorderCactus() {
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        showMessage('Inicia sesión para pre-ordenar', 'error');
+        return;
+    }
+    showMessage('Gracias — Te hemos inscrito para la pre-orden (simulado)', 'success');
+}
+
+function notifyCactus() {
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        showMessage('Inicia sesión para recibir notificaciones', 'error');
+        return;
+    }
+    showMessage('Te notificaremos cuando haya novedades', 'success');
+}
+
 // ==================== INICIALIZACIÓN ====================
 document.addEventListener('DOMContentLoaded', () => {
     renderComics();
     renderMovies();
     setupMoviePlayerProtection();
+    // cerrar menú con ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeCactusMenu();
+    });
 });
