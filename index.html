@@ -240,9 +240,24 @@
         <!-- PÁGINA: PELICULAS -->
 <section id="movie-page" class="page">
     <div class="section-header">
-        <h2>Nuestras Películas</h2>
-        <p class="section-subtitle">Experiencias cinematográficas únicas</p>
+        <h2>Películas</h2>
     </div>
+    <!-- Banner de posters (rotador) -->
+    <div class="poster-banner">
+        <div class="poster-rotator">
+            <img id="bannerPoster" src="" alt="Poster" />
+        </div>
+    </div>
+
+    <!-- Botones de categorías -->
+    <div class="category-buttons">
+        <button class="cat-btn" onclick="openCategoryMenu('películas', this)">películas</button>
+        <button class="cat-btn" onclick="openCategoryMenu('series', this)">series</button>
+        <button class="cat-btn" onclick="openCategoryMenu('documentales', this)">documentales</button>
+        <button class="cat-btn" onclick="openCategoryMenu('animación', this)">animación</button>
+    </div>
+
+    <h3 class="recent-title">Películas más recientes:</h3>
 
     <div class="movie-grid" id="movieGrid">
         <!-- Movies 2 -->
@@ -251,20 +266,7 @@
                         <div class="cover-icon">🔫</div>
                         <span class="movie-status">Trending Topic</span>
                     </div>
-                    <div class="movie-content">
-                        <h3>Misión Casi Posible</h3>
-                        <p class="movie-author">Por Wild Company | Director: Alejandro Peris</p>
-                        <p class="movie-description">
-                        El comandante Yakolev Yak reune un equipo liderado por el mismisimo Kingsman para conseguir recuperar unos codigos nucleares perdidos en un pueblo revelde. Lo que no se esperan es que el pueblo les tiene una sorpresa preparada...
-                        </p>
-                        <div class="movie-details">
-                            <span class="detail-badge">Duración: 11:47 minutos</span>
-                            <span class="detail-badge">Año: 2026</span>
-                            <span class="detail-badge">4K</span>
-                        </div>
-                        <button class="btn btn-primary btn-full" onclick="openMoviePlayer('misioncasiposible', false)">Ver Trailer</button>
-                        <button class="btn btn-outline btn-full" onclick="openMoviePlayer('misioncasiposible', true)">Ver Completo</button>
-                    </div>
+                    <div class="movie-content"></div>
                 </div>
 
                 <!-- Movies 3 -->
@@ -273,20 +275,7 @@
                         <div class="cover-icon">⚔️</div>
                         <span class="movie-status">Anunciada</span>
                     </div>
-                    <div class="movie-content">
-                        <h3>Misión Casi Posible: 2</h3>
-                        <p class="movie-author">Por Wild Company | Director: Alejandro Peris</p>
-                        <p class="movie-description">
-                            Tras escapar de la entidad y neutralizarla el comandante Yakolev y Kingsman se ven obligados a huir a San Francisco, el mundo se pone patas arriba y aparece una nueva entidad que no les pondra facil la supervivencia.
-                        </p>
-                        <div class="movie-details">
-                            <span class="detail-badge">Duración: desconocida</span>
-                            <span class="detail-badge">Año: 2026</span>
-                            <span class="detail-badge">IMAX Extended</span>
-                        </div>
-                        <button class="btn btn-secondary btn-full" onclick="openMoviePlayer('misioncasiposible2', false)">Ver Trailer</button>
-                        <button class="btn btn-outline btn-full" onclick="openMoviePlayer('misioncasiposible2', true)">Ver Completo</button>
-                    </div>
+                    <div class="movie-content"></div>
     </div>
 </section>
 
@@ -501,9 +490,22 @@
                 <h3 id="movieModalTitle">Reproduciendo</h3>
                 <p id="movieModalSubtitle">Contenido disponible en la web</p>
             </div>
-            <video id="moviePlayer" class="movie-player" controls autoplay playsinline preload="metadata" controlsList="nodownload noplaybackrate" disablePictureInPicture>
-                <source src="" type="video/mp4">
-            </video>
+            <div class="movie-modal-body">
+                <div class="movie-detail">
+                    <!-- poster element removed (poster used as modal background) -->
+                    <div class="movie-modal-actions">
+                        <button id="modalTrailerBtn" class="btn btn-primary">Ver Trailer</button>
+                        <button id="modalFullBtn" class="btn btn-outline">Ver Completo</button>
+                    </div>
+                    <div id="movieModalBadges" class="movie-modal-badges"></div>
+                </div>
+                <div class="movie-player-wrapper">
+                    <video id="moviePlayer" class="movie-player" controls autoplay playsinline preload="metadata" controlsList="nodownload noplaybackrate" disablePictureInPicture style="display:none;">
+                        <source src="" type="video/mp4">
+                    </video>
+                    <p id="movieModalDescription" class="movie-modal-description"></p>
+                </div>
+            </div>
         </div>
     </div>
     <!-- MODAL MENÚ CACTUS (GTA-V STYLE) -->

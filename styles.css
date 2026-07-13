@@ -1598,6 +1598,137 @@ body {
     margin-bottom: 1rem;
 }
 
+/* ==================== PELÍCULAS: BANNER, CATEGORÍAS Y TARJETAS (ESPECÍFICO) ==================== */
+.poster-banner {
+    width: 100%;
+    height: 200px;
+    background: #a54aa7;
+    border: 6px solid #0a0a0a;
+    margin: 1.5rem 0 2.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a0a0a;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    letter-spacing: 2px;
+}
+
+.poster-rotator { width: 100%; height: 100%; overflow: hidden; display:flex; align-items:center; justify-content:center; }
+.poster-rotator img { width: 100%; height:100%; object-fit:cover; display:block; }
+
+.category-buttons {
+    display: flex;
+    gap: 3rem;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 3.5rem;
+}
+
+.cat-btn {
+    background: #ffffff;
+    color: #0a0a0a;
+    padding: 1.25rem 3.5rem;
+    border-radius: 28px;
+    border: 4px solid #0a0a0a;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.8);
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease;
+}
+
+.cat-btn:hover { transform: translateY(-4px); }
+
+.recent-title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    margin: 2.5rem 0 1.25rem 1rem;
+    color: var(--color-light);
+}
+
+/* Estilos específicos para el grid de la sección Películas (ID movieGrid) */
+#movieGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+    padding: 0 1rem 3rem 1rem;
+    align-items: start;
+}
+
+#movieGrid .movie-card {
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    display: block;
+    padding: 0;
+    box-shadow: none;
+}
+
+#movieGrid .movie-card { cursor: pointer; }
+
+/* Poster ratio box */
+#movieGrid .movie-cover {
+    position: relative;
+    width: 100%;
+    padding-bottom: 70%; /* taller posters (~3:2) */
+    overflow: hidden;
+}
+
+#movieGrid .movie-cover img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+#movieGrid .movie-content {
+    background: transparent;
+    color: #0a0a0a;
+}
+
+/* Ocultar descripción dentro del grid: mostrar solo poster */
+#movieGrid .movie-description { display: none; }
+
+@media (max-width: 1100px) {
+    #movieGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+    #movieGrid { grid-template-columns: 1fr; }
+    .category-buttons { gap: 1rem; flex-wrap: wrap; }
+    .cat-btn { padding: 0.9rem 1.6rem; }
+    .poster-banner { height: 140px; font-size: 1rem; }
+}
+
+/* Featured removed (no styles) */
+
+/* Modal poster and actions */
+.movie-modal-body { display: flex; gap: 1.25rem; align-items: flex-start; }
+.movie-detail { display:flex; flex-direction:column; gap:1rem; align-items:center; }
+.movie-modal-poster { width: 300px; height: 170px; object-fit:cover; border-radius:12px; border:1px solid var(--color-border); }
+.movie-modal-actions { display:flex; gap:0.6rem; }
+.movie-modal-actions .btn { padding:0.6rem 1rem; }
+.movie-player-wrapper { flex:1; }
+
+.movie-modal-badges { display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:8px; }
+.movie-modal-badges .detail-badge { background: rgba(0,0,0,0.45); color: var(--color-light); padding:0.4rem 0.7rem; border-radius:8px; border:1px solid rgba(255,255,255,0.04); }
+.movie-modal-description { color: var(--color-light); margin-top: 12px; font-size: 0.98rem; line-height:1.6; }
+
+/* Category menu */
+.category-menu .cat-list { list-style:none; margin:0; padding:0; }
+.category-menu .cat-list li { margin:0.25rem 0; }
+.cat-list-btn { background:transparent; border:none; color:var(--color-light); cursor:pointer; padding:6px 10px; text-align:left; }
+.cat-list-btn:hover { color:var(--color-cactus); }
+
+@media (max-width:900px) {
+    .movie-modal-body { flex-direction:column; }
+    .movie-modal-poster { width:100%; height:auto; }
+}
+
 .about-section p:last-child {
     margin-bottom: 0;
 }
