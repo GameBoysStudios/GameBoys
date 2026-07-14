@@ -100,7 +100,7 @@ const movies = [
         cover: "🔫",
         image: "movies/portada%20mision%20casi%20posible.png",
         completeImage: "movies/portada%20mision%20casi%20posible_completo.png",
-        preview: "movies/MISIÓN_CASI_POSIBLE-TRAILER.mp4",
+        preview: "https://github.com/GameBoysStudios/GameBoys/releases/download/movie/MISION_CASI_POSIBLE-TRAILER.mp4",
         full: "https://github.com/GameBoysStudios/GameBoys/releases/download/movie/MISION_CASI_POSIBLE.mp4"
         ,categories: ['películas']
         ,featured: true
