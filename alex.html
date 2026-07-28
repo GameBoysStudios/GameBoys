@@ -78,16 +78,24 @@
       border-radius: 16px; padding: 20px;
     }
     .modal h2 { margin: 0 0 12px; font-size: 1.1rem; }
-    .modal .row { display: flex; gap: 8px; margin-top: 12px; }
-    .modal .row .btn { flex: 1; text-align: center; }
+    .modal .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .modal .row .btn { flex: 1; text-align: center; min-width: 120px; }
+    .auth-msg { font-size: 0.8rem; margin-top: 8px; color: var(--muted); }
+    .auth-msg.err { color: var(--danger); }
+    .auth-msg.ok { color: var(--green); }
     @media (max-width: 720px) { .side { display: none; } }
   </style>
+
+  <!-- Firebase (mismo proyecto que la web GameBoys) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
 </head>
 <body>
   <div class="layout">
     <aside class="side">
       <h1><span class="dot"></span> Alex <span class="badge">2.0</span></h1>
-      <p class="sub">Game Boys Studios · Diego Ar</p>
+      <p class="sub">Game Boys Studios · misma cuenta Firebase</p>
 
       <div class="label">Versión</div>
       <select id="selVersion" onchange="cambiarVersion()">
@@ -95,12 +103,13 @@
         <option value="pro" disabled>Alex Pro (pronto)</option>
       </select>
 
-      <div class="label">Cuenta</div>
+      <div class="label">Cuenta Firebase</div>
       <div class="box" id="accountBox">
         <strong id="tierLabel">Invitado</strong><br>
-        <span id="emailLabel">Sin cuenta</span>
+        <span id="emailLabel">Sin sesión</span>
       </div>
-      <button class="btn primary" type="button" onclick="abrirModal()">Crear cuenta / Entrar</button>
+      <button class="btn primary" type="button" id="btnAuth" onclick="abrirModal()">Iniciar sesión</button>
+      <button class="btn" type="button" id="btnLogout" style="display:none" onclick="cerrarSesion()">Cerrar sesión</button>
 
       <div class="label">Cuota (12 h)</div>
       <div class="box">
@@ -112,9 +121,10 @@
       <button class="btn" type="button" onclick="nuevaConversacion()">＋ Nueva conversación</button>
 
       <div class="side-foot">
-        Sin cuenta: <strong>10</strong> msgs / 12h<br>
-        Cuenta normal: <strong>50</strong> msgs / 12h<br>
+        Sin sesión: <strong>10</strong> msgs / 12h<br>
+        Con cuenta GBS: <strong>50</strong> msgs / 12h<br>
         Premium: <strong>ilimitado</strong><br><br>
+        Usa la <strong>misma cuenta</strong> que en el resto de la web.<br><br>
         <a href="index.html" style="color:var(--accent)">← Volver al sitio</a>
       </div>
     </aside>
@@ -130,27 +140,29 @@
         <input id="input" type="text" placeholder="Escribe un mensaje…" autocomplete="off" />
         <button id="btnSend" type="button">Enviar</button>
       </div>
-      <p class="hint">Enter para enviar · Los límites dependen de tu cuenta</p>
+      <p class="hint">Enter para enviar · Límites según tu cuenta Firebase de Game Boys</p>
     </div>
   </div>
 
   <div class="modal-bg" id="modalBg">
     <div class="modal">
-      <h2>Cuenta Alex</h2>
+      <h2>Cuenta Game Boys</h2>
       <input type="email" id="regEmail" placeholder="Email" style="margin-bottom:8px" />
       <input type="password" id="regPass" placeholder="Contraseña" />
       <p style="font-size:0.75rem;color:var(--muted);margin:10px 0 0">
-        Al registrarte pasas a plan <strong>normal</strong> (50 mensajes / 12h).
+        Misma cuenta que películas y cómics. Plan <strong>normal</strong> (50 msgs / 12h).
       </p>
+      <div class="auth-msg" id="authMsg"></div>
       <div class="row">
         <button class="btn" type="button" onclick="cerrarModal()">Cancelar</button>
-        <button class="btn primary" type="button" onclick="registrar()">Guardar</button>
+        <button class="btn primary" type="button" onclick="loginEmail()">Entrar</button>
+        <button class="btn primary" type="button" onclick="signupEmail()">Crear</button>
       </div>
+      <button class="btn" type="button" style="margin-top:10px" onclick="loginGoogle()">Continuar con Google</button>
     </div>
   </div>
 
   <script>
-    // API de Alex en Render
     const ALEX_API = "https://alex-ia-cl4n.onrender.com";
 
     const messagesEl = document.getElementById("messages");
@@ -158,20 +170,20 @@
     const btn = document.getElementById("btnSend");
     const thinking = document.getElementById("thinking");
 
-    function uuid() {
-      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
-        const r = Math.random() * 16 | 0;
-        return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
-      });
+    let firebaseUser = null;
+    let guestId = localStorage.getItem("alex_guest_id");
+    if (!guestId) {
+      guestId = "guest-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem("alex_guest_id", guestId);
     }
 
     function getAccountId() {
-      let id = localStorage.getItem("alex_cuenta_id");
-      if (!id) {
-        id = "guest-" + uuid();
-        localStorage.setItem("alex_cuenta_id", id);
-      }
-      return id;
+      if (firebaseUser && firebaseUser.uid) return firebaseUser.uid;
+      return guestId;
+    }
+
+    function getEmail() {
+      return (firebaseUser && firebaseUser.email) || "";
     }
 
     function addMsg(rol, texto) {
@@ -185,11 +197,10 @@
     function pintarCuota(c) {
       if (!c) return;
       const tier = c.tier || "guest";
-      const nombres = { guest: "Invitado", normal: "Normal", premium: "Premium" };
+      const nombres = { guest: "Invitado", normal: "Normal (GBS)", premium: "Premium" };
       document.getElementById("tierLabel").textContent = nombres[tier] || tier;
-      document.getElementById("emailLabel").textContent = c.email || localStorage.getItem("alex_email") || "Sin cuenta";
-      localStorage.setItem("alex_tier", tier);
-      if (c.email) localStorage.setItem("alex_email", c.email);
+      document.getElementById("emailLabel").textContent =
+        c.email || getEmail() || (firebaseUser ? firebaseUser.uid : "Sin sesión");
 
       let texto, pct = 0;
       if (c.limite == null) {
@@ -201,23 +212,62 @@
         pct = Math.min(100, ((c.usados || 0) / c.limite) * 100);
       }
       document.getElementById("cuotaTexto").textContent = texto;
-      document.getElementById("headerCuota").textContent = "Cuota: " + texto + " · " + (nombres[tier] || tier);
+      document.getElementById("headerCuota").textContent =
+        "Cuota: " + texto + " · " + (nombres[tier] || tier);
       const fill = document.getElementById("cuotaFill");
       const bar = document.getElementById("cuotaBar");
       fill.style.width = pct + "%";
       bar.className = "bar" + (pct >= 90 ? " danger" : pct >= 70 ? " warn" : "");
     }
 
-    async function cargarCuota() {
+    async function vincularYCargarCuota() {
+      const id = getAccountId();
       try {
+        if (firebaseUser) {
+          await fetch(ALEX_API + "/api/vincular_firebase", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email || "",
+              tier: "normal"
+            })
+          });
+        }
         const res = await fetch(ALEX_API + "/api/cuota", {
-          headers: { "X-Alex-Account": getAccountId() }
+          headers: { "X-Alex-Account": id }
         });
-        if (!res.ok) throw new Error("cuota");
-        pintarCuota(await res.json());
+        if (res.ok) pintarCuota(await res.json());
       } catch (_) {
         document.getElementById("cuotaTexto").textContent = "Servidor no disponible";
       }
+    }
+
+    function onAuth(user) {
+      firebaseUser = user || null;
+      const btnAuth = document.getElementById("btnAuth");
+      const btnLogout = document.getElementById("btnLogout");
+      if (user) {
+        btnAuth.style.display = "none";
+        btnLogout.style.display = "block";
+        document.getElementById("emailLabel").textContent = user.email || user.uid;
+        document.getElementById("tierLabel").textContent = "Normal (GBS)";
+        addMsg("alex", "Sesión Firebase detectada: " + (user.email || user.uid) + ". Plan normal (50 msgs / 12h).");
+      } else {
+        btnAuth.style.display = "block";
+        btnLogout.style.display = "none";
+        document.getElementById("tierLabel").textContent = "Invitado";
+        document.getElementById("emailLabel").textContent = "Sin sesión";
+      }
+      vincularYCargarCuota();
+    }
+
+    // Escuchar la misma auth que el resto de la web
+    if (typeof auth !== "undefined") {
+      auth.onAuthStateChanged(onAuth);
+    } else {
+      console.warn("Firebase auth no cargó; modo invitado.");
+      vincularYCargarCuota();
     }
 
     async function enviar() {
@@ -228,6 +278,15 @@
       thinking.classList.add("show");
       btn.disabled = true;
 
+      const payload = {
+        mensaje: texto,
+        cuenta_id: getAccountId()
+      };
+      if (firebaseUser) {
+        payload.firebase_uid = firebaseUser.uid;
+        payload.email = firebaseUser.email || "";
+      }
+
       try {
         const res = await fetch(ALEX_API + "/api/chat", {
           method: "POST",
@@ -235,7 +294,7 @@
             "Content-Type": "application/json",
             "X-Alex-Account": getAccountId()
           },
-          body: JSON.stringify({ mensaje: texto, cuenta_id: getAccountId() })
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (data.cuota) pintarCuota(data.cuota);
@@ -251,12 +310,11 @@
 
     function nuevaConversacion() {
       messagesEl.innerHTML = "";
-      addMsg("alex", "¡Hola! Soy Alex 2.0. ¿En qué puedo ayudarte?");
+      addMsg("alex", "¡Hola! Soy Alex 2.0. Usa tu cuenta de Game Boys para más mensajes.");
     }
 
     function cambiarVersion() {
-      const v = document.getElementById("selVersion").value;
-      if (v === "pro") {
+      if (document.getElementById("selVersion").value === "pro") {
         alert("Alex Pro llegará pronto.");
         document.getElementById("selVersion").value = "2.0";
       }
@@ -265,38 +323,47 @@
     function abrirModal() { document.getElementById("modalBg").classList.add("open"); }
     function cerrarModal() { document.getElementById("modalBg").classList.remove("open"); }
 
-    async function registrar() {
+    function setAuthMsg(t, ok) {
+      const el = document.getElementById("authMsg");
+      el.textContent = t;
+      el.className = "auth-msg " + (ok ? "ok" : "err");
+    }
+
+    function loginEmail() {
       const email = document.getElementById("regEmail").value.trim();
       const password = document.getElementById("regPass").value;
-      if (!email || !password) { alert("Email y contraseña requeridos"); return; }
-      try {
-        const res = await fetch(ALEX_API + "/api/registro", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cuenta_id: getAccountId(),
-            email,
-            password,
-            tier: "normal"
-          })
-        });
-        const data = await res.json();
-        if (data.ok === false) { alert(data.error || "Error al registrar"); return; }
-        localStorage.setItem("alex_email", email);
-        localStorage.setItem("alex_tier", data.tier || "normal");
-        pintarCuota(data);
-        cerrarModal();
-        addMsg("alex", "Cuenta guardada. Plan Normal: 50 mensajes cada 12 horas.");
-      } catch (e) {
-        alert("No se pudo registrar (¿Render despierto?)");
-      }
+      if (!email || !password) return setAuthMsg("Completa email y contraseña", false);
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => { setAuthMsg("¡Sesión iniciada!", true); cerrarModal(); })
+        .catch(err => setAuthMsg(err.message, false));
+    }
+
+    function signupEmail() {
+      const email = document.getElementById("regEmail").value.trim();
+      const password = document.getElementById("regPass").value;
+      if (!email || !password) return setAuthMsg("Completa email y contraseña", false);
+      if (password.length < 6) return setAuthMsg("Mínimo 6 caracteres", false);
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => { setAuthMsg("¡Cuenta creada!", true); cerrarModal(); })
+        .catch(err => setAuthMsg(err.message, false));
+    }
+
+    function loginGoogle() {
+      auth.signInWithPopup(googleProvider)
+        .then(() => { setAuthMsg("Google OK", true); cerrarModal(); })
+        .catch(err => setAuthMsg(err.message, false));
+    }
+
+    function cerrarSesion() {
+      auth.signOut().then(() => {
+        addMsg("alex", "Sesión cerrada. Vuelves al plan invitado (10 msgs / 12h).");
+      });
     }
 
     btn.addEventListener("click", enviar);
     inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") enviar(); });
 
     nuevaConversacion();
-    cargarCuota();
     inputEl.focus();
   </script>
 </body>
