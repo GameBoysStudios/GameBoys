@@ -9,7 +9,7 @@
     :root {
       --bg: #0f0f12; --panel: #16161c; --border: #2a2a35; --text: #e8e8ed;
       --muted: #8b8b9a; --accent: #7c6af5; --accent2: #9486f7; --green: #3dd68c;
-      --warn: #f5a524; --danger: #f04438; --premium: #f5c542; --radius: 12px;
+      --warn: #f5a524; --danger: #f04438; --premium: #f5c542; --pro: #5ec8ff; --radius: 12px;
     }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
@@ -21,6 +21,8 @@
     .side h1 { font-size: 1.15rem; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
     .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); display: inline-block; }
     .badge { font-size: 0.65rem; background: var(--accent); color: #fff; padding: 2px 7px; border-radius: 6px; }
+    .badge.pro { background: linear-gradient(90deg, #5ec8ff, #7c6af5); }
+    .badge.admin { background: #3d3210; color: var(--premium); border: 1px solid #6a5518; }
     .sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; }
     .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-top: 10px; }
     select, input:not([type=file]) {
@@ -46,6 +48,7 @@
     .plan-pill.guest { background: #2a2a35; color: #c8c8d0; }
     .plan-pill.normal { background: #2a2450; color: #bdb0ff; }
     .plan-pill.premium { background: #3d3210; color: var(--premium); border: 1px solid #6a5518; }
+    .plan-pill.admin { background: #0d2a3a; color: var(--pro); border: 1px solid #1a4a60; }
     .bar { height: 6px; background: var(--border); border-radius: 4px; margin-top: 8px; overflow: hidden; }
     .bar > i { display: block; height: 100%; width: 0; background: var(--green); transition: width .3s; }
     .bar.warn > i { background: var(--warn); }
@@ -64,6 +67,7 @@
     .top-plan.guest { background: #2a2a35; color: #c8c8d0; }
     .top-plan.normal { background: #2a2450; color: #bdb0ff; }
     .top-plan.premium { background: #3d3210; color: var(--premium); }
+    .top-plan.admin { background: #0d2a3a; color: var(--pro); }
     #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .msg { padding: 12px 16px; border-radius: var(--radius); max-width: 85%; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
     .msg.user { background: #2a2a35; align-self: flex-end; }
@@ -98,6 +102,8 @@
     .auth-msg { font-size: 0.8rem; margin-top: 8px; color: var(--muted); }
     .auth-msg.err { color: var(--danger); }
     .auth-msg.ok { color: var(--green); }
+    .pro-hint { font-size: 0.72rem; color: var(--pro); margin-top: 4px; display: none; }
+    .pro-hint.show { display: block; }
     @media (max-width: 720px) { .side { display: none; } }
   </style>
 
@@ -108,19 +114,21 @@
 <body>
   <div class="layout">
     <aside class="side">
-      <h1><span class="dot"></span> Alex <span class="badge">2.0</span></h1>
-      <p class="sub">Traduce · imágenes · cuenta Firebase GBS</p>
+      <h1><span class="dot"></span> Alex <span class="badge" id="badgeVer">2.0</span></h1>
+      <p class="sub">Traduce · mapas · imágenes · cuenta Firebase GBS</p>
 
-      <div class="label">Versión</div>
+      <div class="label">Modelo</div>
       <select id="selVersion" onchange="cambiarVersion()">
-        <option value="2.0" selected>Alex 2.0 (actual)</option>
-        <option value="pro" disabled>Alex Pro (pronto)</option>
+        <option value="2.0" selected>Alex 2.0</option>
+        <option value="pro" disabled>Alex Pro 2.0 (solo admin)</option>
       </select>
+      <p class="pro-hint" id="proHint">Rol admin activo: puedes usar Pro 2.0</p>
 
-      <div class="label">Suscripción</div>
+      <div class="label">Suscripción / rol</div>
       <div class="box" id="accountBox">
         <div><strong>Plan:</strong> <span id="tierLabel">Cargando…</span></div>
         <div id="planDetalle" style="margin-top:4px">—</div>
+        <div style="margin-top:6px"><strong>Rol:</strong> <span id="rolLabel">—</span></div>
         <div style="margin-top:6px"><strong>Cuenta:</strong> <span id="emailLabel">Sin sesión</span></div>
         <span class="plan-pill guest" id="planPill">INVITADO</span>
       </div>
@@ -142,16 +150,16 @@
         <strong>Planes</strong><br>
         Invitado: 10 msgs / 12h<br>
         Normal (cuenta GBS): 50 / 12h<br>
-        Premium: ilimitado<br><br>
-        Pregunta a Alex: <em>mi suscripción</em><br>
-        Traduce: <em>traduce: hello al español</em><br><br>
+        Premium: ilimitado<br>
+        <strong>Admin:</strong> acceso a Alex Pro 2.0<br><br>
+        Pregunta: <em>mi suscripción</em><br>
         <a href="index.html" style="color:var(--accent)">Volver al sitio</a>
       </div>
     </aside>
 
     <div class="main">
       <div class="top">
-        <div><a href="index.html">Volver</a> · <strong style="color:var(--text)">Alex 2.0</strong></div>
+        <div><a href="index.html">Volver</a> · <strong style="color:var(--text)" id="topModelo">Alex 2.0</strong></div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <span class="top-plan guest" id="headerPlan">Suscripción: —</span>
           <span id="headerCuota">Cuota: —</span>
@@ -164,7 +172,7 @@
         <input id="input" type="text" placeholder="Mensaje… prueba: mi suscripción" autocomplete="off" />
         <button id="btnSend" type="button">Enviar</button>
       </div>
-      <p class="hint">Suscripción visible arriba · También escribe “mi plan” o “mi suscripción”</p>
+      <p class="hint">Pro 2.0 solo con rol administrador · Escribe “mi plan” para ver tu suscripción</p>
     </div>
   </div>
 
@@ -175,7 +183,7 @@
       <input type="password" id="regPass" placeholder="Contraseña" />
       <p style="font-size:0.75rem;color:var(--muted);margin:10px 0 0">
         Misma cuenta que películas y cómics. Plan <strong>Normal</strong> = 50 msgs / 12h.
-        Premium lo asigna el admin por UID en Firebase.
+        Premium y Admin se asignan por UID en Firebase.
       </p>
       <div class="auth-msg" id="authMsg"></div>
       <div class="row">
@@ -197,6 +205,8 @@
 
     let firebaseUser = null;
     let ultimaCuota = null;
+    let esAdmin = false;
+    let modeloActual = localStorage.getItem("alex_modelo") || "2.0";
     let guestId = localStorage.getItem("alex_guest_id");
     if (!guestId) {
       guestId = "guest-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -235,6 +245,33 @@
       return "Tu suscripción: " + plan + ".";
     }
 
+    function nombreModelo(id) {
+      return id === "pro" ? "Alex Pro 2.0" : "Alex 2.0";
+    }
+
+    function aplicarModeloUI() {
+      const sel = document.getElementById("selVersion");
+      const proOpt = sel.querySelector('option[value="pro"]');
+      if (esAdmin) {
+        proOpt.disabled = false;
+        proOpt.textContent = "Alex Pro 2.0";
+        document.getElementById("proHint").classList.add("show");
+      } else {
+        proOpt.disabled = true;
+        proOpt.textContent = "Alex Pro 2.0 (solo admin)";
+        document.getElementById("proHint").classList.remove("show");
+        if (modeloActual === "pro") modeloActual = "2.0";
+      }
+      sel.value = modeloActual;
+      localStorage.setItem("alex_modelo", modeloActual);
+
+      const badge = document.getElementById("badgeVer");
+      badge.textContent = modeloActual === "pro" ? "Pro 2.0" : "2.0";
+      badge.className = "badge" + (modeloActual === "pro" ? " pro" : "");
+      document.getElementById("topModelo").textContent = nombreModelo(modeloActual);
+      document.title = nombreModelo(modeloActual) + " — Game Boys Studios";
+    }
+
     function addMsg(rol, texto) {
       const div = document.createElement("div");
       div.className = "msg " + rol;
@@ -248,19 +285,26 @@
       ultimaCuota = c;
       const tier = c.tier || "guest";
       const plan = nombrePlan(tier);
+      esAdmin = !!(c.admin || c.rol === "admin");
 
       document.getElementById("tierLabel").textContent = plan;
       document.getElementById("planDetalle").textContent = detallePlan(c);
+      document.getElementById("rolLabel").textContent = esAdmin ? "Administrador" : (c.rol || "usuario");
       document.getElementById("emailLabel").textContent =
         c.email || getEmail() || (firebaseUser ? firebaseUser.uid : "Sin sesión");
 
       const pill = document.getElementById("planPill");
-      pill.textContent = plan.toUpperCase();
-      pill.className = "plan-pill " + tier;
+      if (esAdmin) {
+        pill.textContent = "ADMIN";
+        pill.className = "plan-pill admin";
+      } else {
+        pill.textContent = plan.toUpperCase();
+        pill.className = "plan-pill " + tier;
+      }
 
       const hp = document.getElementById("headerPlan");
-      hp.textContent = "Suscripción: " + plan;
-      hp.className = "top-plan " + tier;
+      hp.textContent = esAdmin ? "Rol: Admin · " + plan : "Suscripción: " + plan;
+      hp.className = "top-plan " + (esAdmin ? "admin" : tier);
 
       let texto, pct = 0;
       if (c.limite == null) {
@@ -277,6 +321,8 @@
       const bar = document.getElementById("cuotaBar");
       fill.style.width = pct + "%";
       bar.className = "bar" + (pct >= 90 ? " danger" : pct >= 70 ? " warn" : "");
+
+      aplicarModeloUI();
     }
 
     async function vincularYCargarCuota() {
@@ -320,9 +366,14 @@
         btnAuth.style.display = "block";
         btnLogout.style.display = "none";
         document.getElementById("emailLabel").textContent = "Sin sesión";
+        esAdmin = false;
+        aplicarModeloUI();
       }
       vincularYCargarCuota().then((c) => {
-        if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion));
+        if (c) {
+          addMsg("sys", textoSuscripcion(c, c.suscripcion) +
+            (c.admin ? " · Rol: Administrador (Pro 2.0 disponible)." : ""));
+        }
       });
     }
 
@@ -341,9 +392,14 @@
       inputEl.value = "";
       addMsg("user", texto);
       thinking.classList.add("show");
+      thinking.textContent = nombreModelo(modeloActual) + " está pensando…";
       btn.disabled = true;
 
-      const payload = { mensaje: texto, cuenta_id: getAccountId() };
+      const payload = {
+        mensaje: texto,
+        cuenta_id: getAccountId(),
+        modelo: modeloActual
+      };
       if (firebaseUser) {
         payload.firebase_uid = firebaseUser.uid;
         payload.email = firebaseUser.email || "";
@@ -360,7 +416,16 @@
         });
         const data = await res.json();
         if (data.cuota) pintarCuota(data.cuota, data.suscripcion);
-        addMsg("alex", data.respuesta || "(sin respuesta)");
+        if (data.admin != null) {
+          esAdmin = !!data.admin;
+          aplicarModeloUI();
+        }
+        if (data.error === "modelo_restringido") {
+          modeloActual = "2.0";
+          aplicarModeloUI();
+        }
+        const pref = data.modelo_nombre ? "[" + data.modelo_nombre + "] " : "";
+        addMsg("alex", (data.error === "modelo_restringido" ? "" : "") + (data.respuesta || "(sin respuesta)"));
       } catch (e) {
         addMsg("alex", "No pude conectar con Alex. ¿Está despierto el servidor en Render?");
       } finally {
@@ -388,7 +453,8 @@
         const payload = {
           imagen: b64,
           idioma: "es",
-          cuenta_id: getAccountId()
+          cuenta_id: getAccountId(),
+          modelo: modeloActual
         };
         if (firebaseUser) {
           payload.firebase_uid = firebaseUser.uid;
@@ -420,9 +486,10 @@
       messagesEl.innerHTML = "";
       addMsg(
         "alex",
-        "¡Hola! Soy Alex 2.0 (Game Boys Studios · Diego Ar). " +
-        "Puedo explicar, buscar info, traducir, analizar imágenes y decirte tu suscripción. " +
-        "Prueba: «mi plan» o «mi suscripción»."
+        "¡Hola! Soy " + nombreModelo(modeloActual) + " (Game Boys Studios · Diego Ar). " +
+        "Puedo explicar, buscar lugares, traducir, analizar imágenes y decirte tu suscripción. " +
+        (esAdmin ? "Tienes rol admin: Pro 2.0 desbloqueado. " : "") +
+        "Prueba: «mi plan» o «dónde está el puente de Brooklyn»."
       );
       if (ultimaCuota) {
         addMsg("sys", textoSuscripcion(ultimaCuota));
@@ -434,10 +501,16 @@
     }
 
     function cambiarVersion() {
-      if (document.getElementById("selVersion").value === "pro") {
-        alert("Alex Pro llegará pronto.");
+      const v = document.getElementById("selVersion").value;
+      if (v === "pro" && !esAdmin) {
+        alert("Alex Pro 2.0 solo está disponible para administradores.");
         document.getElementById("selVersion").value = "2.0";
+        modeloActual = "2.0";
+      } else {
+        modeloActual = v;
       }
+      aplicarModeloUI();
+      addMsg("sys", "Modelo activo: " + nombreModelo(modeloActual));
     }
 
     function abrirModal() { document.getElementById("modalBg").classList.add("open"); }
@@ -476,13 +549,17 @@
 
     function cerrarSesion() {
       auth.signOut().then(() => {
-        addMsg("sys", "Sesión cerrada. Plan Invitado (10 msgs / 12h) salvo Premium por UID.");
+        esAdmin = false;
+        modeloActual = "2.0";
+        aplicarModeloUI();
+        addMsg("sys", "Sesión cerrada. Plan Invitado. Pro 2.0 bloqueado.");
       });
     }
 
     btn.addEventListener("click", enviar);
     inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") enviar(); });
 
+    aplicarModeloUI();
     nuevaConversacion();
     inputEl.focus();
   </script>
