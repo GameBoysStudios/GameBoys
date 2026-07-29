@@ -22,7 +22,6 @@
     .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); display: inline-block; }
     .badge { font-size: 0.65rem; background: var(--accent); color: #fff; padding: 2px 7px; border-radius: 6px; }
     .badge.pro { background: linear-gradient(90deg, #5ec8ff, #7c6af5); }
-    .badge.admin { background: #3d3210; color: var(--premium); border: 1px solid #6a5518; }
     .sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; }
     .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-top: 10px; }
     select, input:not([type=file]) {
@@ -61,9 +60,7 @@
       font-size: 0.9rem; color: var(--muted);
     }
     .top a { color: var(--accent); text-decoration: none; }
-    .top-plan {
-      font-weight: 700; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem;
-    }
+    .top-plan { font-weight: 700; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; }
     .top-plan.guest { background: #2a2a35; color: #c8c8d0; }
     .top-plan.normal { background: #2a2450; color: #bdb0ff; }
     .top-plan.premium { background: #3d3210; color: var(--premium); }
@@ -80,12 +77,12 @@
       flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
       background: #16161c; color: var(--text); font-size: 0.95rem;
     }
-    #btnSend, #btnImg {
+    #btnSend, #btnImg, #btnPdf {
       padding: 12px 14px; border: none; border-radius: 8px; background: var(--accent);
       color: #fff; cursor: pointer; font-weight: 600; white-space: nowrap;
     }
-    #btnImg { background: #2d2d3a; }
-    #btnSend:disabled, #btnImg:disabled { opacity: .45; cursor: not-allowed; }
+    #btnImg, #btnPdf { background: #2d2d3a; }
+    #btnSend:disabled, #btnImg:disabled, #btnPdf:disabled { opacity: .45; cursor: not-allowed; }
     .hint { text-align: center; font-size: 0.72rem; color: var(--muted); padding: 0 16px 12px; }
     .modal-bg {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
@@ -115,14 +112,14 @@
   <div class="layout">
     <aside class="side">
       <h1><span class="dot"></span> Alex <span class="badge" id="badgeVer">2.0</span></h1>
-      <p class="sub">Traduce · mapas · imágenes · cuenta Firebase GBS</p>
+      <p class="sub">Traduce · mapas · imágenes · PDF (Pro) · Firebase</p>
 
       <div class="label">Modelo</div>
       <select id="selVersion" onchange="cambiarVersion()">
         <option value="2.0" selected>Alex 2.0</option>
         <option value="pro" disabled>Alex Pro 2.0 (solo admin)</option>
       </select>
-      <p class="pro-hint" id="proHint">Rol admin activo: puedes usar Pro 2.0</p>
+      <p class="pro-hint" id="proHint">Admin: Pro 2.0 · visión mejorada · PDF</p>
 
       <div class="label">Suscripción / rol</div>
       <div class="box" id="accountBox">
@@ -144,15 +141,16 @@
       <div class="label">Acciones</div>
       <button class="btn" type="button" onclick="nuevaConversacion()">＋ Nueva conversación</button>
       <button class="btn" type="button" onclick="document.getElementById('fileImg').click()">Analizar imagen</button>
+      <button class="btn" type="button" id="btnPdfSide" onclick="subirPdf()">Analizar PDF (Pro)</button>
       <input type="file" id="fileImg" accept="image/*" style="display:none" />
+      <input type="file" id="filePdf" accept="application/pdf,.pdf" style="display:none" />
 
       <div class="side-foot">
         <strong>Planes</strong><br>
         Invitado: 10 msgs / 12h<br>
-        Normal (cuenta GBS): 50 / 12h<br>
+        Normal: 50 / 12h<br>
         Premium: ilimitado<br>
-        <strong>Admin:</strong> acceso a Alex Pro 2.0<br><br>
-        Pregunta: <em>mi suscripción</em><br>
+        <strong>Admin / Pro:</strong> visión + PDF<br><br>
         <a href="index.html" style="color:var(--accent)">Volver al sitio</a>
       </div>
     </aside>
@@ -169,10 +167,11 @@
       <div class="thinking" id="thinking">Alex está pensando…</div>
       <div class="input-row">
         <button id="btnImg" type="button" title="Analizar imagen" onclick="document.getElementById('fileImg').click()">IMG</button>
-        <input id="input" type="text" placeholder="Mensaje… prueba: mi suscripción" autocomplete="off" />
+        <button id="btnPdf" type="button" title="Analizar PDF (Pro)" onclick="subirPdf()">PDF</button>
+        <input id="input" type="text" placeholder="Mensaje…" autocomplete="off" />
         <button id="btnSend" type="button">Enviar</button>
       </div>
-      <p class="hint">Pro 2.0 solo con rol administrador · Escribe “mi plan” para ver tu suscripción</p>
+      <p class="hint">PDF y visión avanzada requieren Alex Pro 2.0 (admin)</p>
     </div>
   </div>
 
@@ -182,8 +181,7 @@
       <input type="email" id="regEmail" placeholder="Email" style="margin-bottom:8px" />
       <input type="password" id="regPass" placeholder="Contraseña" />
       <p style="font-size:0.75rem;color:var(--muted);margin:10px 0 0">
-        Misma cuenta que películas y cómics. Plan <strong>Normal</strong> = 50 msgs / 12h.
-        Premium y Admin se asignan por UID en Firebase.
+        Misma cuenta que películas y cómics. Admin desbloquea Pro (PDF + visión).
       </p>
       <div class="auth-msg" id="authMsg"></div>
       <div class="row">
@@ -217,34 +215,29 @@
       if (firebaseUser && firebaseUser.uid) return firebaseUser.uid;
       return guestId;
     }
-
     function getEmail() {
       return (firebaseUser && firebaseUser.email) || "";
     }
-
     function nombrePlan(tier) {
       return { guest: "Invitado", normal: "Normal", premium: "Premium" }[tier] || tier || "Invitado";
     }
-
     function detallePlan(c) {
       const tier = (c && c.tier) || "guest";
-      if (tier === "premium") return "Mensajes ilimitados · suscripción Premium";
-      if (tier === "normal") return "50 mensajes cada 12 horas · cuenta Game Boys";
-      return "10 mensajes cada 12 horas · sin sesión";
+      if (tier === "premium") return "Mensajes ilimitados · Premium";
+      if (tier === "normal") return "50 mensajes / 12h · cuenta Game Boys";
+      return "10 mensajes / 12h · sin sesión";
     }
-
     function textoSuscripcion(c, apiText) {
       if (apiText) return apiText;
       const tier = (c && c.tier) || "guest";
       const plan = nombrePlan(tier);
-      if (tier === "premium") return "Tu suscripción: Premium (mensajes ilimitados).";
+      if (tier === "premium") return "Tu suscripción: Premium (ilimitado).";
       if (c && c.limite != null) {
         const rest = c.restantes != null ? c.restantes : Math.max(0, c.limite - (c.usados || 0));
-        return "Tu suscripción: " + plan + " · " + rest + " de " + c.limite + " mensajes restantes (ventana 12 h).";
+        return "Tu suscripción: " + plan + " · " + rest + " de " + c.limite + " restantes (12 h).";
       }
       return "Tu suscripción: " + plan + ".";
     }
-
     function nombreModelo(id) {
       return id === "pro" ? "Alex Pro 2.0" : "Alex 2.0";
     }
@@ -264,7 +257,6 @@
       }
       sel.value = modeloActual;
       localStorage.setItem("alex_modelo", modeloActual);
-
       const badge = document.getElementById("badgeVer");
       badge.textContent = modeloActual === "pro" ? "Pro 2.0" : "2.0";
       badge.className = "badge" + (modeloActual === "pro" ? " pro" : "");
@@ -280,7 +272,7 @@
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    function pintarCuota(c, suscripcionApi) {
+    function pintarCuota(c) {
       if (!c) return;
       ultimaCuota = c;
       const tier = c.tier || "guest";
@@ -301,27 +293,21 @@
         pill.textContent = plan.toUpperCase();
         pill.className = "plan-pill " + tier;
       }
-
       const hp = document.getElementById("headerPlan");
       hp.textContent = esAdmin ? "Rol: Admin · " + plan : "Suscripción: " + plan;
       hp.className = "top-plan " + (esAdmin ? "admin" : tier);
 
       let texto, pct = 0;
-      if (c.limite == null) {
-        texto = "Ilimitado";
-        pct = 100;
-      } else {
+      if (c.limite == null) { texto = "Ilimitado"; pct = 100; }
+      else {
         const rest = c.restantes != null ? c.restantes : Math.max(0, c.limite - (c.usados || 0));
         texto = rest + " / " + c.limite + " restantes";
         pct = Math.min(100, ((c.usados || 0) / c.limite) * 100);
       }
       document.getElementById("cuotaTexto").textContent = texto;
       document.getElementById("headerCuota").textContent = "Cuota: " + texto;
-      const fill = document.getElementById("cuotaFill");
-      const bar = document.getElementById("cuotaBar");
-      fill.style.width = pct + "%";
-      bar.className = "bar" + (pct >= 90 ? " danger" : pct >= 70 ? " warn" : "");
-
+      document.getElementById("cuotaFill").style.width = pct + "%";
+      document.getElementById("cuotaBar").className = "bar" + (pct >= 90 ? " danger" : pct >= 70 ? " warn" : "");
       aplicarModeloUI();
     }
 
@@ -332,59 +318,33 @@
           await fetch(ALEX_API + "/api/vincular_firebase", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              tier: "normal"
-            })
+            body: JSON.stringify({ uid: firebaseUser.uid, email: firebaseUser.email || "", tier: "normal" })
           });
         }
-        const res = await fetch(ALEX_API + "/api/cuota", {
-          headers: { "X-Alex-Account": id }
-        });
+        const res = await fetch(ALEX_API + "/api/cuota", { headers: { "X-Alex-Account": id } });
         if (res.ok) {
           const c = await res.json();
-          pintarCuota(c, c.suscripcion);
+          pintarCuota(c);
           return c;
         }
       } catch (_) {
         document.getElementById("cuotaTexto").textContent = "Servidor no disponible";
-        document.getElementById("tierLabel").textContent = "Desconocido";
       }
       return null;
     }
 
     function onAuth(user) {
       firebaseUser = user || null;
-      const btnAuth = document.getElementById("btnAuth");
-      const btnLogout = document.getElementById("btnLogout");
-      if (user) {
-        btnAuth.style.display = "none";
-        btnLogout.style.display = "block";
-        document.getElementById("emailLabel").textContent = user.email || user.uid;
-      } else {
-        btnAuth.style.display = "block";
-        btnLogout.style.display = "none";
-        document.getElementById("emailLabel").textContent = "Sin sesión";
-        esAdmin = false;
-        aplicarModeloUI();
-      }
+      document.getElementById("btnAuth").style.display = user ? "none" : "block";
+      document.getElementById("btnLogout").style.display = user ? "block" : "none";
+      if (!user) { esAdmin = false; aplicarModeloUI(); }
       vincularYCargarCuota().then((c) => {
-        if (c) {
-          addMsg("sys", textoSuscripcion(c, c.suscripcion) +
-            (c.admin ? " · Rol: Administrador (Pro 2.0 disponible)." : ""));
-        }
+        if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion) + (c.admin ? " · Admin (Pro + PDF)." : ""));
       });
     }
 
-    if (typeof auth !== "undefined") {
-      auth.onAuthStateChanged(onAuth);
-    } else {
-      console.warn("Firebase auth no cargó; modo invitado.");
-      vincularYCargarCuota().then((c) => {
-        if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion));
-      });
-    }
+    if (typeof auth !== "undefined") auth.onAuthStateChanged(onAuth);
+    else vincularYCargarCuota();
 
     async function enviar() {
       const texto = inputEl.value.trim();
@@ -394,40 +354,21 @@
       thinking.classList.add("show");
       thinking.textContent = nombreModelo(modeloActual) + " está pensando…";
       btn.disabled = true;
-
-      const payload = {
-        mensaje: texto,
-        cuenta_id: getAccountId(),
-        modelo: modeloActual
-      };
-      if (firebaseUser) {
-        payload.firebase_uid = firebaseUser.uid;
-        payload.email = firebaseUser.email || "";
-      }
-
+      const payload = { mensaje: texto, cuenta_id: getAccountId(), modelo: modeloActual };
+      if (firebaseUser) { payload.firebase_uid = firebaseUser.uid; payload.email = firebaseUser.email || ""; }
       try {
         const res = await fetch(ALEX_API + "/api/chat", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Alex-Account": getAccountId()
-          },
+          headers: { "Content-Type": "application/json", "X-Alex-Account": getAccountId() },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (data.cuota) pintarCuota(data.cuota, data.suscripcion);
-        if (data.admin != null) {
-          esAdmin = !!data.admin;
-          aplicarModeloUI();
-        }
-        if (data.error === "modelo_restringido") {
-          modeloActual = "2.0";
-          aplicarModeloUI();
-        }
-        const pref = data.modelo_nombre ? "[" + data.modelo_nombre + "] " : "";
-        addMsg("alex", (data.error === "modelo_restringido" ? "" : "") + (data.respuesta || "(sin respuesta)"));
+        if (data.cuota) pintarCuota(data.cuota);
+        if (data.admin != null) { esAdmin = !!data.admin; aplicarModeloUI(); }
+        if (data.error === "modelo_restringido") { modeloActual = "2.0"; aplicarModeloUI(); }
+        addMsg("alex", data.respuesta || "(sin respuesta)");
       } catch (e) {
-        addMsg("alex", "No pude conectar con Alex. ¿Está despierto el servidor en Render?");
+        addMsg("alex", "No pude conectar con Alex en Render.");
       } finally {
         thinking.classList.remove("show");
         btn.disabled = false;
@@ -435,45 +376,87 @@
       }
     }
 
+    function subirPdf() {
+      if (!esAdmin) {
+        addMsg("sys", "El análisis de PDF es solo para Alex Pro 2.0 (rol administrador).");
+        return;
+      }
+      if (modeloActual !== "pro") {
+        modeloActual = "pro";
+        aplicarModeloUI();
+        addMsg("sys", "Cambiado a Alex Pro 2.0 para analizar el PDF.");
+      }
+      document.getElementById("filePdf").click();
+    }
+
     document.getElementById("fileImg").addEventListener("change", async (ev) => {
       const file = ev.target.files && ev.target.files[0];
       ev.target.value = "";
       if (!file) return;
-      if (file.size > 3.5 * 1024 * 1024) {
-        addMsg("alex", "Imagen demasiado grande (máx ~3.5 MB).");
+      if (file.size > 4.5 * 1024 * 1024) {
+        addMsg("alex", "Imagen demasiado grande (máx ~4.5 MB).");
         return;
       }
       addMsg("user", "[Imagen: " + file.name + "]");
       thinking.classList.add("show");
+      thinking.textContent = nombreModelo(modeloActual) + " analiza la imagen…";
       btn.disabled = true;
-
       const reader = new FileReader();
       reader.onload = async () => {
-        const b64 = reader.result;
         const payload = {
-          imagen: b64,
-          idioma: "es",
-          cuenta_id: getAccountId(),
-          modelo: modeloActual
+          imagen: reader.result, idioma: "es",
+          cuenta_id: getAccountId(), modelo: modeloActual
         };
-        if (firebaseUser) {
-          payload.firebase_uid = firebaseUser.uid;
-          payload.email = firebaseUser.email || "";
-        }
+        if (firebaseUser) { payload.firebase_uid = firebaseUser.uid; payload.email = firebaseUser.email || ""; }
         try {
           const res = await fetch(ALEX_API + "/api/analizar_imagen", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Alex-Account": getAccountId()
-            },
+            headers: { "Content-Type": "application/json", "X-Alex-Account": getAccountId() },
             body: JSON.stringify(payload)
           });
           const data = await res.json();
-          if (data.cuota) pintarCuota(data.cuota, data.suscripcion);
+          if (data.cuota) pintarCuota(data.cuota);
           addMsg("alex", data.descripcion || data.error || "No pude analizar la imagen.");
         } catch (e) {
-          addMsg("alex", "Error al enviar la imagen al servidor.");
+          addMsg("alex", "Error al enviar la imagen.");
+        } finally {
+          thinking.classList.remove("show");
+          btn.disabled = false;
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById("filePdf").addEventListener("change", async (ev) => {
+      const file = ev.target.files && ev.target.files[0];
+      ev.target.value = "";
+      if (!file) return;
+      if (file.size > 7 * 1024 * 1024) {
+        addMsg("alex", "PDF demasiado grande (máx ~7 MB).");
+        return;
+      }
+      addMsg("user", "[PDF: " + file.name + "]");
+      thinking.classList.add("show");
+      thinking.textContent = "Alex Pro 2.0 lee el PDF…";
+      btn.disabled = true;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const payload = {
+          pdf: reader.result, idioma: "es",
+          cuenta_id: getAccountId(), modelo: "pro"
+        };
+        if (firebaseUser) { payload.firebase_uid = firebaseUser.uid; payload.email = firebaseUser.email || ""; }
+        try {
+          const res = await fetch(ALEX_API + "/api/analizar_pdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Alex-Account": getAccountId() },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.cuota) pintarCuota(data.cuota);
+          addMsg("alex", data.descripcion || data.error || "No pude analizar el PDF.");
+        } catch (e) {
+          addMsg("alex", "Error al enviar el PDF.");
         } finally {
           thinking.classList.remove("show");
           btn.disabled = false;
@@ -486,79 +469,63 @@
       messagesEl.innerHTML = "";
       addMsg(
         "alex",
-        "¡Hola! Soy " + nombreModelo(modeloActual) + " (Game Boys Studios · Diego Ar). " +
-        "Puedo explicar, buscar lugares, traducir, analizar imágenes y decirte tu suscripción. " +
-        (esAdmin ? "Tienes rol admin: Pro 2.0 desbloqueado. " : "") +
-        "Prueba: «mi plan» o «dónde está el puente de Brooklyn»."
+        "¡Hola! Soy " + nombreModelo(modeloActual) + " (Diego Ar · Game Boys). " +
+        "Puedo charlar, buscar lugares, traducir e imágenes" +
+        (esAdmin ? "; con Pro también resumo PDFs." : ".") +
+        " Prueba subir una imagen o un PDF si eres admin."
       );
-      if (ultimaCuota) {
-        addMsg("sys", textoSuscripcion(ultimaCuota));
-      } else {
-        vincularYCargarCuota().then((c) => {
-          if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion));
-        });
-      }
+      if (ultimaCuota) addMsg("sys", textoSuscripcion(ultimaCuota));
+      else vincularYCargarCuota().then((c) => { if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion)); });
     }
 
     function cambiarVersion() {
       const v = document.getElementById("selVersion").value;
       if (v === "pro" && !esAdmin) {
-        alert("Alex Pro 2.0 solo está disponible para administradores.");
+        alert("Alex Pro 2.0 solo para administradores.");
         document.getElementById("selVersion").value = "2.0";
         modeloActual = "2.0";
-      } else {
-        modeloActual = v;
-      }
+      } else modeloActual = v;
       aplicarModeloUI();
       addMsg("sys", "Modelo activo: " + nombreModelo(modeloActual));
     }
 
     function abrirModal() { document.getElementById("modalBg").classList.add("open"); }
     function cerrarModal() { document.getElementById("modalBg").classList.remove("open"); }
-
     function setAuthMsg(t, ok) {
       const el = document.getElementById("authMsg");
       el.textContent = t;
       el.className = "auth-msg " + (ok ? "ok" : "err");
     }
-
     function loginEmail() {
       const email = document.getElementById("regEmail").value.trim();
       const password = document.getElementById("regPass").value;
       if (!email || !password) return setAuthMsg("Completa email y contraseña", false);
       auth.signInWithEmailAndPassword(email, password)
-        .then(() => { setAuthMsg("¡Sesión iniciada!", true); cerrarModal(); })
+        .then(() => { setAuthMsg("OK", true); cerrarModal(); })
         .catch(err => setAuthMsg(err.message, false));
     }
-
     function signupEmail() {
       const email = document.getElementById("regEmail").value.trim();
       const password = document.getElementById("regPass").value;
       if (!email || !password) return setAuthMsg("Completa email y contraseña", false);
-      if (password.length < 6) return setAuthMsg("Mínimo 6 caracteres", false);
       auth.createUserWithEmailAndPassword(email, password)
-        .then(() => { setAuthMsg("¡Cuenta creada!", true); cerrarModal(); })
+        .then(() => { setAuthMsg("Cuenta creada", true); cerrarModal(); })
         .catch(err => setAuthMsg(err.message, false));
     }
-
     function loginGoogle() {
       auth.signInWithPopup(googleProvider)
         .then(() => { setAuthMsg("Google OK", true); cerrarModal(); })
         .catch(err => setAuthMsg(err.message, false));
     }
-
     function cerrarSesion() {
       auth.signOut().then(() => {
-        esAdmin = false;
-        modeloActual = "2.0";
-        aplicarModeloUI();
-        addMsg("sys", "Sesión cerrada. Plan Invitado. Pro 2.0 bloqueado.");
+        esAdmin = false; modeloActual = "2.0"; aplicarModeloUI();
+        addMsg("sys", "Sesión cerrada.");
       });
     }
 
     btn.addEventListener("click", enviar);
     inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") enviar(); });
-
     aplicarModeloUI();
     nuevaConversacion();
     inputEl.focus();
