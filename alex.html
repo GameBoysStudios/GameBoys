@@ -119,7 +119,7 @@
 
       <div class="label">Acciones</div>
       <button class="btn" type="button" onclick="nuevaConversacion()">＋ Nueva conversación</button>
-      <button class="btn" type="button" onclick="document.getElementById('fileImg').click()">🖼 Analizar imagen</button>
+      <button class="btn" type="button" onclick="document.getElementById('fileImg').click()">Analizar imagen</button>
       <input type="file" id="fileImg" accept="image/*" style="display:none" />
 
       <div class="side-foot">
@@ -128,23 +128,23 @@
         Premium: <strong>ilimitado</strong><br><br>
         Traduce: <em>traduce: hello al español</em><br>
         Imagen: análisis casero (colores, brillo)<br><br>
-        <a href="index.html" style="color:var(--accent)">← Volver al sitio</a>
+        <a href="index.html" style="color:var(--accent)">Volver al sitio</a>
       </div>
     </aside>
 
     <div class="main">
       <div class="top">
-        <div><a href="index.html">← Volver</a> &nbsp;·&nbsp; <strong style="color:var(--text)">Alex 2.0</strong></div>
+        <div><a href="index.html">Volver</a> · <strong style="color:var(--text)">Alex 2.0</strong></div>
         <div id="headerCuota">Cuota: —</div>
       </div>
       <div id="messages"></div>
       <div class="thinking" id="thinking">Alex está pensando…</div>
       <div class="input-row">
-        <button id="btnImg" type="button" title="Analizar imagen" onclick="document.getElementById('fileImg').click()">🖼</button>
+        <button id="btnImg" type="button" title="Analizar imagen" onclick="document.getElementById('fileImg').click()">IMG</button>
         <input id="input" type="text" placeholder="Mensaje… o 'traduce: hi al español'" autocomplete="off" />
         <button id="btnSend" type="button">Enviar</button>
       </div>
-      <p class="hint">Enter envía · 🖼 analiza imagen (colores/brillo) · traduce con Google o MyMemory</p>
+      <p class="hint">Enter envía · IMG analiza imagen · traduce con Google o MyMemory</p>
     </div>
   </div>
 
@@ -313,7 +313,7 @@
       ev.target.value = "";
       if (!file) return;
       if (file.size > 3.5 * 1024 * 1024) {
-        addMsg("alex", "Imagen demasiado grande (máx ~3.5 MB).").
+        addMsg("alex", "Imagen demasiado grande (máx ~3.5 MB).");
         return;
       }
       addMsg("user", "[Imagen: " + file.name + "]");
