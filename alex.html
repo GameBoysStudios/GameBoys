@@ -23,7 +23,7 @@
     .badge { font-size: 0.65rem; background: var(--accent); color: #fff; padding: 2px 7px; border-radius: 6px; }
     .sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; }
     .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-top: 10px; }
-    select, input {
+    select, input:not([type=file]) {
       width: 100%; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
       background: var(--bg); color: var(--text); font-size: 0.85rem;
     }
@@ -57,16 +57,17 @@
     .msg.alex { background: #1c1c24; align-self: flex-start; }
     .thinking { display: none; padding: 0 16px 8px; color: var(--muted); font-size: 0.85rem; }
     .thinking.show { display: block; }
-    .input-row { display: flex; gap: 8px; padding: 16px; border-top: 1px solid var(--border); }
+    .input-row { display: flex; gap: 8px; padding: 16px; border-top: 1px solid var(--border); align-items: center; }
     #input {
       flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
       background: #16161c; color: var(--text); font-size: 0.95rem;
     }
-    #btnSend {
-      padding: 12px 18px; border: none; border-radius: 8px; background: var(--accent);
-      color: #fff; cursor: pointer; font-weight: 600;
+    #btnSend, #btnImg {
+      padding: 12px 14px; border: none; border-radius: 8px; background: var(--accent);
+      color: #fff; cursor: pointer; font-weight: 600; white-space: nowrap;
     }
-    #btnSend:disabled { opacity: .45; cursor: not-allowed; }
+    #btnImg { background: #2d2d3a; }
+    #btnSend:disabled, #btnImg:disabled { opacity: .45; cursor: not-allowed; }
     .hint { text-align: center; font-size: 0.72rem; color: var(--muted); padding: 0 16px 12px; }
     .modal-bg {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55);
@@ -86,7 +87,6 @@
     @media (max-width: 720px) { .side { display: none; } }
   </style>
 
-  <!-- Firebase (mismo proyecto que la web GameBoys) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
@@ -95,7 +95,7 @@
   <div class="layout">
     <aside class="side">
       <h1><span class="dot"></span> Alex <span class="badge">2.0</span></h1>
-      <p class="sub">Game Boys Studios · misma cuenta Firebase</p>
+      <p class="sub">Traduce · analiza imágenes · misma cuenta Firebase</p>
 
       <div class="label">Versión</div>
       <select id="selVersion" onchange="cambiarVersion()">
@@ -119,12 +119,15 @@
 
       <div class="label">Acciones</div>
       <button class="btn" type="button" onclick="nuevaConversacion()">＋ Nueva conversación</button>
+      <button class="btn" type="button" onclick="document.getElementById('fileImg').click()">🖼 Analizar imagen</button>
+      <input type="file" id="fileImg" accept="image/*" style="display:none" />
 
       <div class="side-foot">
         Sin sesión: <strong>10</strong> msgs / 12h<br>
         Con cuenta GBS: <strong>50</strong> msgs / 12h<br>
         Premium: <strong>ilimitado</strong><br><br>
-        Usa la <strong>misma cuenta</strong> que en el resto de la web.<br><br>
+        Traduce: <em>traduce: hello al español</em><br>
+        Imagen: análisis casero (colores, brillo)<br><br>
         <a href="index.html" style="color:var(--accent)">← Volver al sitio</a>
       </div>
     </aside>
@@ -137,10 +140,11 @@
       <div id="messages"></div>
       <div class="thinking" id="thinking">Alex está pensando…</div>
       <div class="input-row">
-        <input id="input" type="text" placeholder="Escribe un mensaje…" autocomplete="off" />
+        <button id="btnImg" type="button" title="Analizar imagen" onclick="document.getElementById('fileImg').click()">🖼</button>
+        <input id="input" type="text" placeholder="Mensaje… o 'traduce: hi al español'" autocomplete="off" />
         <button id="btnSend" type="button">Enviar</button>
       </div>
-      <p class="hint">Enter para enviar · Límites según tu cuenta Firebase de Game Boys</p>
+      <p class="hint">Enter envía · 🖼 analiza imagen (colores/brillo) · traduce con Google o MyMemory</p>
     </div>
   </div>
 
@@ -252,7 +256,7 @@
         btnLogout.style.display = "block";
         document.getElementById("emailLabel").textContent = user.email || user.uid;
         document.getElementById("tierLabel").textContent = "Normal (GBS)";
-        addMsg("alex", "Sesión Firebase detectada: " + (user.email || user.uid) + ". Plan normal (50 msgs / 12h).");
+        addMsg("alex", "Sesión Firebase: " + (user.email || user.uid) + ". Plan normal (50 msgs / 12h).");
       } else {
         btnAuth.style.display = "block";
         btnLogout.style.display = "none";
@@ -262,7 +266,6 @@
       vincularYCargarCuota();
     }
 
-    // Escuchar la misma auth que el resto de la web
     if (typeof auth !== "undefined") {
       auth.onAuthStateChanged(onAuth);
     } else {
@@ -278,10 +281,7 @@
       thinking.classList.add("show");
       btn.disabled = true;
 
-      const payload = {
-        mensaje: texto,
-        cuenta_id: getAccountId()
-      };
+      const payload = { mensaje: texto, cuenta_id: getAccountId() };
       if (firebaseUser) {
         payload.firebase_uid = firebaseUser.uid;
         payload.email = firebaseUser.email || "";
@@ -308,9 +308,55 @@
       }
     }
 
+    document.getElementById("fileImg").addEventListener("change", async (ev) => {
+      const file = ev.target.files && ev.target.files[0];
+      ev.target.value = "";
+      if (!file) return;
+      if (file.size > 3.5 * 1024 * 1024) {
+        addMsg("alex", "Imagen demasiado grande (máx ~3.5 MB).").
+        return;
+      }
+      addMsg("user", "[Imagen: " + file.name + "]");
+      thinking.classList.add("show");
+      btn.disabled = true;
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const b64 = reader.result;
+        const payload = {
+          imagen: b64,
+          idioma: "es",
+          cuenta_id: getAccountId()
+        };
+        if (firebaseUser) {
+          payload.firebase_uid = firebaseUser.uid;
+          payload.email = firebaseUser.email || "";
+        }
+        try {
+          const res = await fetch(ALEX_API + "/api/analizar_imagen", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Alex-Account": getAccountId()
+            },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.cuota) pintarCuota(data.cuota);
+          addMsg("alex", data.descripcion || data.error || "No pude analizar la imagen.");
+        } catch (e) {
+          addMsg("alex", "Error al enviar la imagen al servidor.");
+        } finally {
+          thinking.classList.remove("show");
+          btn.disabled = false;
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
     function nuevaConversacion() {
       messagesEl.innerHTML = "";
-      addMsg("alex", "¡Hola! Soy Alex 2.0. Usa tu cuenta de Game Boys para más mensajes.");
+      addMsg("alex", "¡Hola! Soy Alex 2.0. Puedo traducir (traduce: hello al español) y analizar imágenes de forma casera.");
     }
 
     function cambiarVersion() {
