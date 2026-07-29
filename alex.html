@@ -72,6 +72,26 @@
     .msg.sys { background: transparent; border: 1px dashed var(--border); color: var(--muted); font-size: 0.85rem; align-self: center; max-width: 95%; text-align: center; }
     .thinking { display: none; padding: 0 16px 8px; color: var(--muted); font-size: 0.85rem; }
     .thinking.show { display: block; }
+    /* Barra de progreso solo Pro */
+    .pro-progress {
+      display: none; margin: 0 16px 10px; padding: 10px 12px;
+      background: #12121a; border: 1px solid #2a3a4a; border-radius: 10px;
+    }
+    .pro-progress.show { display: block; }
+    .pro-progress .pp-top {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.78rem; color: var(--pro); margin-bottom: 6px; gap: 8px;
+    }
+    .pro-progress .pp-stage { color: var(--muted); font-size: 0.72rem; }
+    .pro-progress .pp-track {
+      height: 8px; background: #1e1e2a; border-radius: 999px; overflow: hidden;
+    }
+    .pro-progress .pp-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #5ec8ff, #7c6af5, #3dd68c);
+      border-radius: 999px; transition: width 0.35s ease;
+    }
+    .pro-progress .pp-eta { font-size: 0.72rem; color: var(--muted); margin-top: 5px; text-align: right; }
     .input-row { display: flex; gap: 8px; padding: 16px; border-top: 1px solid var(--border); align-items: center; }
     #input {
       flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
@@ -112,14 +132,14 @@
   <div class="layout">
     <aside class="side">
       <h1><span class="dot"></span> Alex <span class="badge" id="badgeVer">2.0</span></h1>
-      <p class="sub">Traduce · mapas · imágenes · PDF (Pro) · Firebase</p>
+      <p class="sub">Traduce · mapas · imágenes · PDF · RAE (Pro)</p>
 
       <div class="label">Modelo</div>
       <select id="selVersion" onchange="cambiarVersion()">
         <option value="2.0" selected>Alex 2.0</option>
         <option value="pro" disabled>Alex Pro 2.0 (solo admin)</option>
       </select>
-      <p class="pro-hint" id="proHint">Admin: Pro 2.0 · visión mejorada · PDF</p>
+      <p class="pro-hint" id="proHint">Admin: Pro · visión · PDF · RAE · barra de progreso</p>
 
       <div class="label">Suscripción / rol</div>
       <div class="box" id="accountBox">
@@ -150,7 +170,7 @@
         Invitado: 10 msgs / 12h<br>
         Normal: 50 / 12h<br>
         Premium: ilimitado<br>
-        <strong>Admin / Pro:</strong> visión + PDF<br><br>
+        <strong>Admin / Pro:</strong> visión + PDF + RAE<br><br>
         <a href="index.html" style="color:var(--accent)">Volver al sitio</a>
       </div>
     </aside>
@@ -165,13 +185,22 @@
       </div>
       <div id="messages"></div>
       <div class="thinking" id="thinking">Alex está pensando…</div>
+      <div class="pro-progress" id="proProgress" aria-live="polite">
+        <div class="pp-top">
+          <span id="ppTitle">Alex Pro trabajando…</span>
+          <span id="ppPct">0%</span>
+        </div>
+        <div class="pp-stage" id="ppStage">Preparando…</div>
+        <div class="pp-track"><div class="pp-fill" id="ppFill"></div></div>
+        <div class="pp-eta" id="ppEta">Tiempo estimado: —</div>
+      </div>
       <div class="input-row">
         <button id="btnImg" type="button" title="Analizar imagen" onclick="document.getElementById('fileImg').click()">IMG</button>
         <button id="btnPdf" type="button" title="Analizar PDF (Pro)" onclick="subirPdf()">PDF</button>
         <input id="input" type="text" placeholder="Mensaje…" autocomplete="off" />
         <button id="btnSend" type="button">Enviar</button>
       </div>
-      <p class="hint">PDF y visión avanzada requieren Alex Pro 2.0 (admin)</p>
+      <p class="hint">Pro: RAE + barra de progreso en chat, imagen y PDF</p>
     </div>
   </div>
 
@@ -181,7 +210,7 @@
       <input type="email" id="regEmail" placeholder="Email" style="margin-bottom:8px" />
       <input type="password" id="regPass" placeholder="Contraseña" />
       <p style="font-size:0.75rem;color:var(--muted);margin:10px 0 0">
-        Misma cuenta que películas y cómics. Admin desbloquea Pro (PDF + visión).
+        Misma cuenta que películas y cómics. Admin desbloquea Pro (PDF + visión + RAE).
       </p>
       <div class="auth-msg" id="authMsg"></div>
       <div class="row">
@@ -209,6 +238,124 @@
     if (!guestId) {
       guestId = "guest-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
       localStorage.setItem("alex_guest_id", guestId);
+    }
+
+    /* ---- Barra de progreso SOLO Pro (estimada en cliente) ---- */
+    let _ppTimer = null;
+    let _ppStart = 0;
+    let _ppDur = 8000;
+    const PP_CONFIG = {
+      chat: {
+        title: "Alex Pro respondiendo…",
+        ms: 10000,
+        stages: [
+          [0, "Leyendo el mensaje…"],
+          [15, "Consultando memoria y RAE si hace falta…"],
+          [40, "Buscando conocimiento…"],
+          [70, "Generando respuesta…"],
+          [90, "Casi listo…"]
+        ]
+      },
+      generacion: {
+        title: "Alex Pro generando…",
+        ms: 14000,
+        stages: [
+          [0, "Entendiendo el pedido…"],
+          [20, "Investigando el tema…"],
+          [50, "Estructurando el contenido…"],
+          [75, "Redactando…"],
+          [92, "Pulido final…"]
+        ]
+      },
+      imagen: {
+        title: "Alex Pro analiza la imagen…",
+        ms: 28000,
+        stages: [
+          [0, "Subiendo imagen…"],
+          [15, "Análisis local (colores / escena)…"],
+          [35, "Descripción con modelo gratuito…"],
+          [70, "Combinando resultados…"],
+          [90, "Casi listo…"]
+        ]
+      },
+      pdf: {
+        title: "Alex Pro lee el PDF…",
+        ms: 35000,
+        stages: [
+          [0, "Subiendo PDF…"],
+          [12, "Extrayendo texto…"],
+          [35, "Resumen y puntos clave…"],
+          [55, "Si es escaneo: renderizando página…"],
+          [75, "Descripción visual…"],
+          [92, "Casi listo…"]
+        ]
+      }
+    };
+
+    function _ppStageFor(pct, stages) {
+      let label = stages[0][1];
+      for (const [p, s] of stages) {
+        if (pct >= p) label = s;
+      }
+      return label;
+    }
+
+    function startProProgress(tipo) {
+      stopProProgress();
+      if (modeloActual !== "pro") return; // solo Pro
+      const cfg = PP_CONFIG[tipo] || PP_CONFIG.chat;
+      _ppDur = cfg.ms;
+      _ppStart = Date.now();
+      const box = document.getElementById("proProgress");
+      box.classList.add("show");
+      document.getElementById("ppTitle").textContent = cfg.title;
+      document.getElementById("ppFill").style.width = "2%";
+      document.getElementById("ppPct").textContent = "2%";
+      document.getElementById("ppStage").textContent = cfg.stages[0][1];
+      document.getElementById("ppEta").textContent =
+        "Tiempo estimado: ~" + Math.round(cfg.ms / 1000) + " s";
+
+      _ppTimer = setInterval(() => {
+        const elapsed = Date.now() - _ppStart;
+        // curva suave que se acerca a 92% y espera al servidor
+        let pct = Math.min(92, (1 - Math.exp(-elapsed / (_ppDur * 0.55))) * 100);
+        pct = Math.max(2, pct);
+        document.getElementById("ppFill").style.width = pct.toFixed(1) + "%";
+        document.getElementById("ppPct").textContent = Math.round(pct) + "%";
+        document.getElementById("ppStage").textContent = _ppStageFor(pct, cfg.stages);
+        const rest = Math.max(0, Math.ceil((_ppDur - elapsed) / 1000));
+        document.getElementById("ppEta").textContent =
+          rest > 0 ? ("Tiempo restante estimado: ~" + rest + " s") : "Finalizando…";
+      }, 200);
+    }
+
+    function finishProProgress() {
+      if (modeloActual !== "pro") {
+        stopProProgress();
+        return;
+      }
+      if (_ppTimer) {
+        clearInterval(_ppTimer);
+        _ppTimer = null;
+      }
+      document.getElementById("ppFill").style.width = "100%";
+      document.getElementById("ppPct").textContent = "100%";
+      document.getElementById("ppStage").textContent = "Completado";
+      document.getElementById("ppEta").textContent = "Listo";
+      setTimeout(stopProProgress, 450);
+    }
+
+    function stopProProgress() {
+      if (_ppTimer) {
+        clearInterval(_ppTimer);
+        _ppTimer = null;
+      }
+      document.getElementById("proProgress").classList.remove("show");
+      document.getElementById("ppFill").style.width = "0%";
+    }
+
+    function pareceGeneracion(texto) {
+      return /\b(genera|escribe|hazme|dame|lista|nombres|historia|resumen|plan|redacta|crea)\b/i.test(texto || "");
     }
 
     function getAccountId() {
@@ -339,7 +486,7 @@
       document.getElementById("btnLogout").style.display = user ? "block" : "none";
       if (!user) { esAdmin = false; aplicarModeloUI(); }
       vincularYCargarCuota().then((c) => {
-        if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion) + (c.admin ? " · Admin (Pro + PDF)." : ""));
+        if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion) + (c.admin ? " · Admin (Pro + PDF + RAE)." : ""));
       });
     }
 
@@ -354,6 +501,8 @@
       thinking.classList.add("show");
       thinking.textContent = nombreModelo(modeloActual) + " está pensando…";
       btn.disabled = true;
+      const tipoProg = pareceGeneracion(texto) ? "generacion" : "chat";
+      startProProgress(tipoProg);
       const payload = { mensaje: texto, cuenta_id: getAccountId(), modelo: modeloActual };
       if (firebaseUser) { payload.firebase_uid = firebaseUser.uid; payload.email = firebaseUser.email || ""; }
       try {
@@ -370,6 +519,7 @@
       } catch (e) {
         addMsg("alex", "No pude conectar con Alex en Render.");
       } finally {
+        finishProProgress();
         thinking.classList.remove("show");
         btn.disabled = false;
         inputEl.focus();
@@ -401,6 +551,7 @@
       thinking.classList.add("show");
       thinking.textContent = nombreModelo(modeloActual) + " analiza la imagen…";
       btn.disabled = true;
+      startProProgress("imagen");
       const reader = new FileReader();
       reader.onload = async () => {
         const payload = {
@@ -414,12 +565,17 @@
             headers: { "Content-Type": "application/json", "X-Alex-Account": getAccountId() },
             body: JSON.stringify(payload)
           });
-          const data = await res.json();
+          let data;
+          try { data = await res.json(); } catch (_) {
+            addMsg("alex", "Respuesta no válida del servidor (status " + res.status + ").");
+            return;
+          }
           if (data.cuota) pintarCuota(data.cuota);
           addMsg("alex", data.descripcion || data.error || "No pude analizar la imagen.");
         } catch (e) {
           addMsg("alex", "Error al enviar la imagen.");
         } finally {
+          finishProProgress();
           thinking.classList.remove("show");
           btn.disabled = false;
         }
@@ -439,6 +595,7 @@
       thinking.classList.add("show");
       thinking.textContent = "Alex Pro 2.0 lee el PDF…";
       btn.disabled = true;
+      startProProgress("pdf");
       const reader = new FileReader();
       reader.onload = async () => {
         const payload = {
@@ -452,12 +609,21 @@
             headers: { "Content-Type": "application/json", "X-Alex-Account": getAccountId() },
             body: JSON.stringify(payload)
           });
-          const data = await res.json();
+          let data;
+          try { data = await res.json(); } catch (_) {
+            addMsg("alex", "Respuesta no válida (status " + res.status + "). PDF demasiado grande o timeout.");
+            return;
+          }
           if (data.cuota) pintarCuota(data.cuota);
-          addMsg("alex", data.descripcion || data.error || "No pude analizar el PDF.");
+          if (!res.ok) {
+            addMsg("alex", data.descripcion || data.error || ("Error HTTP " + res.status));
+          } else {
+            addMsg("alex", data.descripcion || data.error || "No pude analizar el PDF.");
+          }
         } catch (e) {
           addMsg("alex", "Error al enviar el PDF.");
         } finally {
+          finishProProgress();
           thinking.classList.remove("show");
           btn.disabled = false;
         }
@@ -471,7 +637,7 @@
         "alex",
         "¡Hola! Soy " + nombreModelo(modeloActual) + " (Diego Ar · Game Boys). " +
         "Puedo charlar, buscar lugares, traducir e imágenes" +
-        (esAdmin ? "; con Pro también resumo PDFs." : ".") +
+        (esAdmin ? "; con Pro también resumo PDFs y consulto la RAE." : ".") +
         " Prueba subir una imagen o un PDF si eres admin."
       );
       if (ultimaCuota) addMsg("sys", textoSuscripcion(ultimaCuota));
