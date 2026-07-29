@@ -143,6 +143,7 @@
         Invitado: 10 msgs / 12h<br>
         Normal (cuenta GBS): 50 / 12h<br>
         Premium: ilimitado<br><br>
+        Pregunta a Alex: <em>mi suscripción</em><br>
         Traduce: <em>traduce: hello al español</em><br><br>
         <a href="index.html" style="color:var(--accent)">Volver al sitio</a>
       </div>
@@ -160,10 +161,10 @@
       <div class="thinking" id="thinking">Alex está pensando…</div>
       <div class="input-row">
         <button id="btnImg" type="button" title="Analizar imagen" onclick="document.getElementById('fileImg').click()">IMG</button>
-        <input id="input" type="text" placeholder="Mensaje… o 'traduce: hi al español'" autocomplete="off" />
+        <input id="input" type="text" placeholder="Mensaje… prueba: mi suscripción" autocomplete="off" />
         <button id="btnSend" type="button">Enviar</button>
       </div>
-      <p class="hint">Enter envía · La suscripción se muestra arriba y en el panel izquierdo</p>
+      <p class="hint">Suscripción visible arriba · También escribe “mi plan” o “mi suscripción”</p>
     </div>
   </div>
 
@@ -222,12 +223,11 @@
       return "10 mensajes cada 12 horas · sin sesión";
     }
 
-    function textoSuscripcion(c) {
+    function textoSuscripcion(c, apiText) {
+      if (apiText) return apiText;
       const tier = (c && c.tier) || "guest";
       const plan = nombrePlan(tier);
-      if (tier === "premium") {
-        return "Tu suscripción: Premium (mensajes ilimitados).";
-      }
+      if (tier === "premium") return "Tu suscripción: Premium (mensajes ilimitados).";
       if (c && c.limite != null) {
         const rest = c.restantes != null ? c.restantes : Math.max(0, c.limite - (c.usados || 0));
         return "Tu suscripción: " + plan + " · " + rest + " de " + c.limite + " mensajes restantes (ventana 12 h).";
@@ -243,7 +243,7 @@
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    function pintarCuota(c) {
+    function pintarCuota(c, suscripcionApi) {
       if (!c) return;
       ultimaCuota = c;
       const tier = c.tier || "guest";
@@ -298,7 +298,7 @@
         });
         if (res.ok) {
           const c = await res.json();
-          pintarCuota(c);
+          pintarCuota(c, c.suscripcion);
           return c;
         }
       } catch (_) {
@@ -322,9 +322,7 @@
         document.getElementById("emailLabel").textContent = "Sin sesión";
       }
       vincularYCargarCuota().then((c) => {
-        if (c) {
-          addMsg("sys", textoSuscripcion(c) + (user ? " Sesión: " + (user.email || user.uid) + "." : ""));
-        }
+        if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion));
       });
     }
 
@@ -332,7 +330,9 @@
       auth.onAuthStateChanged(onAuth);
     } else {
       console.warn("Firebase auth no cargó; modo invitado.");
-      vincularYCargarCuota();
+      vincularYCargarCuota().then((c) => {
+        if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion));
+      });
     }
 
     async function enviar() {
@@ -359,7 +359,7 @@
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (data.cuota) pintarCuota(data.cuota);
+        if (data.cuota) pintarCuota(data.cuota, data.suscripcion);
         addMsg("alex", data.respuesta || "(sin respuesta)");
       } catch (e) {
         addMsg("alex", "No pude conectar con Alex. ¿Está despierto el servidor en Render?");
@@ -404,7 +404,7 @@
             body: JSON.stringify(payload)
           });
           const data = await res.json();
-          if (data.cuota) pintarCuota(data.cuota);
+          if (data.cuota) pintarCuota(data.cuota, data.suscripcion);
           addMsg("alex", data.descripcion || data.error || "No pude analizar la imagen.");
         } catch (e) {
           addMsg("alex", "Error al enviar la imagen al servidor.");
@@ -418,15 +418,17 @@
 
     function nuevaConversacion() {
       messagesEl.innerHTML = "";
-      const base =
+      addMsg(
+        "alex",
         "¡Hola! Soy Alex 2.0 (Game Boys Studios · Diego Ar). " +
-        "Puedo explicar, buscar info, traducir, analizar imágenes de forma básica y aprender de ti.";
-      addMsg("alex", base);
+        "Puedo explicar, buscar info, traducir, analizar imágenes y decirte tu suscripción. " +
+        "Prueba: «mi plan» o «mi suscripción»."
+      );
       if (ultimaCuota) {
         addMsg("sys", textoSuscripcion(ultimaCuota));
       } else {
         vincularYCargarCuota().then((c) => {
-          if (c) addMsg("sys", textoSuscripcion(c));
+          if (c) addMsg("sys", textoSuscripcion(c, c.suscripcion));
         });
       }
     }
@@ -474,7 +476,7 @@
 
     function cerrarSesion() {
       auth.signOut().then(() => {
-        addMsg("sys", "Sesión cerrada. Vuelves al plan Invitado (10 msgs / 12h) si no eres Premium por UID.");
+        addMsg("sys", "Sesión cerrada. Plan Invitado (10 msgs / 12h) salvo Premium por UID.");
       });
     }
 
