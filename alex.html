@@ -9,13 +9,13 @@
     :root {
       --bg: #0f0f12; --panel: #16161c; --border: #2a2a35; --text: #e8e8ed;
       --muted: #8b8b9a; --accent: #7c6af5; --accent2: #9486f7; --green: #3dd68c;
-      --warn: #f5a524; --danger: #f04438; --radius: 12px;
+      --warn: #f5a524; --danger: #f04438; --premium: #f5c542; --radius: 12px;
     }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
     .layout { display: flex; min-height: 100vh; }
     .side {
-      width: 280px; background: var(--panel); border-right: 1px solid var(--border);
+      width: 290px; background: var(--panel); border-right: 1px solid var(--border);
       padding: 16px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
     }
     .side h1 { font-size: 1.15rem; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
@@ -36,9 +36,16 @@
     .btn.primary:hover { background: var(--accent2); }
     .box {
       background: var(--bg); border-radius: var(--radius); padding: 12px; font-size: 0.8rem;
-      color: var(--muted); line-height: 1.45;
+      color: var(--muted); line-height: 1.5;
     }
     .box strong { color: var(--text); }
+    .plan-pill {
+      display: inline-block; margin-top: 8px; padding: 4px 10px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em;
+    }
+    .plan-pill.guest { background: #2a2a35; color: #c8c8d0; }
+    .plan-pill.normal { background: #2a2450; color: #bdb0ff; }
+    .plan-pill.premium { background: #3d3210; color: var(--premium); border: 1px solid #6a5518; }
     .bar { height: 6px; background: var(--border); border-radius: 4px; margin-top: 8px; overflow: hidden; }
     .bar > i { display: block; height: 100%; width: 0; background: var(--green); transition: width .3s; }
     .bar.warn > i { background: var(--warn); }
@@ -51,10 +58,17 @@
       font-size: 0.9rem; color: var(--muted);
     }
     .top a { color: var(--accent); text-decoration: none; }
+    .top-plan {
+      font-weight: 700; padding: 4px 10px; border-radius: 999px; font-size: 0.78rem;
+    }
+    .top-plan.guest { background: #2a2a35; color: #c8c8d0; }
+    .top-plan.normal { background: #2a2450; color: #bdb0ff; }
+    .top-plan.premium { background: #3d3210; color: var(--premium); }
     #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .msg { padding: 12px 16px; border-radius: var(--radius); max-width: 85%; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
     .msg.user { background: #2a2a35; align-self: flex-end; }
     .msg.alex { background: #1c1c24; align-self: flex-start; }
+    .msg.sys { background: transparent; border: 1px dashed var(--border); color: var(--muted); font-size: 0.85rem; align-self: center; max-width: 95%; text-align: center; }
     .thinking { display: none; padding: 0 16px 8px; color: var(--muted); font-size: 0.85rem; }
     .thinking.show { display: block; }
     .input-row { display: flex; gap: 8px; padding: 16px; border-top: 1px solid var(--border); align-items: center; }
@@ -95,7 +109,7 @@
   <div class="layout">
     <aside class="side">
       <h1><span class="dot"></span> Alex <span class="badge">2.0</span></h1>
-      <p class="sub">Traduce · analiza imágenes · misma cuenta Firebase</p>
+      <p class="sub">Traduce · imágenes · cuenta Firebase GBS</p>
 
       <div class="label">Versión</div>
       <select id="selVersion" onchange="cambiarVersion()">
@@ -103,15 +117,17 @@
         <option value="pro" disabled>Alex Pro (pronto)</option>
       </select>
 
-      <div class="label">Cuenta Firebase</div>
+      <div class="label">Suscripción</div>
       <div class="box" id="accountBox">
-        <strong id="tierLabel">Invitado</strong><br>
-        <span id="emailLabel">Sin sesión</span>
+        <div><strong>Plan:</strong> <span id="tierLabel">Cargando…</span></div>
+        <div id="planDetalle" style="margin-top:4px">—</div>
+        <div style="margin-top:6px"><strong>Cuenta:</strong> <span id="emailLabel">Sin sesión</span></div>
+        <span class="plan-pill guest" id="planPill">INVITADO</span>
       </div>
       <button class="btn primary" type="button" id="btnAuth" onclick="abrirModal()">Iniciar sesión</button>
       <button class="btn" type="button" id="btnLogout" style="display:none" onclick="cerrarSesion()">Cerrar sesión</button>
 
-      <div class="label">Cuota (12 h)</div>
+      <div class="label">Mensajes (ventana 12 h)</div>
       <div class="box">
         <strong id="cuotaTexto">—</strong>
         <div class="bar" id="cuotaBar"><i id="cuotaFill"></i></div>
@@ -123,11 +139,11 @@
       <input type="file" id="fileImg" accept="image/*" style="display:none" />
 
       <div class="side-foot">
-        Sin sesión: <strong>10</strong> msgs / 12h<br>
-        Con cuenta GBS: <strong>50</strong> msgs / 12h<br>
-        Premium: <strong>ilimitado</strong><br><br>
-        Traduce: <em>traduce: hello al español</em><br>
-        Imagen: análisis casero (colores, brillo)<br><br>
+        <strong>Planes</strong><br>
+        Invitado: 10 msgs / 12h<br>
+        Normal (cuenta GBS): 50 / 12h<br>
+        Premium: ilimitado<br><br>
+        Traduce: <em>traduce: hello al español</em><br><br>
         <a href="index.html" style="color:var(--accent)">Volver al sitio</a>
       </div>
     </aside>
@@ -135,7 +151,10 @@
     <div class="main">
       <div class="top">
         <div><a href="index.html">Volver</a> · <strong style="color:var(--text)">Alex 2.0</strong></div>
-        <div id="headerCuota">Cuota: —</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="top-plan guest" id="headerPlan">Suscripción: —</span>
+          <span id="headerCuota">Cuota: —</span>
+        </div>
       </div>
       <div id="messages"></div>
       <div class="thinking" id="thinking">Alex está pensando…</div>
@@ -144,7 +163,7 @@
         <input id="input" type="text" placeholder="Mensaje… o 'traduce: hi al español'" autocomplete="off" />
         <button id="btnSend" type="button">Enviar</button>
       </div>
-      <p class="hint">Enter envía · IMG analiza imagen · traduce con Google o MyMemory</p>
+      <p class="hint">Enter envía · La suscripción se muestra arriba y en el panel izquierdo</p>
     </div>
   </div>
 
@@ -154,7 +173,8 @@
       <input type="email" id="regEmail" placeholder="Email" style="margin-bottom:8px" />
       <input type="password" id="regPass" placeholder="Contraseña" />
       <p style="font-size:0.75rem;color:var(--muted);margin:10px 0 0">
-        Misma cuenta que películas y cómics. Plan <strong>normal</strong> (50 msgs / 12h).
+        Misma cuenta que películas y cómics. Plan <strong>Normal</strong> = 50 msgs / 12h.
+        Premium lo asigna el admin por UID en Firebase.
       </p>
       <div class="auth-msg" id="authMsg"></div>
       <div class="row">
@@ -175,6 +195,7 @@
     const thinking = document.getElementById("thinking");
 
     let firebaseUser = null;
+    let ultimaCuota = null;
     let guestId = localStorage.getItem("alex_guest_id");
     if (!guestId) {
       guestId = "guest-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -190,6 +211,30 @@
       return (firebaseUser && firebaseUser.email) || "";
     }
 
+    function nombrePlan(tier) {
+      return { guest: "Invitado", normal: "Normal", premium: "Premium" }[tier] || tier || "Invitado";
+    }
+
+    function detallePlan(c) {
+      const tier = (c && c.tier) || "guest";
+      if (tier === "premium") return "Mensajes ilimitados · suscripción Premium";
+      if (tier === "normal") return "50 mensajes cada 12 horas · cuenta Game Boys";
+      return "10 mensajes cada 12 horas · sin sesión";
+    }
+
+    function textoSuscripcion(c) {
+      const tier = (c && c.tier) || "guest";
+      const plan = nombrePlan(tier);
+      if (tier === "premium") {
+        return "Tu suscripción: Premium (mensajes ilimitados).";
+      }
+      if (c && c.limite != null) {
+        const rest = c.restantes != null ? c.restantes : Math.max(0, c.limite - (c.usados || 0));
+        return "Tu suscripción: " + plan + " · " + rest + " de " + c.limite + " mensajes restantes (ventana 12 h).";
+      }
+      return "Tu suscripción: " + plan + ".";
+    }
+
     function addMsg(rol, texto) {
       const div = document.createElement("div");
       div.className = "msg " + rol;
@@ -200,15 +245,26 @@
 
     function pintarCuota(c) {
       if (!c) return;
+      ultimaCuota = c;
       const tier = c.tier || "guest";
-      const nombres = { guest: "Invitado", normal: "Normal (GBS)", premium: "Premium" };
-      document.getElementById("tierLabel").textContent = nombres[tier] || tier;
+      const plan = nombrePlan(tier);
+
+      document.getElementById("tierLabel").textContent = plan;
+      document.getElementById("planDetalle").textContent = detallePlan(c);
       document.getElementById("emailLabel").textContent =
         c.email || getEmail() || (firebaseUser ? firebaseUser.uid : "Sin sesión");
 
+      const pill = document.getElementById("planPill");
+      pill.textContent = plan.toUpperCase();
+      pill.className = "plan-pill " + tier;
+
+      const hp = document.getElementById("headerPlan");
+      hp.textContent = "Suscripción: " + plan;
+      hp.className = "top-plan " + tier;
+
       let texto, pct = 0;
       if (c.limite == null) {
-        texto = "Ilimitado (Premium)";
+        texto = "Ilimitado";
         pct = 100;
       } else {
         const rest = c.restantes != null ? c.restantes : Math.max(0, c.limite - (c.usados || 0));
@@ -216,8 +272,7 @@
         pct = Math.min(100, ((c.usados || 0) / c.limite) * 100);
       }
       document.getElementById("cuotaTexto").textContent = texto;
-      document.getElementById("headerCuota").textContent =
-        "Cuota: " + texto + " · " + (nombres[tier] || tier);
+      document.getElementById("headerCuota").textContent = "Cuota: " + texto;
       const fill = document.getElementById("cuotaFill");
       const bar = document.getElementById("cuotaBar");
       fill.style.width = pct + "%";
@@ -241,10 +296,16 @@
         const res = await fetch(ALEX_API + "/api/cuota", {
           headers: { "X-Alex-Account": id }
         });
-        if (res.ok) pintarCuota(await res.json());
+        if (res.ok) {
+          const c = await res.json();
+          pintarCuota(c);
+          return c;
+        }
       } catch (_) {
         document.getElementById("cuotaTexto").textContent = "Servidor no disponible";
+        document.getElementById("tierLabel").textContent = "Desconocido";
       }
+      return null;
     }
 
     function onAuth(user) {
@@ -255,15 +316,16 @@
         btnAuth.style.display = "none";
         btnLogout.style.display = "block";
         document.getElementById("emailLabel").textContent = user.email || user.uid;
-        document.getElementById("tierLabel").textContent = "Normal (GBS)";
-        addMsg("alex", "Sesión Firebase: " + (user.email || user.uid) + ". Plan normal (50 msgs / 12h).");
       } else {
         btnAuth.style.display = "block";
         btnLogout.style.display = "none";
-        document.getElementById("tierLabel").textContent = "Invitado";
         document.getElementById("emailLabel").textContent = "Sin sesión";
       }
-      vincularYCargarCuota();
+      vincularYCargarCuota().then((c) => {
+        if (c) {
+          addMsg("sys", textoSuscripcion(c) + (user ? " Sesión: " + (user.email || user.uid) + "." : ""));
+        }
+      });
     }
 
     if (typeof auth !== "undefined") {
@@ -356,7 +418,17 @@
 
     function nuevaConversacion() {
       messagesEl.innerHTML = "";
-      addMsg("alex", "¡Hola! Soy Alex 2.0. Puedo traducir (traduce: hello al español) y analizar imágenes de forma casera.");
+      const base =
+        "¡Hola! Soy Alex 2.0 (Game Boys Studios · Diego Ar). " +
+        "Puedo explicar, buscar info, traducir, analizar imágenes de forma básica y aprender de ti.";
+      addMsg("alex", base);
+      if (ultimaCuota) {
+        addMsg("sys", textoSuscripcion(ultimaCuota));
+      } else {
+        vincularYCargarCuota().then((c) => {
+          if (c) addMsg("sys", textoSuscripcion(c));
+        });
+      }
     }
 
     function cambiarVersion() {
@@ -402,7 +474,7 @@
 
     function cerrarSesion() {
       auth.signOut().then(() => {
-        addMsg("alex", "Sesión cerrada. Vuelves al plan invitado (10 msgs / 12h).");
+        addMsg("sys", "Sesión cerrada. Vuelves al plan Invitado (10 msgs / 12h) si no eres Premium por UID.");
       });
     }
 
