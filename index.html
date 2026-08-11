@@ -543,6 +543,35 @@
         </div>
     </div>
 
+    <!-- MODAL MENÚ CIV (GTA-V STYLE) -->
+    <div id="civMenuModal" class="cactus-menu-modal" style="display:none;">
+        <div class="cactus-menu-content">
+            <button class="cactus-menu-close" onclick="closeCivMenu()" aria-label="Cerrar menú">✕</button>
+            <div class="cactus-menu-header">
+                <h2>Little Civilizations</h2>
+                <p class="subtitle">Anunciado — Noticias, trailers y acceso anticipado</p>
+            </div>
+            <div class="cactus-menu-body">
+                <div class="left-panel">
+                    <div class="big-cover">🔮</div>
+                    <div class="menu-options">
+                        <button class="menu-btn active" data-tab="overview" onclick="switchCivTab(event)">Información</button>
+                        <button class="menu-btn" data-tab="trailers" onclick="switchCivTab(event)">Tráilers</button>
+                        <button class="menu-btn" data-tab="screenshots" onclick="switchCivTab(event)">Capturas de pantalla y Artwork</button>
+                        <button class="menu-btn" data-tab="features" onclick="switchCivTab(event)">Funcionalidades</button>
+                        <button class="menu-btn" data-tab="preorder" onclick="switchCivTab(event)">Pre-order</button>
+                    </div>
+                </div>
+                <div class="right-panel" id="civTabContent">
+                    <!-- Contenido dinámico -->
+                </div>
+            </div>
+            <div class="cactus-menu-footer">
+                <button class="btn btn-outline" onclick="notifyCiv()">Notificarme</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- MODAL LECTOR DE CÓMIC -->
     <div id="comicReaderModal" class="modal" style="display:none;">
         <div class="modal-content">
