@@ -557,16 +557,16 @@ THE DEMO IS ONLY AVAILABLE IN SPANISH.</p>
             <h3>Trailers</h3>
             <p>Disfruta del tráiler oficial y avances exclusivos.</p>
             <div class="video-wrapper-small">
-                <iframe width="560" height="315" src="https://youtu.be/AzZuzLvHYxI?si=Joq6ZYsAtvGVrsCk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/AzZuzLvHYxI?si=jc9YqBO4FHWSjxnp&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
         `;
     } else if (tab === 'screenshots') {
         content.innerHTML = `
             <h3>Screenshots</h3>
             <div class="screenshot-grid">
-                <div class="screenshot"> <img src="games/cactus/civ1.jpg" alt="Screenshot 1" onerror="this.style.display='none'"> </div>
-                <div class="screenshot"> <img src="games/cactus/civ2.jpg" alt="Screenshot 2" onerror="this.style.display='none'"> </div>
-                <div class="screenshot"> <img src="games/cactus/civ3.jpg" alt="Screenshot 3" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/civ/civ1.jpg" alt="Screenshot 1" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/civ/civ2.jpg" alt="Screenshot 2" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/civ/civ3.jpg" alt="Screenshot 3" onerror="this.style.display='none'"> </div>
             </div>
         `;
     } else if (tab === 'features') {
