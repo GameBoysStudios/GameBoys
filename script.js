@@ -520,28 +520,53 @@ function renderCivTab(tab) {
     if (tab === 'overview') {
         content.innerHTML = `
             <h3>Overview</h3>
-            <p>Un civ, proveniente de un desierto misterioso, se embarca en una aventura épica llena de desafíos y descubrimientos, en el centro de Hong Kong.</p>
+            <p>Construye una civilización desde sus humildes comienzos y guíala a través de la historia hasta alcanzar la Era Espacial. Explora, expande tu territorio, desarrolla nuevas tecnologías y conviértete en la mayor potencia del mundo.
+
+Cada partida comienza con un pequeño asentamiento. Dependerá de tus decisiones transformar ese rincón del mapa en un imperio capaz de cambiar el curso de la historia.
+
+Explora un mundo lleno de oportunidades, administra tus recursos, construye ciudades, desbloquea nuevos avances y progresa a través de distintas eras históricas, desde la Antigüedad hasta un futuro donde el espacio representa el mayor desafío.
+
+¿Expandirte rápidamente o crecer con calma? ¿Invertir en desarrollo o explorar nuevos territorios? Cada decisión cuenta.
+
+Características</p>
             <ul>
-                <li>Historia cinematográfica</li>
-                <li>Exploración abierta</li>
-                <li>Diálogo interactivo</li>
+                <li>Explora un gran mundo con varios continentes</li>
+                <li>Construye y desarrolla tu propia civilización</li>
+                <li>Avanza por diferentes eras históricas</li>
+                <li>Investiga nuevas tecnologías y desbloquea mejoras</li>
+                <li>Investiga nuevas tecnologías y desbloquea mejoras</li>
+                <li>Expande tu territorio y descubre nuevas regiones</li>
+                <li>Juega contra la IA o desafía a otros jugadores en el modo multijugador</li>
+                <li>Interfaz sencilla y fácil de aprender</li>
+                <li>Partidas rejugables gracias a la evolución de cada civilización</li>
             </ul>
+            <p>Nuestro objetivo
+Little Civilizations busca ofrecer una experiencia de estrategia accesible, donde cualquier jugador pueda comenzar en pocos minutos, pero siempre tenga nuevos objetivos que alcanzar conforme su civilización evoluciona.
+
+Cada decisión ayuda a escribir una historia diferente.
+
+Estado del proyecto
+El juego continúa en desarrollo y seguirá recibiendo nuevas características, mejoras de equilibrio y contenido adicional mediante futuras actualizaciones.
+
+THE GAME WILL BE IN MULTIPLE IDIOMS
+
+THE DEMO IS ONLY AVAILABLE IN SPANISH.</p>
         `;
     } else if (tab === 'trailers') {
         content.innerHTML = `
             <h3>Trailers</h3>
             <p>Disfruta del tráiler oficial y avances exclusivos.</p>
             <div class="video-wrapper-small">
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/QJ0_A-3C3x8?si=UdZuWYpMO5Mxw8Rs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <iframe width="560" height="315" src="https://youtu.be/AzZuzLvHYxI?si=Joq6ZYsAtvGVrsCk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
         `;
     } else if (tab === 'screenshots') {
         content.innerHTML = `
             <h3>Screenshots</h3>
             <div class="screenshot-grid">
-                <div class="screenshot"> <img src="games/cactus/screen1.jpg" alt="Screenshot 1" onerror="this.style.display='none'"> </div>
-                <div class="screenshot"> <img src="games/cactus/screen2.jpg" alt="Screenshot 2" onerror="this.style.display='none'"> </div>
-                <div class="screenshot"> <img src="games/cactus/screen3.jpg" alt="Screenshot 3" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/cactus/civ1.jpg" alt="Screenshot 1" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/cactus/civ2.jpg" alt="Screenshot 2" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/cactus/civ3.jpg" alt="Screenshot 3" onerror="this.style.display='none'"> </div>
             </div>
         `;
     } else if (tab === 'features') {
@@ -549,10 +574,10 @@ function renderCivTab(tab) {
             <h3>Features</h3>
             <ul>
                 <li>Mundo abierto dinámico</li>
-                <li>Sistema de clima y día/noche</li>
-                <li>Combinación de sigilo y acción</li>
-                <li>3 Actos diferentes</li>
-                <li>Más de 20 niveles!</li>
+                <li>Modo multijugador</li>
+                <li>Combinación de tranquilidad y acción</li>
+                <li>4 eras</li>
+                <li>Enemigos con IA</li>
             </ul>
         `;
     } else if (tab === 'preorder') {
