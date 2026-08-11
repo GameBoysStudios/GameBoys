@@ -592,6 +592,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupMoviePlayerProtection();
     // cerrar menú con ESC
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeCactusMenu();
-    });
+         if (e.key === 'Escape') {
+            closeCactusMenu();
+            closeCivMenu();
+    }
+});
 });
