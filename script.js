@@ -20,11 +20,47 @@ function navigateTo(page) {
 }
 
 // ==================== AUTENTICACIÓN FIREBASE ====================
-auth.onAuthStateChanged((user) => {
+const ALEX_API = "https://alex-ia-cl4n.onrender.com";
+auth.onAuthStateChanged(async (user) => {
+    const adminLink = document.getElementById('adminLink');
+
     if (user) {
         showUserPanel(user);
+
+        // Comprobar si es admin (mismo sistema que Alex AI)
+        try {
+            await fetch(ALEX_API + "/api/vincular_firebase", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    uid: user.uid,
+                    email: user.email || "",
+                    tier: "normal"
+                })
+            });
+
+            const res = await fetch(ALEX_API + "/api/cuota", {
+                headers: { "X-Alex-Account": user.uid }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const isAdmin = !!(data.admin || data.rol === "admin");
+
+                if (adminLink) {
+                    adminLink.style.display = isAdmin ? "inline" : "none";
+                }
+            } else if (adminLink) {
+                adminLink.style.display = "none";
+            }
+        } catch (err) {
+            console.error("Error comprobando admin:", err);
+            if (adminLink) adminLink.style.display = "none";
+        }
+
     } else {
         hideUserPanel();
+        if (adminLink) adminLink.style.display = "none";
     }
 });
 
