@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin | Game Boys Studios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <style>
+        :root {
+            --color-dark: #0a0e1a;
+            --color-darker: #050810;
+            --color-panel: #0d1225;
+            --color-card: #121833;
+            --color-border: #1e2747;
+            --color-cactus: #2ecb71;
+            --color-cactus-dim: rgba(46, 203, 113, 0.15);
+            --color-orange: #ff6b35;
+            --color-light: #e8ecf4;
+            --color-muted: #8b93a7;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --sidebar-width: 260px;
+            --header-height: 64px;
+            --transition: all 0.25s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-darker);
+            color: var(--color-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .gate-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--color-darker);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            gap: 1.25rem;
+        }
+        .gate-screen.hidden { display: none; }
+        .gate-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-cactus);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .gate-text { color: var(--color-muted); font-size: 0.95rem; }
+        .gate-error { color: var(--color-orange); font-weight: 600; }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .admin-layout.visible { opacity: 1; }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--color-panel) 0%, var(--color-darker) 100%);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            padding: 1.5rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .sidebar-logo .icon { font-size: 1.75rem; }
+        .sidebar-logo .text {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.85rem;
+            line-height: 1.2;
+            color: var(--color-cactus);
+            letter-spacing: 1px;
+        }
+        .sidebar-logo .text small {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--color-orange);
+            font-weight: 600;
+            letter-spacing: 1.5px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.25rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            color: var(--color-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-item:hover {
+            background: var(--color-cactus-dim);
+            color: var(--color-light);
+        }
+        .nav-item.active {
+            background: var(--color-cactus-dim);
+            color: var(--color-cactus);
+            border-color: rgba(46, 203, 113, 0.25);
+        }
+        .nav-item .nav-icon { font-size: 1.15rem; width: 24px; text-align: center; }
+
+        .sidebar-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--color-border);
+        }
+        .user-info-box {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--color-cactus-dim);
+            border: 1px solid rgba(46, 203, 113, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .user-meta { flex: 1; min-width: 0; }
+        .user-meta .name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .user-meta .role {
+            font-size: 0.75rem;
+            color: var(--color-cactus);
+        }
+        .btn-logout {
+            width: 100%;
+            padding: 0.6rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .btn-logout:hover {
+            border-color: var(--color-orange);
+            color: var(--color-orange);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            height: var(--header-height);
+            background: var(--color-panel);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .topbar-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            color: var(--color-light);
+            letter-spacing: 1px;
+        }
+        .btn-back {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-muted);
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .btn-back:hover {
+            border-color: var(--color-cactus);
+            color: var(--color-cactus);
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: fadeIn 0.35s ease; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header { margin-bottom: 2rem; }
+        .page-header h1 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            color: var(--color-cactus);
+            margin-bottom: 0.35rem;
+            letter-spacing: 1px;
+        }
+        .page-header p { color: var(--color-muted); font-size: 0.95rem; }
+
+        .cards-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+        .stat-card:hover { border-color: rgba(46, 203, 113, 0.35); }
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: var(--color-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .stat-card .value {
+            font-family: var(--font-display);
+            font-size: 1.85rem;
+            color: var(--color-cactus);
+            font-weight: 700;
+        }
+        .stat-card .sub {
+            font-size: 0.85rem;
+            color: var(--color-muted);
+            margin-top: 0.35rem;
+        }
+
+        .section-card {
+            background: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .section-card h2 {
+            font-size: 1.1rem;
+            color: var(--color-light);
+            margin-bottom: 1.25rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--color-muted);
+        }
+        .empty-state .icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        .actions-bar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: var(--font-body);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-cactus), #23a057);
+            color: #0a0e1a;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(46, 203, 113, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-light);
+        }
+        .btn-outline:hover {
+            border-color: var(--color-cactus);
+            color: var(--color-cactus);
+        }
+
+        .dev-note {
+            background: rgba(255, 107, 53, 0.08);
+            border: 1px solid rgba(255, 107, 53, 0.25);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--color-muted);
+            margin-bottom: 1.5rem;
+        }
+        .dev-note strong { color: var(--color-orange); }
+
+        @media (max-width: 900px) {
+            .sidebar { width: 72px; }
+            .sidebar-logo .text,
+            .nav-item span:not(.nav-icon),
+            .user-meta,
+            .sidebar-footer .btn-logout { display: none; }
+            .sidebar-logo { justify-content: center; }
+            .nav-item { justify-content: center; padding: 0.9rem; }
+            .main-content { margin-left: 72px; }
+            .content-area { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gateScreen" class="gate-screen">
+        <div class="gate-spinner"></div>
+        <p class="gate-text" id="gateText">Verificando acceso...</p>
+    </div>
+
+    <div id="adminLayout" class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <span class="icon">🌵</span>
+                <div class="text">GAME BOYS<small>ADMIN PANEL</small></div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="home">
+                    <span class="nav-icon">🏠</span>
+                    <span>Home</span>
+                </button>
+                <button class="nav-item" data-tab="earnings">
+                    <span class="nav-icon">💶</span>
+                    <span>Ganancias Empresa</span>
+                </button>
+                <button class="nav-item" data-tab="contacts">
+                    <span class="nav-icon">📇</span>
+                    <span>Contactos</span>
+                </button>
+                <button class="nav-item" data-tab="clients">
+                    <span class="nav-icon">👥</span>
+                    <span>Clientes</span>
+                </button>
+                <button class="nav-item" data-tab="calendar">
+                    <span class="nav-icon">📅</span>
+                    <span>Calendario</span>
+                </button>
+                <button class="nav-item" data-tab="tasks">
+                    <span class="nav-icon">✅</span>
+                    <span>Tareas</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info-box">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-meta">
+                        <div class="name" id="adminName">—</div>
+                        <div class="role">Administrador</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logoutAdmin()">Cerrar sesión</button>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-title" id="topbarTitle">Home</div>
+                <a href="index.html" class="btn-back">← Volver al sitio</a>
+            </header>
+
+            <div class="content-area">
+
+                <!-- HOME -->
+                <div id="tab-home" class="tab-panel active">
+                    <div class="page-header">
+                        <h1>Home</h1>
+                        <p>Resumen de tus ganancias personales y estado general</p>
+                    </div>
+                    <div class="cards-row">
+                        <div class="stat-card">
+                            <div class="label">Tus ganancias totales</div>
+                            <div class="value" id="personalTotal">0,00 €</div>
+                            <div class="sub">Suma de todos tus juegos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Este mes</div>
+                            <div class="value" id="personalMonth">0,00 €</div>
+                            <div class="sub">Ganancias del mes actual</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Juegos en los que participas</div>
+                            <div class="value" id="gamesCount">0</div>
+                            <div class="sub">Con porcentaje asignado</div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <h2>🎮 Desglose por juego</h2>
+                        <div class="dev-note">
+                            <strong>Pendiente de datos.</strong> Aquí aparecerán los juegos en los que participas, tu % y tu parte en €.
+                        </div>
+                        <div class="empty-state">
+                            <div class="icon">📊</div>
+                            <p>Aún no hay datos de participación cargados.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GANANCIAS EMPRESA -->
+                <div id="tab-earnings" class="tab-panel">
+                    <div class="page-header">
+                        <h1>Ganancias Empresa</h1>
+                        <p>Registro de ingresos y gastos de Game Boys Studios</p>
+                    </div>
+                    <div class="cards-row">
+                        <div class="stat-card">
+                            <div class="label">Balance actual</div>
+                            <div class="value" id="companyBalance">0,00 €</div>
+                            <div class="sub">Ingresos − Gastos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Total ingresos</div>
+                            <div class="value" style="color: var(--color-cactus);" id="totalIncome">0,00 €</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Total gastos</div>
+                            <div class="value" style="color: var(--color-orange);" id="totalExpense">0,00 €</div>
+                        </div>
+                    </div>
+                    <div class="actions-bar">
+                        <button class="btn btn-primary" onclick="openAddMovement('income')">+ Añadir Ingreso</button>
+                        <button class="btn btn-outline" onclick="openAddMovement('expense')">+ Añadir Gasto</button>
+                    </div>
+                    <div class="section-card">
+                        <h2>📋 Historial de movimientos</h2>
+                        <div class="dev-note">
+                            <strong>Cada movimiento guarda automáticamente</strong> quién lo registró, la fecha y el motivo.
+                        </div>
+                        <div class="empty-state">
+                            <div class="icon">💶</div>
+                            <p>Todavía no hay movimientos registrados.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTACTOS -->
+                <div id="tab-contacts" class="tab-panel">
+                    <div class="page-header">
+                        <h1>Contactos</h1>
+                        <p>Fichas de contactos potenciales, partners y prensa</p>
+                    </div>
+                    <div class="actions-bar">
+                        <button class="btn btn-primary" disabled>+ Nuevo contacto</button>
+                    </div>
+                    <div class="section-card">
+                        <div class="empty-state">
+                            <div class="icon">📇</div>
+                            <p>Sección lista. Aquí irán las fichas de contactos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CLIENTES -->
+                <div id="tab-clients" class="tab-panel">
+                    <div class="page-header">
+                        <h1>Clientes</h1>
+                        <p>Fichas de clientes reales</p>
+                    </div>
+                    <div class="actions-bar">
+                        <button class="btn btn-primary" disabled>+ Nuevo cliente</button>
+                    </div>
+                    <div class="section-card">
+                        <div class="empty-state">
+                            <div class="icon">👥</div>
+                            <p>Sección lista. Aquí irán las fichas de clientes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CALENDARIO -->
+                <div id="tab-calendar" class="tab-panel">
+                    <div class="page-header">
+                        <h1>Calendario</h1>
+                        <p>Calendario común del equipo</p>
+                    </div>
+                    <div class="section-card">
+                        <div class="empty-state">
+                            <div class="icon">📅</div>
+                            <p>Sección lista. Aquí irá el calendario compartido.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAREAS -->
+                <div id="tab-tasks" class="tab-panel">
+                    <div class="page-header">
+                        <h1>Tareas</h1>
+                        <p>Tareas pendientes y en progreso del equipo</p>
+                    </div>
+                    <div class="actions-bar">
+                        <button class="btn btn-primary" disabled>+ Nueva tarea</button>
+                    </div>
+                    <div class="section-card">
+                        <div class="empty-state">
+                            <div class="icon">✅</div>
+                            <p>Sección lista. Aquí irán las tareas del equipo.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        // Misma API que usa Alex AI para saber quién es admin
+        const ALEX_API = "https://alex-ia-cl4n.onrender.com";
+
+        const gateScreen = document.getElementById('gateScreen');
+        const gateText = document.getElementById('gateText');
+        const adminLayout = document.getElementById('adminLayout');
+
+        function showGate(msg, isError = false) {
+            gateText.textContent = msg;
+            gateText.className = isError ? 'gate-text gate-error' : 'gate-text';
+            gateScreen.classList.remove('hidden');
+        }
+
+        function hideGate() {
+            gateScreen.classList.add('hidden');
+            adminLayout.classList.add('visible');
+        }
+
+        function redirectToHome() {
+            window.location.href = 'index.html';
+        }
+
+        // Comprueba admin usando la misma fuente que Alex AI
+        async function checkAdminAccess(user) {
+            if (!user) {
+                showGate('No has iniciado sesión. Redirigiendo...', true);
+                setTimeout(redirectToHome, 1500);
+                return false;
+            }
+
+            try {
+                // Primero vinculamos (igual que Alex)
+                await fetch(ALEX_API + "/api/vincular_firebase", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        uid: user.uid,
+                        email: user.email || "",
+                        tier: "normal"
+                    })
+                });
+
+                // Consultamos cuota/rol
+                const res = await fetch(ALEX_API + "/api/cuota", {
+                    headers: { "X-Alex-Account": user.uid }
+                });
+
+                if (!res.ok) throw new Error("No se pudo verificar el rol");
+
+                const data = await res.json();
+                const isAdmin = !!(data.admin || data.rol === "admin");
+
+                if (!isAdmin) {
+                    showGate('Acceso denegado. Solo administradores. Redirigiendo...', true);
+                    setTimeout(redirectToHome, 1800);
+                    return false;
+                }
+
+                // Acceso concedido
+                document.getElementById('adminName').textContent =
+                    user.displayName || user.email || 'Admin';
+                hideGate();
+                return true;
+
+            } catch (err) {
+                console.error('Error verificando admin:', err);
+                showGate('Error de verificación. Redirigiendo...', true);
+                setTimeout(redirectToHome, 1800);
+                return false;
+            }
+        }
+
+        auth.onAuthStateChanged(async (user) => {
+            await checkAdminAccess(user);
+        });
+
+        function logoutAdmin() {
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Navegación entre pestañas
+        const tabTitles = {
+            home: 'Home',
+            earnings: 'Ganancias Empresa',
+            contacts: 'Contactos',
+            clients: 'Clientes',
+            calendar: 'Calendario',
+            tasks: 'Tareas'
+        };
+
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById('tab-' + tab).classList.add('active');
+                document.getElementById('topbarTitle').textContent = tabTitles[tab] || tab;
+            });
+        });
+
+        function openAddMovement(type) {
+            alert('Próximamente: formulario para añadir ' +
+                (type === 'income' ? 'ingreso' : 'gasto') +
+                '.\n\nSe registrará automáticamente quién lo añade y el motivo.');
+        }
+    </script>
+</body>
+</html>
