@@ -600,9 +600,9 @@ THE DEMO IS ONLY AVAILABLE IN SPANISH.</p>
         content.innerHTML = `
             <h3>Screenshots</h3>
             <div class="screenshot-grid">
-                <div class="screenshot"> <img src="games/civ/civ1.jpg" alt="Screenshot 1" onerror="this.style.display='none'"> </div>
-                <div class="screenshot"> <img src="games/civ/civ2.jpg" alt="Screenshot 2" onerror="this.style.display='none'"> </div>
-                <div class="screenshot"> <img src="games/civ/civ3.jpg" alt="Screenshot 3" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/civ1.png" alt="Screenshot 1" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/civ2.png" alt="Screenshot 2" onerror="this.style.display='none'"> </div>
+                <div class="screenshot"> <img src="games/civ3.png" alt="Screenshot 3" onerror="this.style.display='none'"> </div>
             </div>
         `;
     } else if (tab === 'features') {
