@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         :root {
             --color-dark: #0a0e1a;
@@ -423,6 +424,7 @@
                 <button class="nav-item" data-tab="clients"><span class="nav-icon">👥</span><span>Clientes</span></button>
                 <button class="nav-item" data-tab="calendar"><span class="nav-icon">📅</span><span>Calendario</span></button>
                 <button class="nav-item" data-tab="tasks"><span class="nav-icon">✅</span><span>Tareas</span></button>
+                <button class="nav-item" data-tab="mail"><span class="nav-icon">✉️</span><span>Correo</span></button>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info-box">
@@ -573,6 +575,52 @@
                     <div class="section-card">
                         <div id="tasksList" class="task-list">
                             <div class="empty-state"><div class="icon">✅</div><p>Cargando...</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CORREO -->
+                <div id="tab-mail" class="tab-panel">
+                    <div class="page-header">
+                        <h1>Correo</h1>
+                        <p>Escribe y envía correos a contactos o clientes</p>
+                    </div>
+                    <div class="section-card">
+                        <div class="form-group">
+                            <label>Destinatario</label>
+                            <select id="mailRecipient">
+                                <option value="">— Selecciona contacto o cliente —</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Plantilla</label>
+                            <select id="mailTemplate" onchange="applyMailTemplate()">
+                                <option value="">— Sin plantilla (escribir libre) —</option>
+                                <option value="presentacion">Presentación inicial</option>
+                                <option value="seguimiento">Seguimiento</option>
+                                <option value="propuesta">Propuesta / presupuesto</option>
+                                <option value="reunion">Proponer reunión</option>
+                                <option value="agradecimiento">Agradecimiento</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Asunto</label>
+                            <input type="text" id="mailSubject" placeholder="Asunto del correo">
+                        </div>
+                        <div class="form-group">
+                            <label>Mensaje</label>
+                            <textarea id="mailBody" style="min-height:220px" placeholder="Escribe aquí el correo..."></textarea>
+                        </div>
+                        <div class="actions-bar">
+                            <button class="btn btn-primary" id="mailSendBtn" onclick="sendMail()">✉️ Enviar correo</button>
+                            <button class="btn btn-outline" onclick="clearMailForm()">Limpiar</button>
+                        </div>
+                        <p id="mailStatus" style="font-size:0.9rem;color:var(--color-muted);min-height:1.2rem;"></p>
+                    </div>
+                    <div class="section-card">
+                        <h2>📋 Historial de enviados</h2>
+                        <div id="mailLogList">
+                            <div class="empty-state"><div class="icon">✉️</div><p>Cargando...</p></div>
                         </div>
                     </div>
                 </div>
@@ -881,7 +929,7 @@
         // ===== NAVEGACIÓN =====
         const tabTitles = {
             home: 'Home', earnings: 'Ganancias Empresa', contacts: 'Contactos',
-            clients: 'Clientes', calendar: 'Calendario', tasks: 'Tareas'
+            clients: 'Clientes', calendar: 'Calendario', tasks: 'Tareas', mail: 'Correo'
         };
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -903,6 +951,206 @@
             loadClients();
             initCalendar();
             loadTasks();
+            initMail();
+        }
+
+        // ===== CORREO (EmailJS) =====
+        const EMAILJS_SERVICE_ID = 'service_cp0vwvg';
+        const EMAILJS_TEMPLATE_ID = 'template_k8posrm';
+        const EMAILJS_PUBLIC_KEY = 'yq78a9r12orMggO4p';
+
+        let mailRecipients = []; // { type, id, name, email, company }
+
+        const MAIL_TEMPLATES = {
+            presentacion: {
+                subject: 'Presentación – Game Boys Studios',
+                body: 'Hola {{nombre}},\n\nMe pongo en contacto desde Game Boys Studios. Somos un estudio creativo de videojuegos y cómics y nos gustaría presentarte nuestro trabajo.\n\nEstaré encantado de contarte más detalles cuando te venga bien.\n\nUn saludo,\nGame Boys Studios'
+            },
+            seguimiento: {
+                subject: 'Seguimiento – {{empresa}}',
+                body: 'Hola {{nombre}},\n\nQuería retomar nuestra conversación y ver si has tenido ocasión de revisar lo que hablamos.\n\nQuedo a tu disposición para cualquier duda.\n\nUn saludo,\nGame Boys Studios'
+            },
+            propuesta: {
+                subject: 'Propuesta – Game Boys Studios',
+                body: 'Hola {{nombre}},\n\nTe envío una propuesta adaptada a {{empresa}}.\n\nSi te parece bien, podemos agendar una llamada para repasarla juntos.\n\nUn saludo,\nGame Boys Studios'
+            },
+            reunion: {
+                subject: 'Propuesta de reunión – Game Boys Studios',
+                body: 'Hola {{nombre}},\n\nMe gustaría proponer una reunión breve para hablar de posibles colaboraciones con {{empresa}}.\n\n¿Tienes disponibilidad esta semana o la próxima?\n\nUn saludo,\nGame Boys Studios'
+            },
+            agradecimiento: {
+                subject: 'Gracias por tu tiempo',
+                body: 'Hola {{nombre}},\n\nMuchas gracias por tu tiempo. Ha sido un placer hablar contigo.\n\nQuedamos a la espera de tus comentarios.\n\nUn saludo,\nGame Boys Studios'
+            }
+        };
+
+        async function initMail() {
+            try {
+                if (window.emailjs) emailjs.init(EMAILJS_PUBLIC_KEY);
+            } catch (e) { console.warn('EmailJS init', e); }
+            await loadMailRecipients();
+            await loadMailLog();
+        }
+
+        async function loadMailRecipients() {
+            const select = document.getElementById('mailRecipient');
+            if (!select) return;
+            mailRecipients = [];
+            try {
+                const [cSnap, clSnap] = await Promise.all([
+                    db.collection('contacts').orderBy('name').get(),
+                    db.collection('clients').orderBy('name').get()
+                ]);
+                cSnap.forEach(doc => {
+                    const d = doc.data();
+                    if (d.email) mailRecipients.push({ type: 'contact', id: doc.id, name: d.name || '', email: d.email, company: d.company || '' });
+                });
+                clSnap.forEach(doc => {
+                    const d = doc.data();
+                    if (d.email) mailRecipients.push({ type: 'client', id: doc.id, name: d.name || '', email: d.email, company: d.company || '' });
+                });
+            } catch (err) {
+                console.error(err);
+            }
+            let html = '<option value="">— Selecciona contacto o cliente —</option>';
+            const contacts = mailRecipients.filter(r => r.type === 'contact');
+            const clients = mailRecipients.filter(r => r.type === 'client');
+            if (contacts.length) {
+                html += '<optgroup label="Contactos">';
+                contacts.forEach((r, i) => {
+                    const idx = mailRecipients.indexOf(r);
+                    html += `<option value="${idx}">${r.name}${r.company ? ' · ' + r.company : ''} (${r.email})</option>`;
+                });
+                html += '</optgroup>';
+            }
+            if (clients.length) {
+                html += '<optgroup label="Clientes">';
+                clients.forEach((r) => {
+                    const idx = mailRecipients.indexOf(r);
+                    html += `<option value="${idx}">${r.name}${r.company ? ' · ' + r.company : ''} (${r.email})</option>`;
+                });
+                html += '</optgroup>';
+            }
+            select.innerHTML = html;
+        }
+
+        function getSelectedRecipient() {
+            const idx = document.getElementById('mailRecipient').value;
+            if (idx === '' || idx == null) return null;
+            return mailRecipients[Number(idx)] || null;
+        }
+
+        function fillTemplateVars(text, r) {
+            return (text || '')
+                .replace(/\{\{nombre\}\}/gi, r.name || '')
+                .replace(/\{\{empresa\}\}/gi, r.company || r.name || '')
+                .replace(/\{\{email\}\}/gi, r.email || '');
+        }
+
+        function applyMailTemplate() {
+            const key = document.getElementById('mailTemplate').value;
+            const r = getSelectedRecipient();
+            if (!key || !MAIL_TEMPLATES[key]) return;
+            const t = MAIL_TEMPLATES[key];
+            const subject = r ? fillTemplateVars(t.subject, r) : t.subject.replace(/\{\{[^}]+\}\}/g, '');
+            const body = r ? fillTemplateVars(t.body, r) : t.body.replace(/\{\{[^}]+\}\}/g, '');
+            document.getElementById('mailSubject').value = subject;
+            document.getElementById('mailBody').value = body;
+        }
+
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.id === 'mailRecipient') {
+                const key = document.getElementById('mailTemplate').value;
+                if (key) applyMailTemplate();
+            }
+        });
+
+        function clearMailForm() {
+            document.getElementById('mailRecipient').value = '';
+            document.getElementById('mailTemplate').value = '';
+            document.getElementById('mailSubject').value = '';
+            document.getElementById('mailBody').value = '';
+            document.getElementById('mailStatus').textContent = '';
+        }
+
+        async function sendMail() {
+            const r = getSelectedRecipient();
+            const subject = document.getElementById('mailSubject').value.trim();
+            const message = document.getElementById('mailBody').value.trim();
+            const status = document.getElementById('mailStatus');
+            const btn = document.getElementById('mailSendBtn');
+
+            if (!r) return alert('Selecciona un destinatario.');
+            if (!r.email) return alert('Ese contacto no tiene email.');
+            if (!subject) return alert('Escribe un asunto.');
+            if (!message) return alert('Escribe el mensaje.');
+            if (!window.emailjs) return alert('EmailJS no está cargado. Recarga la página.');
+
+            btn.disabled = true;
+            status.textContent = 'Enviando...';
+            status.style.color = 'var(--color-muted)';
+
+            try {
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    subject,
+                    message,
+                    email: r.email,
+                    to_email: r.email,
+                    to_name: r.name || '',
+                    from_name: 'Game Boys Studios'
+                });
+
+                await db.collection('email_log').add({
+                    to: r.email,
+                    toName: r.name || '',
+                    toCompany: r.company || '',
+                    recipientType: r.type,
+                    recipientId: r.id,
+                    subject,
+                    message,
+                    sentBy: currentUser.uid,
+                    sentByName: currentUserName,
+                    sentAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'sent'
+                });
+
+                status.textContent = 'Correo enviado correctamente a ' + r.email;
+                status.style.color = 'var(--color-cactus)';
+                loadMailLog();
+            } catch (err) {
+                console.error(err);
+                status.textContent = 'Error al enviar: ' + (err.text || err.message || err);
+                status.style.color = 'var(--color-orange)';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function loadMailLog() {
+            const wrap = document.getElementById('mailLogList');
+            if (!wrap) return;
+            try {
+                const snap = await db.collection('email_log').orderBy('sentAt', 'desc').limit(30).get();
+                if (snap.empty) {
+                    wrap.innerHTML = '<div class="empty-state"><div class="icon">✉️</div><p>Aún no has enviado correos desde aquí.</p></div>';
+                    return;
+                }
+                let html = '<table><thead><tr><th>Fecha</th><th>Para</th><th>Asunto</th><th>Enviado por</th></tr></thead><tbody>';
+                snap.forEach(doc => {
+                    const e = doc.data();
+                    html += `<tr>
+                        <td>${formatDate(e.sentAt)}</td>
+                        <td>${e.toName || ''} &lt;${e.to || ''}&gt;</td>
+                        <td>${e.subject || '—'}</td>
+                        <td>${e.sentByName || '—'}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                wrap.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                wrap.innerHTML = '<div class="empty-state"><p>Error al cargar historial (puede faltar índice sentAt).</p></div>';
+            }
         }
 
         // Cache de participaciones para el justificante
