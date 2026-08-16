@@ -875,55 +875,100 @@
         }
 
         // ===== AUTH + PIN =====
-        async function checkAdminAccess(user) {
-            if (!user) {
-                showGate('No has iniciado sesión. Redirigiendo...', true);
-                setTimeout(redirectHome, 1500);
-                return;
+        // Mantener sesión entre reinicios del PC / cierre de la app PWA
+        try {
+            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        } catch (e) { console.warn('setPersistence', e); }
+
+        let authReady = false;
+        let authCheckRunning = false;
+
+        async function isAdminUser(user) {
+            // 1) Intentar API Alex (con reintentos por cold start de Render)
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    await fetch(ALEX_API + "/api/vincular_firebase", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ uid: user.uid, email: user.email || "", tier: "normal" })
+                    });
+                    const res = await fetch(ALEX_API + "/api/cuota", {
+                        headers: { "X-Alex-Account": user.uid }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.admin || data.rol === "admin") return true;
+                        return false;
+                    }
+                } catch (e) {
+                    console.warn('API admin check intento', attempt + 1, e);
+                }
+                await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
             }
-            currentUser = user;
-
+            // 2) Fallback: rol en Firestore (si la API no responde)
             try {
-                await fetch(ALEX_API + "/api/vincular_firebase", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ uid: user.uid, email: user.email || "", tier: "normal" })
-                });
-                const res = await fetch(ALEX_API + "/api/cuota", {
-                    headers: { "X-Alex-Account": user.uid }
-                });
-                if (!res.ok) throw new Error("Error API");
-                const data = await res.json();
-                const isAdmin = !!(data.admin || data.rol === "admin");
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const role = (userDoc.data() || {}).role || (userDoc.data() || {}).rol;
+                if (role === 'admin') return true;
+            } catch (e) { console.warn(e); }
+            return null; // null = no se pudo verificar (red)
+        }
 
-                if (!isAdmin) {
+        async function checkAdminAccess(user) {
+            if (authCheckRunning) return;
+            authCheckRunning = true;
+            try {
+                if (!user) {
+                    // Esperar a que Firebase restaure la sesión desde IndexedDB/localStorage
+                    if (!authReady) {
+                        showGate('Restaurando sesión...');
+                        return;
+                    }
+                    showGate('No has iniciado sesión. Redirigiendo...', true);
+                    setTimeout(redirectHome, 1500);
+                    return;
+                }
+
+                currentUser = user;
+                currentUserName = user.displayName || user.email || 'Admin';
+                document.getElementById('adminName').textContent = currentUserName;
+                showGate('Verificando acceso de administrador...');
+
+                const adminStatus = await isAdminUser(user);
+                if (adminStatus === false) {
                     showGate('Acceso denegado. Solo administradores. Redirigiendo...', true);
                     setTimeout(redirectHome, 1800);
                     return;
                 }
-
-                currentUserName = user.displayName || user.email || 'Admin';
-                document.getElementById('adminName').textContent = currentUserName;
-
-                // Asegurar documento de usuario en Firestore y pedir PIN
-                const userRef = db.collection('users').doc(user.uid);
-                const userDoc = await userRef.get();
-                if (!userDoc.exists) {
-                    await userRef.set({
-                        email: user.email || '',
-                        displayName: currentUserName,
-                        role: 'admin',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
+                if (adminStatus === null) {
+                    // Sin red / API caída: si ya había PIN OK en este navegador, dejar pasar a PIN
+                    showGate('No se pudo verificar con el servidor. Reintentando con datos locales...');
                 }
 
-                // Pedir PIN
-                showPinScreen();
+                const userRef = db.collection('users').doc(user.uid);
+                try {
+                    const userDoc = await userRef.get();
+                    if (!userDoc.exists) {
+                        await userRef.set({
+                            email: user.email || '',
+                            displayName: currentUserName,
+                            role: 'admin',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    }
+                } catch (e) { console.warn('users doc', e); }
 
-            } catch (err) {
-                console.error(err);
-                showGate('Error de verificación. Redirigiendo...', true);
-                setTimeout(redirectHome, 1800);
+                // Si el PIN ya se validó en esta sesión del navegador, no volver a pedirlo
+                const pinOk = localStorage.getItem('gb_admin_pin_ok');
+                if (pinOk === user.uid) {
+                    hideAllGates();
+                    loadAllData();
+                    return;
+                }
+
+                showPinScreen();
+            } finally {
+                authCheckRunning = false;
             }
         }
 
@@ -943,13 +988,13 @@
                 const storedPin = data.adminPin;
 
                 if (!storedPin) {
-                    // Primera vez: guardar este PIN
                     await db.collection('users').doc(currentUser.uid).set({
                         adminPin: pin,
                         pinSetAt: firebase.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
                     msg.textContent = 'PIN creado correctamente.';
                     msg.className = 'pin-msg ok';
+                    localStorage.setItem('gb_admin_pin_ok', currentUser.uid);
                     setTimeout(() => { hideAllGates(); loadAllData(); }, 600);
                     return;
                 }
@@ -957,6 +1002,7 @@
                 if (storedPin === pin) {
                     msg.textContent = 'PIN correcto.';
                     msg.className = 'pin-msg ok';
+                    localStorage.setItem('gb_admin_pin_ok', currentUser.uid);
                     setTimeout(() => { hideAllGates(); loadAllData(); }, 400);
                 } else {
                     msg.textContent = 'PIN incorrecto.';
@@ -975,9 +1021,26 @@
             if (e.key === 'Enter') submitPin();
         });
 
-        auth.onAuthStateChanged(user => checkAdminAccess(user));
+        // Primera emisión puede ser null mientras restaura; solo redirigir tras estar listos
+        auth.onAuthStateChanged(user => {
+            if (!authReady) {
+                authReady = true;
+                // Pequeña espera extra por si la restauración llega justo después
+                if (!user) {
+                    showGate('Restaurando sesión...');
+                    setTimeout(() => {
+                        const u = auth.currentUser;
+                        if (u) checkAdminAccess(u);
+                        else checkAdminAccess(null);
+                    }, 700);
+                    return;
+                }
+            }
+            checkAdminAccess(user);
+        });
 
         function logoutAdmin() {
+            localStorage.removeItem('gb_admin_pin_ok');
             auth.signOut().then(() => redirectHome());
         }
 
