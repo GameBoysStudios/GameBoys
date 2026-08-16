@@ -434,6 +434,7 @@
                 <button class="nav-item" data-tab="calendar"><span class="nav-icon">📅</span><span>Calendario</span></button>
                 <button class="nav-item" data-tab="tasks"><span class="nav-icon">✅</span><span>Tareas</span></button>
                 <button class="nav-item" data-tab="mail"><span class="nav-icon">✉️</span><span>Correo</span></button>
+                <button class="nav-item" data-tab="docs"><span class="nav-icon">📄</span><span>Documentos</span></button>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info-box">
@@ -630,6 +631,51 @@
                         <h2>📋 Historial de enviados</h2>
                         <div id="mailLogList">
                             <div class="empty-state"><div class="icon">✉️</div><p>Cargando...</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DOCUMENTOS -->
+                <div id="tab-docs" class="tab-panel">
+                    <div class="page-header">
+                        <h1>Documentos</h1>
+                        <p>Genera papeleo oficial de Game Boys Studios (PDF)</p>
+                    </div>
+                    <div class="section-card">
+                        <div class="form-group">
+                            <label>Tipo de documento</label>
+                            <select id="docType" onchange="onDocTypeChange()">
+                                <option value="colaboracion">Contrato de colaboración</option>
+                                <option value="despido">Fin de colaboración</option>
+                                <option value="alta_juego">Alta de nuevo juego / proyecto</option>
+                                <option value="patente">Registro de patente / propiedad intelectual</option>
+                                <option value="ajuste_ganancias">Ajuste de ganancias</option>
+                            </select>
+                        </div>
+                        <div id="docFields"></div>
+                        <div class="form-group">
+                            <label>Modo de firma</label>
+                            <select id="docSignMode" onchange="toggleDocSignMode()">
+                                <option value="digital">Firma digital en la web</option>
+                                <option value="manual">Hueco para firmar a mano</option>
+                            </select>
+                        </div>
+                        <div id="docSignBox" class="form-group">
+                            <label>Firma digital (ratón o dedo)</label>
+                            <canvas id="docSignCanvas" width="480" height="140" style="width:100%;max-width:480px;height:140px;background:#fff;border:1px solid var(--color-border);border-radius:8px;touch-action:none;cursor:crosshair;"></canvas>
+                            <div class="actions-bar" style="margin-top:0.5rem;">
+                                <button type="button" class="btn btn-outline" onclick="clearDocSignature()">Borrar firma</button>
+                            </div>
+                        </div>
+                        <div class="actions-bar">
+                            <button class="btn btn-primary" onclick="generateOfficialDoc()">📄 Generar PDF</button>
+                        </div>
+                        <p style="font-size:0.8rem;color:var(--color-muted);margin-top:0.75rem;">Documento interno de Game Boys Studios (Madrid). No sustituye asesoramiento legal profesional.</p>
+                    </div>
+                    <div class="section-card">
+                        <h2>📋 Historial de documentos</h2>
+                        <div id="docsHistoryList">
+                            <div class="empty-state"><div class="icon">📄</div><p>Cargando...</p></div>
                         </div>
                     </div>
                 </div>
@@ -938,7 +984,7 @@
         // ===== NAVEGACIÓN =====
         const tabTitles = {
             home: 'Home', earnings: 'Ganancias Empresa', contacts: 'Contactos',
-            clients: 'Clientes', calendar: 'Calendario', tasks: 'Tareas', mail: 'Correo'
+            clients: 'Clientes', calendar: 'Calendario', tasks: 'Tareas', mail: 'Correo', docs: 'Documentos'
         };
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -961,6 +1007,396 @@
             initCalendar();
             loadTasks();
             initMail();
+            initDocs();
+        }
+
+        // ===== DOCUMENTOS OFICIALES =====
+        const COMPANY = {
+            name: 'Game Boys Studios',
+            city: 'Madrid',
+            country: 'España'
+        };
+
+        const DOC_META = {
+            colaboracion: { code: 'COL', title: 'CONTRATO DE COLABORACIÓN' },
+            despido: { code: 'FIN', title: 'FIN DE COLABORACIÓN' },
+            alta_juego: { code: 'JUE', title: 'ALTA DE NUEVO JUEGO / PROYECTO' },
+            patente: { code: 'PAT', title: 'REGISTRO DE PATENTE / PROPIEDAD INTELECTUAL' },
+            ajuste_ganancias: { code: 'AJU', title: 'AJUSTE DE GANANCIAS' }
+        };
+
+        let docSignPad = null;
+
+        function initDocs() {
+            onDocTypeChange();
+            initDocSignaturePad();
+            loadDocsHistory();
+        }
+
+        function onDocTypeChange() {
+            const type = document.getElementById('docType').value;
+            const box = document.getElementById('docFields');
+            const commonPerson = `
+                <div class="form-group"><label>Nombre completo</label><input type="text" id="docPersonName" placeholder="Nombre y apellidos"></div>
+                <div class="form-group"><label>DNI / NIE / ID</label><input type="text" id="docPersonId" placeholder="Opcional"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="docPersonEmail" placeholder="opcional@email.com"></div>`;
+            const commonDates = `
+                <div class="form-group"><label>Fecha del documento</label><input type="date" id="docDate"></div>`;
+
+            let extra = '';
+            if (type === 'colaboracion') {
+                extra = `
+                <div class="form-group"><label>Rol / función</label><input type="text" id="docRole" placeholder="Ej: Programador, Artista, Marketing"></div>
+                <div class="form-group"><label>Proyecto / juego (si aplica)</label><input type="text" id="docProject" placeholder="Nombre del proyecto"></div>
+                <div class="form-group"><label>Porcentaje de ganancias (%)</label><input type="number" id="docPercent" step="0.01" min="0" max="100" placeholder="Ej: 10"></div>
+                <div class="form-group"><label>Duración / condiciones</label><textarea id="docTerms" placeholder="Duración, hitos, condiciones especiales..."></textarea></div>`;
+            } else if (type === 'despido') {
+                extra = `
+                <div class="form-group"><label>Proyecto / rol anterior</label><input type="text" id="docProject" placeholder="Proyecto o función"></div>
+                <div class="form-group"><label>Fecha de fin</label><input type="date" id="docEndDate"></div>
+                <div class="form-group"><label>Motivo (interno)</label><textarea id="docReason" placeholder="Motivo del fin de colaboración"></textarea></div>
+                <div class="form-group"><label>Condiciones de cierre</label><textarea id="docTerms" placeholder="Liquidación, confidencialidad residual, etc."></textarea></div>`;
+            } else if (type === 'alta_juego') {
+                extra = `
+                <div class="form-group"><label>Nombre del juego / proyecto</label><input type="text" id="docGameName" placeholder="Título"></div>
+                <div class="form-group"><label>Género / tipo</label><input type="text" id="docGameGenre" placeholder="Ej: Roguelike, Visual novel..."></div>
+                <div class="form-group"><label>Plataformas previstas</label><input type="text" id="docGamePlatforms" placeholder="PC, Switch, móvil..."></div>
+                <div class="form-group"><label>Responsable del proyecto</label><input type="text" id="docPersonName" placeholder="Nombre del lead"></div>
+                <div class="form-group"><label>Descripción breve</label><textarea id="docTerms" placeholder="Sinopsis o alcance del alta"></textarea></div>`;
+            } else if (type === 'patente') {
+                extra = `
+                ${commonPerson}
+                <div class="form-group"><label>Título de la invención / obra</label><input type="text" id="docPatentTitle" placeholder="Nombre de la patente o activo"></div>
+                <div class="form-group"><label>Tipo</label>
+                    <select id="docPatentType">
+                        <option value="Software / código">Software / código</option>
+                        <option value="Diseño / arte">Diseño / arte</option>
+                        <option value="Marca">Marca</option>
+                        <option value="Mecánica de juego">Mecánica de juego</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Descripción</label><textarea id="docTerms" placeholder="Descripción del activo y alcance de protección interna"></textarea></div>`;
+            } else if (type === 'ajuste_ganancias') {
+                extra = `
+                ${commonPerson}
+                <div class="form-group"><label>Proyecto / juego</label><input type="text" id="docProject" placeholder="Nombre del proyecto"></div>
+                <div class="form-group"><label>Porcentaje anterior (%)</label><input type="number" id="docPercentOld" step="0.01" min="0" max="100"></div>
+                <div class="form-group"><label>Porcentaje nuevo (%)</label><input type="number" id="docPercentNew" step="0.01" min="0" max="100"></div>
+                <div class="form-group"><label>Motivo del ajuste</label><textarea id="docReason" placeholder="Por qué se ajusta el reparto"></textarea></div>
+                <div class="form-group"><label>Fecha de efecto</label><input type="date" id="docEffectDate"></div>`;
+            }
+
+            if (type === 'colaboracion' || type === 'despido') {
+                box.innerHTML = commonPerson + extra + commonDates;
+            } else if (type === 'alta_juego') {
+                box.innerHTML = extra + commonDates;
+            } else {
+                box.innerHTML = extra + commonDates;
+            }
+
+            const dateEl = document.getElementById('docDate');
+            if (dateEl && !dateEl.value) {
+                dateEl.value = new Date().toISOString().slice(0, 10);
+            }
+        }
+
+        function initDocSignaturePad() {
+            const canvas = document.getElementById('docSignCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            let drawing = false;
+            const pos = (e) => {
+                const r = canvas.getBoundingClientRect();
+                const src = e.touches ? e.touches[0] : e;
+                return {
+                    x: (src.clientX - r.left) * (canvas.width / r.width),
+                    y: (src.clientY - r.top) * (canvas.height / r.height)
+                };
+            };
+            const start = (e) => { drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); };
+            const move = (e) => { if (!drawing) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); };
+            const end = () => { drawing = false; };
+            canvas.onmousedown = start;
+            canvas.onmousemove = move;
+            canvas.onmouseup = end;
+            canvas.onmouseleave = end;
+            canvas.ontouchstart = start;
+            canvas.ontouchmove = move;
+            canvas.ontouchend = end;
+            docSignPad = { canvas, ctx };
+            clearDocSignature();
+        }
+
+        function clearDocSignature() {
+            const canvas = document.getElementById('docSignCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#111';
+            ctx.lineWidth = 2;
+        }
+
+        function toggleDocSignMode() {
+            const mode = document.getElementById('docSignMode').value;
+            document.getElementById('docSignBox').style.display = mode === 'digital' ? 'block' : 'none';
+        }
+
+        function val(id) {
+            const el = document.getElementById(id);
+            return el ? (el.value || '').trim() : '';
+        }
+
+        function buildDocBody(type, data) {
+            const lines = [];
+            if (type === 'colaboracion') {
+                lines.push(`${COMPANY.name}, con domicilio a efectos en ${COMPANY.city} (${COMPANY.country}), y ${data.personName}${data.personId ? ' (ID: ' + data.personId + ')' : ''}, acuerdan formalizar una colaboración profesional.`);
+                lines.push('');
+                lines.push('1. OBJETO. La persona colaboradora prestará servicios en el marco de las actividades de ' + COMPANY.name + (data.project ? ', en relación con el proyecto «' + data.project + '»' : '') + (data.role ? ', en calidad de ' + data.role : '') + '.');
+                lines.push('2. RETRIBUCIÓN / PARTICIPACIÓN. ' + (data.percent ? 'Se acuerda una participación del ' + data.percent + '% sobre las ganancias netas atribuibles según la política interna del estudio.' : 'Las condiciones económicas se detallan en anexo o acuerdo complementario.'));
+                lines.push('3. CONDICIONES. ' + (data.terms || 'Las partes se comprometen a actuar de buena fe y a respetar la confidencialidad de la información del estudio.'));
+                lines.push('4. PROPIEDAD INTELECTUAL. Salvo pacto escrito en contrario, los derechos sobre el trabajo realizado para el estudio corresponderán a ' + COMPANY.name + '.');
+                lines.push('5. DURACIÓN. El presente acuerdo entra en vigor en la fecha indicada y permanecerá vigente hasta su finalización de mutuo acuerdo o comunicación escrita.');
+            } else if (type === 'despido') {
+                lines.push(`${COMPANY.name} comunica a ${data.personName}${data.personId ? ' (ID: ' + data.personId + ')' : ''} la finalización de la colaboración${data.project ? ' en relación con «' + data.project + '»' : ''}.`);
+                lines.push('');
+                lines.push('1. FECHA DE FIN. La colaboración concluye el día ' + (data.endDate || data.date) + '.');
+                lines.push('2. MOTIVO. ' + (data.reason || 'Finalización de la relación de colaboración según decisión del estudio.'));
+                lines.push('3. CONDICIONES DE CIERRE. ' + (data.terms || 'Ambas partes declaran estar al corriente de obligaciones mutuas pendientes de liquidar según acuerdos previos.'));
+                lines.push('4. CONFIDENCIALIDAD. Siguen vigentes las obligaciones de confidencialidad y no uso indebido de material del estudio.');
+                lines.push('5. Este documento tiene carácter interno de constancia y no sustituye los trámites legales que pudieran corresponder.');
+            } else if (type === 'alta_juego') {
+                lines.push(`${COMPANY.name} registra el alta interna del siguiente proyecto creativo:`);
+                lines.push('');
+                lines.push('1. TÍTULO. «' + (data.gameName || 'Sin título') + '».');
+                lines.push('2. GÉNERO / TIPO. ' + (data.gameGenre || '—') + '.');
+                lines.push('3. PLATAFORMAS PREVISTAS. ' + (data.gamePlatforms || '—') + '.');
+                lines.push('4. RESPONSABLE. ' + (data.personName || '—') + '.');
+                lines.push('5. DESCRIPCIÓN / ALCANCE. ' + (data.terms || 'Pendiente de ampliar.') + '.');
+                lines.push('6. El proyecto queda incorporado al catálogo interno de ' + COMPANY.name + ' a partir de la fecha del documento.');
+            } else if (type === 'patente') {
+                lines.push(`${COMPANY.name} deja constancia del registro interno del siguiente activo de propiedad intelectual:`);
+                lines.push('');
+                lines.push('1. TITULAR / INVENTOR DECLARADO. ' + (data.personName || '—') + (data.personId ? ' (ID: ' + data.personId + ')' : '') + '.');
+                lines.push('2. TÍTULO. «' + (data.patentTitle || '—') + '».');
+                lines.push('3. TIPO. ' + (data.patentType || '—') + '.');
+                lines.push('4. DESCRIPCIÓN. ' + (data.terms || '—') + '.');
+                lines.push('5. ÁMBITO. Este documento es un registro interno del estudio en ' + COMPANY.city + '. No constituye por sí solo el registro oficial ante oficinas de patentes o propiedad intelectual.');
+                lines.push('6. Las partes reconocen la importancia de proteger el activo descrito y de gestionar su explotación según la política de ' + COMPANY.name + '.');
+            } else if (type === 'ajuste_ganancias') {
+                lines.push(`${COMPANY.name} y ${data.personName}${data.personId ? ' (ID: ' + data.personId + ')' : ''} acuerdan modificar las condiciones de participación en ganancias${data.project ? ' del proyecto «' + data.project + '»' : ''}.`);
+                lines.push('');
+                lines.push('1. PORCENTAJE ANTERIOR. ' + (data.percentOld !== '' ? data.percentOld + '%' : '—') + '.');
+                lines.push('2. PORCENTAJE NUEVO. ' + (data.percentNew !== '' ? data.percentNew + '%' : '—') + '.');
+                lines.push('3. FECHA DE EFECTO. ' + (data.effectDate || data.date) + '.');
+                lines.push('4. MOTIVO. ' + (data.reason || 'Ajuste acordado entre las partes.') + '.');
+                lines.push('5. El nuevo porcentaje sustituye al anterior a partir de la fecha de efecto, sin perjuicio de liquidaciones pendientes anteriores.');
+            }
+            return lines;
+        }
+
+        async function nextDocNumber(code) {
+            const year = new Date().getFullYear();
+            const prefix = 'GBS-' + code + '-' + year + '-';
+            let max = 0;
+            try {
+                const snap = await db.collection('documents').where('code', '==', code).where('year', '==', year).get();
+                snap.forEach(doc => {
+                    const n = doc.data().seq || 0;
+                    if (n > max) max = n;
+                });
+            } catch (e) { console.warn(e); }
+            const seq = max + 1;
+            return { number: prefix + String(seq).padStart(3, '0'), year, seq, code };
+        }
+
+        async function generateOfficialDoc() {
+            const type = document.getElementById('docType').value;
+            const meta = DOC_META[type];
+            if (!meta) return alert('Tipo no válido');
+
+            const data = {
+                personName: val('docPersonName'),
+                personId: val('docPersonId'),
+                personEmail: val('docPersonEmail'),
+                role: val('docRole'),
+                project: val('docProject'),
+                percent: val('docPercent'),
+                percentOld: val('docPercentOld'),
+                percentNew: val('docPercentNew'),
+                terms: val('docTerms'),
+                reason: val('docReason'),
+                endDate: val('docEndDate'),
+                effectDate: val('docEffectDate'),
+                gameName: val('docGameName'),
+                gameGenre: val('docGameGenre'),
+                gamePlatforms: val('docGamePlatforms'),
+                patentTitle: val('docPatentTitle'),
+                patentType: val('docPatentType'),
+                date: val('docDate') || new Date().toISOString().slice(0, 10)
+            };
+
+            if (type !== 'alta_juego' && !data.personName && type !== 'patente') {
+                /* alta_juego uses personName as lead */
+            }
+            if ((type === 'colaboracion' || type === 'despido' || type === 'ajuste_ganancias') && !data.personName) {
+                return alert('Indica el nombre de la persona.');
+            }
+            if (type === 'alta_juego' && !data.gameName) return alert('Indica el nombre del juego.');
+            if (type === 'patente' && !data.patentTitle) return alert('Indica el título del activo.');
+
+            const signMode = document.getElementById('docSignMode').value;
+            let signDataUrl = null;
+            if (signMode === 'digital') {
+                const canvas = document.getElementById('docSignCanvas');
+                // detectar si hay trazo: muestreo simple
+                const ctx = canvas.getContext('2d');
+                const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                let ink = false;
+                for (let i = 0; i < pixels.length; i += 16) {
+                    if (pixels[i] < 250 || pixels[i + 1] < 250 || pixels[i + 2] < 250) { ink = true; break; }
+                }
+                if (!ink) return alert('Dibuja la firma digital o cambia a firma manual.');
+                signDataUrl = canvas.toDataURL('image/png');
+            }
+
+            const num = await nextDocNumber(meta.code);
+            const bodyLines = buildDocBody(type, data);
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+            const pageW = pdf.internal.pageSize.getWidth();
+            const margin = 18;
+            let y = 18;
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(14);
+            pdf.text(COMPANY.name.toUpperCase(), margin, y);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(9);
+            pdf.text(COMPANY.city + ', ' + COMPANY.country, margin, y + 5);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(10);
+            pdf.text(num.number, pageW - margin, y, { align: 'right' });
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(9);
+            pdf.text('Fecha: ' + data.date, pageW - margin, y + 5, { align: 'right' });
+
+            y += 14;
+            pdf.setDrawColor(0);
+            pdf.setLineWidth(0.4);
+            pdf.line(margin, y, pageW - margin, y);
+            y += 10;
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(13);
+            const titleLines = pdf.splitTextToSize(meta.title, pageW - margin * 2);
+            pdf.text(titleLines, margin, y);
+            y += titleLines.length * 6 + 6;
+
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(10);
+            bodyLines.forEach(line => {
+                const wrapped = pdf.splitTextToSize(line || ' ', pageW - margin * 2);
+                if (y + wrapped.length * 5 > 270) {
+                    pdf.addPage();
+                    y = 20;
+                }
+                pdf.text(wrapped, margin, y);
+                y += wrapped.length * 5 + 2;
+            });
+
+            y += 8;
+            if (y > 250) { pdf.addPage(); y = 20; }
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(10);
+            pdf.text('Firmas', margin, y);
+            y += 6;
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(9);
+
+            const col1 = margin;
+            const col2 = pageW / 2 + 5;
+            pdf.text('Por ' + COMPANY.name + ':', col1, y);
+            pdf.text('Por la otra parte:', col2, y);
+            y += 4;
+
+            if (signMode === 'digital' && signDataUrl) {
+                try {
+                    pdf.addImage(signDataUrl, 'PNG', col1, y, 55, 18);
+                } catch (e) { console.warn(e); }
+                pdf.line(col2, y + 16, col2 + 55, y + 16);
+            } else {
+                pdf.line(col1, y + 16, col1 + 55, y + 16);
+                pdf.line(col2, y + 16, col2 + 55, y + 16);
+            }
+            y += 22;
+            pdf.setFontSize(8);
+            pdf.text(currentUserName || 'Admin', col1, y);
+            pdf.text(data.personName || '________________', col2, y);
+            y += 4;
+            pdf.text(COMPANY.city + ', ' + data.date, col1, y);
+
+            y = Math.max(y + 12, 275);
+            pdf.setFontSize(7);
+            pdf.setTextColor(80);
+            pdf.text('Documento generado desde el panel admin de ' + COMPANY.name + ' · Uso interno · ' + num.number, margin, 285);
+            pdf.setTextColor(0);
+
+            pdf.save(num.number + '.pdf');
+
+            try {
+                await db.collection('documents').add({
+                    number: num.number,
+                    code: num.code,
+                    year: num.year,
+                    seq: num.seq,
+                    type,
+                    title: meta.title,
+                    data,
+                    signMode,
+                    generatedBy: currentUser.uid,
+                    generatedByName: currentUserName,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                loadDocsHistory();
+            } catch (err) {
+                console.error(err);
+                alert('PDF generado, pero no se pudo guardar el historial: ' + err.message);
+            }
+        }
+
+        async function loadDocsHistory() {
+            const wrap = document.getElementById('docsHistoryList');
+            if (!wrap) return;
+            try {
+                const snap = await db.collection('documents').orderBy('createdAt', 'desc').limit(40).get();
+                if (snap.empty) {
+                    wrap.innerHTML = '<div class="empty-state"><div class="icon">📄</div><p>Aún no hay documentos generados.</p></div>';
+                    return;
+                }
+                let html = '<table><thead><tr><th>Número</th><th>Tipo</th><th>Fecha</th><th>Persona / proyecto</th><th>Por</th></tr></thead><tbody>';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const who = (d.data && (d.data.personName || d.data.gameName || d.data.patentTitle)) || '—';
+                    html += `<tr>
+                        <td>${d.number || '—'}</td>
+                        <td>${(DOC_META[d.type] && DOC_META[d.type].title) || d.type || '—'}</td>
+                        <td>${formatDate(d.createdAt)}</td>
+                        <td>${who}</td>
+                        <td>${d.generatedByName || '—'}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                wrap.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                wrap.innerHTML = '<div class="empty-state"><p>Error al cargar historial de documentos.</p></div>';
+            }
         }
 
         // ===== CORREO (EmailJS) =====
