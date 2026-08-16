@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin | Game Boys Studios</title>
+    <meta name="theme-color" content="#0a0e1a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GB Admin">
+    <link rel="manifest" href="admin-manifest.json">
+    <link rel="apple-touch-icon" href="admin-icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="admin-icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="admin-icon-512.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -1840,6 +1849,15 @@
             } catch (err) {
                 alert('Error: ' + err.message);
             }
+        }
+
+        // PWA: registrar service worker solo en el panel admin
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./admin-sw.js').catch((err) => {
+                    console.warn('SW admin no registrado:', err);
+                });
+            });
         }
     </script>
 </body>
