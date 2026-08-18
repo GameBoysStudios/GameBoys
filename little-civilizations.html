@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Civilizations | Game Boys Studios</title>
+    <meta name="description" content="Little Civilizations — Build your civilization from the ground up. Pre-order August 21, release August 27.">
+    <meta name="theme-color" content="#0a0e1a">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070b14;
+            --bg2: #0d1225;
+            --card: #121833;
+            --border: rgba(46, 203, 113, 0.22);
+            --green: #2ecb71;
+            --green-dim: rgba(46, 203, 113, 0.12);
+            --text: #e8ecf4;
+            --muted: #9aa6c0;
+            --gold: #e8c547;
+            --purple: #8b7cf6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        a { color: var(--green); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* NAV */
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(14px);
+            background: rgba(7, 11, 20, 0.85);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0.85rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 0.12em;
+            color: var(--text);
+            text-decoration: none !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .brand span { color: var(--green); }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            color: var(--muted);
+            font-size: 0.9rem;
+            text-decoration: none !important;
+            padding: 0.35rem 0.6rem;
+            border-radius: 6px;
+        }
+        .nav-links a:hover { color: var(--text); background: var(--green-dim); }
+        .lang-switch {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .lang-switch button {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            padding: 0.4rem 0.65rem;
+            cursor: pointer;
+        }
+        .lang-switch button.active {
+            background: var(--green);
+            color: #050810;
+            font-weight: 700;
+        }
+
+        /* HERO */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 4.5rem 1.25rem 3.5rem;
+            text-align: center;
+            background:
+                radial-gradient(ellipse 70% 50% at 50% -10%, rgba(46, 203, 113, 0.2), transparent 60%),
+                radial-gradient(ellipse 50% 40% at 90% 80%, rgba(139, 124, 246, 0.1), transparent 50%),
+                var(--bg);
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+        }
+        .hero-badge {
+            display: inline-block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.22em;
+            color: var(--green);
+            border: 1px solid rgba(46, 203, 113, 0.45);
+            background: var(--green-dim);
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            margin-bottom: 1.25rem;
+        }
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(1.8rem, 5vw, 3.2rem);
+            letter-spacing: 0.06em;
+            line-height: 1.15;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(100deg, #fff 0%, #2ecb71 50%, #7af0b0 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hero-tagline {
+            font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+            color: var(--muted);
+            max-width: 36rem;
+            margin: 0 auto 1.5rem;
+            font-weight: 500;
+        }
+        .hero-dates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-bottom: 1.75rem;
+        }
+        .date-pill {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            color: var(--text);
+        }
+        .date-pill strong { color: var(--green); }
+        .hero-cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-decoration: none !important;
+            padding: 0.85rem 1.35rem;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary {
+            background: linear-gradient(135deg, #2ecb71, #1fa855);
+            color: #050810 !important;
+            box-shadow: 0 0 28px rgba(46, 203, 113, 0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text) !important;
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover { border-color: var(--green); background: var(--green-dim); }
+
+        /* SECTIONS */
+        .section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3.5rem 1.25rem;
+        }
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+            letter-spacing: 0.08em;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        .section-sub {
+            text-align: center;
+            color: var(--muted);
+            margin-bottom: 2rem;
+            max-width: 36rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* TRAILER */
+        .video-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            background: #000;
+            aspect-ratio: 16 / 9;
+        }
+        .video-wrap iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* ABOUT */
+        .about-text {
+            max-width: 42rem;
+            margin: 0 auto;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+        .about-text p { margin-bottom: 1rem; }
+        .about-text p:last-child { margin-bottom: 0; }
+
+        /* FEATURES */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+        .feature-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .feature-card:hover {
+            border-color: rgba(46, 203, 113, 0.5);
+            transform: translateY(-3px);
+        }
+        .feature-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .feature-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+        }
+        .feature-card p {
+            font-size: 0.92rem;
+            color: var(--muted);
+            margin: 0;
+        }
+
+        /* EDITIONS */
+        .editions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        @media (max-width: 800px) {
+            .editions-grid { grid-template-columns: 1fr; }
+        }
+        .edition-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .edition-card.featured {
+            border-color: var(--gold);
+            box-shadow: 0 0 40px rgba(232, 197, 71, 0.12);
+        }
+        .edition-card.founders {
+            border-color: var(--purple);
+            box-shadow: 0 0 40px rgba(139, 124, 246, 0.15);
+        }
+        .edition-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            padding: 0.3rem 0.55rem;
+            border-radius: 999px;
+            background: rgba(232, 197, 71, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(232, 197, 71, 0.4);
+        }
+        .edition-badge.limited {
+            background: rgba(139, 124, 246, 0.15);
+            color: #c4b8ff;
+            border-color: rgba(139, 124, 246, 0.45);
+        }
+        .edition-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+        }
+        .edition-price {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--green);
+            margin-bottom: 0.75rem;
+        }
+        .edition-card.featured .edition-price { color: var(--gold); }
+        .edition-card.founders .edition-price { color: #c4b8ff; }
+        .edition-desc {
+            font-size: 0.92rem;
+            color: var(--muted);
+            flex: 1;
+            margin-bottom: 1.25rem;
+        }
+        .edition-card .btn { width: 100%; }
+        .edition-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+        .edition-actions .btn { width: 100%; }
+
+        /* BENEFITS MODAL (GTA VI reserve style) */
+        .benefits-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(8px);
+        }
+        .benefits-modal.open { display: flex; }
+        .benefits-panel {
+            width: min(420px, 100%);
+            max-height: min(82vh, 640px);
+            background: linear-gradient(180deg, #121a2e 0%, #0a0f1c 100%);
+            border: 1px solid rgba(46, 203, 113, 0.35);
+            border-radius: 16px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.65), 0 0 40px rgba(46, 203, 113, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: panelIn 0.28s ease;
+        }
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(18px) scale(0.98); }
+            to { opacity: 1; transform: none; }
+        }
+        .benefits-panel.theme-gold { border-color: rgba(232, 197, 71, 0.45); }
+        .benefits-panel.theme-purple { border-color: rgba(139, 124, 246, 0.5); }
+        .benefits-header {
+            padding: 1.25rem 1.25rem 0.85rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            position: relative;
+        }
+        .benefits-header .eyebrow {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            color: var(--green);
+            margin-bottom: 0.35rem;
+        }
+        .benefits-panel.theme-gold .eyebrow { color: var(--gold); }
+        .benefits-panel.theme-purple .eyebrow { color: #c4b8ff; }
+        .benefits-header h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.15rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin: 0 0 0.25rem;
+        }
+        .benefits-header .price-line {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--green);
+        }
+        .benefits-panel.theme-gold .price-line { color: var(--gold); }
+        .benefits-panel.theme-purple .price-line { color: #c4b8ff; }
+        .benefits-close {
+            position: absolute;
+            top: 0.85rem;
+            right: 0.85rem;
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: var(--text);
+            font-size: 1.1rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .benefits-close:hover { border-color: var(--green); color: var(--green); }
+        .benefits-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 1.25rem 1.25rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--green) transparent;
+        }
+        .benefits-scroll h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin: 0.5rem 0 0.75rem;
+        }
+        .benefit-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .benefit-row:last-child { border-bottom: none; }
+        .benefit-check {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--green-dim);
+            border: 1px solid rgba(46, 203, 113, 0.45);
+            color: var(--green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            margin-top: 2px;
+        }
+        .benefits-panel.theme-gold .benefit-check {
+            background: rgba(232, 197, 71, 0.12);
+            border-color: rgba(232, 197, 71, 0.4);
+            color: var(--gold);
+        }
+        .benefits-panel.theme-purple .benefit-check {
+            background: rgba(139, 124, 246, 0.12);
+            border-color: rgba(139, 124, 246, 0.4);
+            color: #c4b8ff;
+        }
+        .benefit-row strong {
+            display: block;
+            font-size: 0.95rem;
+            margin-bottom: 0.15rem;
+        }
+        .benefit-row span {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+        .benefits-footer {
+            padding: 1rem 1.25rem 1.25rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .benefits-footer .btn { width: 100%; }
+
+        /* GALLERY */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+        @media (max-width: 700px) {
+            .gallery-grid { grid-template-columns: 1fr; }
+        }
+        .gallery-item {
+            aspect-ratio: 16 / 10;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* SPECS */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 600px) {
+            .specs-grid { grid-template-columns: 1fr; }
+        }
+        .spec-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+        .spec-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            color: var(--green);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+        .spec-card ul {
+            list-style: none;
+            font-size: 0.92rem;
+            color: var(--muted);
+        }
+        .spec-card li {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .spec-card li:last-child { border-bottom: none; }
+        .spec-card strong { color: var(--text); font-weight: 600; }
+
+        /* ROADMAP */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-width: 520px;
+            margin: 0 auto;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: linear-gradient(var(--green), rgba(46, 203, 113, 0.15));
+        }
+        .timeline-item {
+            position: relative;
+            padding: 0 0 1.5rem 1.25rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 0.35rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px rgba(46, 203, 113, 0.5);
+        }
+        .timeline-item .when {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            color: var(--green);
+            margin-bottom: 0.2rem;
+        }
+        .timeline-item .what {
+            font-weight: 600;
+            margin-bottom: 0.15rem;
+        }
+        .timeline-item .detail {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        /* FOOTER */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem 1.25rem;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .footer strong {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            color: var(--text);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .footer-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 0.75rem 0;
+        }
+        .footer-links a { color: var(--muted); text-decoration: none !important; }
+        .footer-links a:hover { color: var(--green); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a class="brand" href="index.html">🌵 <span>GAME BOYS</span>&nbsp;STUDIOS</a>
+            <div class="nav-links">
+                <a href="#trailer" data-i18n="nav_trailer">Tráiler</a>
+                <a href="#editions" data-i18n="nav_editions">Ediciones</a>
+                <a href="https://game-boys-studios.itch.io/little-civilizations" target="_blank" rel="noopener">itch.io</a>
+                <a href="https://discord.gg/b8F9XAaT8a" target="_blank" rel="noopener">Discord</a>
+                <div class="lang-switch">
+                    <button type="button" id="btnEs" class="active" onclick="setLang('es')">ES</button>
+                    <button type="button" id="btnEn" onclick="setLang('en')">EN</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-badge" data-i18n="hero_badge">ESTRATEGIA · PC · GODOT</div>
+        <h1>Little Civilizations</h1>
+        <p class="hero-tagline" data-i18n="hero_tagline">Construye tu civilización desde cero y guíala hasta las estrellas.</p>
+        <div class="hero-dates">
+            <div class="date-pill"><strong data-i18n="date_preorder_label">Pre-order</strong>&nbsp;<span data-i18n="date_preorder">21 de agosto</span></div>
+            <div class="date-pill"><strong data-i18n="date_release_label">Lanzamiento</strong>&nbsp;<span data-i18n="date_release">27 de agosto</span></div>
+        </div>
+        <div class="hero-cta">
+            <a class="btn btn-primary" href="https://game-boys-studios.itch.io/little-civilizations" target="_blank" rel="noopener" data-i18n="cta_itch">Ver en itch.io</a>
+            <a class="btn btn-outline" href="#trailer" data-i18n="cta_trailer">Ver tráiler</a>
+            <a class="btn btn-outline" href="#editions" data-i18n="cta_editions">Ver ediciones</a>
+        </div>
+    </header>
+
+    <section class="section" id="trailer">
+        <h2 class="section-title" data-i18n="trailer_title">Tráiler oficial</h2>
+        <p class="section-sub" data-i18n="trailer_sub">Un vistazo al nacimiento de tu imperio.</p>
+        <div class="video-wrap">
+            <iframe
+                src="https://www.youtube.com/embed/AzZuzLvHYxI"
+                title="Little Civilizations Trailer"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                loading="lazy"></iframe>
+        </div>
+    </section>
+
+    <section class="section" id="about">
+        <h2 class="section-title" data-i18n="about_title">Sobre el juego</h2>
+        <div class="about-text">
+            <p data-i18n="about_p1">Construye una civilización desde sus humildes comienzos y guíala a través de la historia hasta alcanzar la Era Espacial. Explora, expande tu territorio, desarrolla tecnologías y conviértete en una potencia mundial.</p>
+            <p data-i18n="about_p2">Cada partida empieza con un pequeño asentamiento. Tus decisiones transforman ese rincón del mapa en un imperio capaz de cambiar el curso de la historia: ¿expansión rápida o crecimiento pausado? ¿ciencia o exploración?</p>
+            <p data-i18n="about_p3">Little Civilizations busca una estrategia accesible: fácil de empezar, con objetivos constantes mientras tu civilización evoluciona. El juego sigue en desarrollo activo y recibirá mejoras y contenido nuevo.</p>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <h2 class="section-title" data-i18n="features_title">Características</h2>
+        <p class="section-sub" data-i18n="features_sub">Todo lo que define la experiencia.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3 data-i18n="f1_t">Mundo explorables</h3>
+                <p data-i18n="f1_d">Varios continentes y regiones por descubrir en cada partida.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏙️</div>
+                <h3 data-i18n="f2_t">Construye tu imperio</h3>
+                <p data-i18n="f2_d">Desarrolla ciudades, gestiona recursos y define tu estilo de juego.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⏳</div>
+                <h3 data-i18n="f3_t">Eras históricas</h3>
+                <p data-i18n="f3_d">Avanza desde la antigüedad hasta un futuro entre las estrellas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔬</div>
+                <h3 data-i18n="f4_t">Tecnología</h3>
+                <p data-i18n="f4_d">Investiga avances y desbloquea mejoras que cambian la partida.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3 data-i18n="f5_t">IA y multijugador</h3>
+                <p data-i18n="f5_d">Enfrenta rivales controlados por IA o desafía a otros jugadores.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✨</div>
+                <h3 data-i18n="f6_t">Fácil de aprender</h3>
+                <p data-i18n="f6_d">Interfaz clara y partidas rejugables con historias distintas cada vez.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="editions">
+        <h2 class="section-title" data-i18n="editions_title">Ediciones</h2>
+        <p class="section-sub" data-i18n="editions_sub">Elige cómo quieres apoyar el lanzamiento. Pre-order a partir del 21 de agosto.</p>
+        <div class="editions-grid">
+            <div class="edition-card">
+                <div class="edition-name">Standard</div>
+                <div class="edition-price">4,99 €</div>
+                <p class="edition-desc" data-i18n="ed_std">El juego completo para todas las plataformas disponibles.</p>
+                <div class="edition-actions">
+                    <a class="btn btn-primary" href="https://game-boys-studios.itch.io/little-civilizations" target="_blank" rel="noopener" data-i18n="ed_buy">Comprar</a>
+                    <button type="button" class="btn btn-outline" onclick="openBenefits('standard')" data-i18n="ed_benefits">Ver beneficios</button>
+                </div>
+            </div>
+            <div class="edition-card featured">
+                <div class="edition-badge" data-i18n="ed_popular">POPULAR</div>
+                <div class="edition-name">Deluxe</div>
+                <div class="edition-price">9,99 €</div>
+                <p class="edition-desc" data-i18n="ed_dlx">Juego + acceso a los DLCs gratis el mismo día de su salida.</p>
+                <div class="edition-actions">
+                    <a class="btn btn-primary" href="https://game-boys-studios.itch.io/little-civilizations" target="_blank" rel="noopener" data-i18n="ed_buy">Comprar</a>
+                    <button type="button" class="btn btn-outline" onclick="openBenefits('deluxe')" data-i18n="ed_benefits">Ver beneficios</button>
+                </div>
+            </div>
+            <div class="edition-card founders">
+                <div class="edition-badge limited" data-i18n="ed_limited">SOLO 50</div>
+                <div class="edition-name">Founders</div>
+                <div class="edition-price">19,99 €</div>
+                <p class="edition-desc" data-i18n="ed_fnd">Edición digital limitada: nombre especial en Discord y DLCs en early access gratis.</p>
+                <div class="edition-actions">
+                    <a class="btn btn-primary" href="https://game-boys-studios.itch.io/little-civilizations" target="_blank" rel="noopener" data-i18n="ed_buy">Comprar</a>
+                    <button type="button" class="btn btn-outline" onclick="openBenefits('founders')" data-i18n="ed_benefits">Ver beneficios</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Panel beneficios estilo reservas -->
+    <div class="benefits-modal" id="benefitsModal" onclick="if(event.target===this)closeBenefits()">
+        <div class="benefits-panel" id="benefitsPanel">
+            <div class="benefits-header">
+                <button type="button" class="benefits-close" onclick="closeBenefits()" aria-label="Close">✕</button>
+                <div class="eyebrow" data-i18n="ben_eyebrow">EDICIÓN DIGITAL</div>
+                <h3 id="benTitle">Standard</h3>
+                <div class="price-line" id="benPrice">4,99 €</div>
+            </div>
+            <div class="benefits-scroll">
+                <h4 data-i18n="ben_includes">Incluye</h4>
+                <div id="benList"></div>
+            </div>
+            <div class="benefits-footer">
+                <a class="btn btn-primary" id="benBuyBtn" href="https://game-boys-studios.itch.io/little-civilizations" target="_blank" rel="noopener" data-i18n="ed_buy">Comprar</a>
+                <button type="button" class="btn btn-outline" onclick="closeBenefits()" data-i18n="ben_close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <section class="section" id="gallery">
+        <h2 class="section-title" data-i18n="gallery_title">Capturas</h2>
+        <p class="section-sub" data-i18n="gallery_sub">Imágenes del mundo de Little Civilizations.</p>
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <img src="games/civ1.png" alt="Little Civilizations screenshot 1" onerror="this.parentElement.textContent='civ1.png'">
+            </div>
+            <div class="gallery-item">
+                <img src="games/civ2.png" alt="Little Civilizations screenshot 2" onerror="this.parentElement.textContent='civ2.png'">
+            </div>
+            <div class="gallery-item">
+                <img src="games/civ3.png" alt="Little Civilizations screenshot 3" onerror="this.parentElement.textContent='civ3.png'">
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="specs">
+        <h2 class="section-title" data-i18n="specs_title">Requisitos (PC)</h2>
+        <p class="section-sub" data-i18n="specs_sub">Valores orientativos — pueden ajustarse antes del lanzamiento.</p>
+        <div class="specs-grid">
+            <div class="spec-card">
+                <h3 data-i18n="specs_min">Mínimos</h3>
+                <ul>
+                    <li><strong>OS:</strong> Windows 10 64-bit</li>
+                    <li><strong>CPU:</strong> Dual-core 2.0 GHz</li>
+                    <li><strong>RAM:</strong> 4 GB</li>
+                    <li><strong>GPU:</strong> Integrated / OpenGL 3.3</li>
+                    <li><strong>Storage:</strong> 1 GB</li>
+                </ul>
+            </div>
+            <div class="spec-card">
+                <h3 data-i18n="specs_rec">Recomendados</h3>
+                <ul>
+                    <li><strong>OS:</strong> Windows 10/11 64-bit</li>
+                    <li><strong>CPU:</strong> Quad-core 3.0 GHz</li>
+                    <li><strong>RAM:</strong> 8 GB</li>
+                    <li><strong>GPU:</strong> Dedicated 2 GB</li>
+                    <li><strong>Storage:</strong> 2 GB SSD</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="roadmap">
+        <h2 class="section-title" data-i18n="roadmap_title">Hoja de ruta</h2>
+        <p class="section-sub" data-i18n="roadmap_sub">Fechas anunciadas por Game Boys Studios.</p>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="when" data-i18n="rm1_when">21 DE AGOSTO</div>
+                <div class="what" data-i18n="rm1_what">Apertura del pre-order</div>
+                <div class="detail" data-i18n="rm1_detail">Standard, Deluxe y Founders (50 unidades).</div>
+            </div>
+            <div class="timeline-item">
+                <div class="when" data-i18n="rm2_when">27 DE AGOSTO</div>
+                <div class="what" data-i18n="rm2_what">Lanzamiento</div>
+                <div class="detail" data-i18n="rm2_detail">Disponible en las plataformas anunciadas.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="when" data-i18n="rm3_when">DESPUÉS DEL LANZAMIENTO</div>
+                <div class="what" data-i18n="rm3_what">Actualizaciones y multiidioma</div>
+                <div class="detail" data-i18n="rm3_detail">Más idiomas, equilibrio y contenido extra. Los DLCs siguen el plan de cada edición.</div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <strong>GAME BOYS STUDIOS</strong>
+        <p data-i18n="footer_tag">Little Civilizations — Madrid, España</p>
+        <div class="footer-links">
+            <a href="index.html" data-i18n="footer_home">Volver a la web</a>
+            <a href="https://game-boys-studios.itch.io/little-civilizations" target="_blank" rel="noopener">itch.io</a>
+            <a href="https://discord.gg/b8F9XAaT8a" target="_blank" rel="noopener">Discord</a>
+            <a href="https://www.youtube.com/channel/UCzpzKxcMGj8rDplhZzBddjw" target="_blank" rel="noopener">YouTube</a>
+        </div>
+        <p>© 2026 Game Boys Studios</p>
+    </footer>
+
+    <script>
+        const I18N = {
+            es: {
+                nav_trailer: 'Tráiler',
+                nav_editions: 'Ediciones',
+                hero_badge: 'ESTRATEGIA · PC · GODOT',
+                hero_tagline: 'Construye tu civilización desde cero y guíala hasta las estrellas.',
+                date_preorder_label: 'Pre-order',
+                date_preorder: '21 de agosto',
+                date_release_label: 'Lanzamiento',
+                date_release: '27 de agosto',
+                cta_itch: 'Ver en itch.io',
+                cta_trailer: 'Ver tráiler',
+                cta_editions: 'Ver ediciones',
+                trailer_title: 'Tráiler oficial',
+                trailer_sub: 'Un vistazo al nacimiento de tu imperio.',
+                about_title: 'Sobre el juego',
+                about_p1: 'Construye una civilización desde sus humildes comienzos y guíala a través de la historia hasta alcanzar la Era Espacial. Explora, expande tu territorio, desarrolla tecnologías y conviértete en una potencia mundial.',
+                about_p2: 'Cada partida empieza con un pequeño asentamiento. Tus decisiones transforman ese rincón del mapa en un imperio capaz de cambiar el curso de la historia: ¿expansión rápida o crecimiento pausado? ¿ciencia o exploración?',
+                about_p3: 'Little Civilizations busca una estrategia accesible: fácil de empezar, con objetivos constantes mientras tu civilización evoluciona. El juego sigue en desarrollo activo y recibirá mejoras y contenido nuevo.',
+                features_title: 'Características',
+                features_sub: 'Todo lo que define la experiencia.',
+                f1_t: 'Mundo explorables', f1_d: 'Varios continentes y regiones por descubrir en cada partida.',
+                f2_t: 'Construye tu imperio', f2_d: 'Desarrolla ciudades, gestiona recursos y define tu estilo de juego.',
+                f3_t: 'Eras históricas', f3_d: 'Avanza desde la antigüedad hasta un futuro entre las estrellas.',
+                f4_t: 'Tecnología', f4_d: 'Investiga avances y desbloquea mejoras que cambian la partida.',
+                f5_t: 'IA y multijugador', f5_d: 'Enfrenta rivales controlados por IA o desafía a otros jugadores.',
+                f6_t: 'Fácil de aprender', f6_d: 'Interfaz clara y partidas rejugables con historias distintas cada vez.',
+                editions_title: 'Ediciones',
+                editions_sub: 'Elige cómo quieres apoyar el lanzamiento. Pre-order a partir del 21 de agosto.',
+                ed_std: 'El juego completo para todas las plataformas disponibles.',
+                ed_dlx: 'Juego + acceso a los DLCs gratis el mismo día de su salida.',
+                ed_fnd: 'Edición digital limitada: nombre especial en Discord y DLCs en early access gratis.',
+                ed_popular: 'POPULAR',
+                ed_limited: 'SOLO 50',
+                ed_buy: 'Comprar',
+                ed_benefits: 'Ver beneficios',
+                ben_eyebrow: 'EDICIÓN DIGITAL',
+                ben_includes: 'Incluye',
+                ben_close: 'Cerrar',
+                ben_std_title: 'Standard',
+                ben_dlx_title: 'Deluxe',
+                ben_fnd_title: 'Founders Digital Edition',
+                gallery_title: 'Capturas',
+                gallery_sub: 'Imágenes del mundo de Little Civilizations.',
+                specs_title: 'Requisitos (PC)',
+                specs_sub: 'Valores orientativos — pueden ajustarse antes del lanzamiento.',
+                specs_min: 'Mínimos',
+                specs_rec: 'Recomendados',
+                roadmap_title: 'Hoja de ruta',
+                roadmap_sub: 'Fechas anunciadas por Game Boys Studios.',
+                rm1_when: '21 DE AGOSTO',
+                rm1_what: 'Apertura del pre-order',
+                rm1_detail: 'Standard, Deluxe y Founders (50 unidades).',
+                rm2_when: '27 DE AGOSTO',
+                rm2_what: 'Lanzamiento',
+                rm2_detail: 'Disponible en las plataformas anunciadas.',
+                rm3_when: 'DESPUÉS DEL LANZAMIENTO',
+                rm3_what: 'Actualizaciones y multiidioma',
+                rm3_detail: 'Más idiomas, equilibrio y contenido extra. Los DLCs siguen el plan de cada edición.',
+                footer_tag: 'Little Civilizations — Madrid, España',
+                footer_home: 'Volver a la web'
+            },
+            en: {
+                nav_trailer: 'Trailer',
+                nav_editions: 'Editions',
+                hero_badge: 'STRATEGY · PC · GODOT',
+                hero_tagline: 'Build your civilization from the ground up and lead it to the stars.',
+                date_preorder_label: 'Pre-order',
+                date_preorder: 'August 21',
+                date_release_label: 'Release',
+                date_release: 'August 27',
+                cta_itch: 'View on itch.io',
+                cta_trailer: 'Watch trailer',
+                cta_editions: 'See editions',
+                trailer_title: 'Official trailer',
+                trailer_sub: 'A glimpse at the birth of your empire.',
+                about_title: 'About the game',
+                about_p1: 'Build a civilization from humble beginnings and guide it through history to the Space Age. Explore, expand your territory, develop technologies, and become a world power.',
+                about_p2: 'Every run starts with a small settlement. Your choices turn that corner of the map into an empire that can change history: expand fast or grow carefully? Science or exploration?',
+                about_p3: 'Little Civilizations aims for accessible strategy: easy to start, with constant goals as your civilization evolves. The game is in active development and will keep receiving updates and new content.',
+                features_title: 'Features',
+                features_sub: 'What defines the experience.',
+                f1_t: 'Explorable world', f1_d: 'Multiple continents and regions to discover every run.',
+                f2_t: 'Build your empire', f2_d: 'Develop cities, manage resources, and define your playstyle.',
+                f3_t: 'Historical ages', f3_d: 'Progress from antiquity to a future among the stars.',
+                f4_t: 'Technology', f4_d: 'Research advances and unlock upgrades that change the run.',
+                f5_t: 'AI & multiplayer', f5_d: 'Face AI rivals or challenge other players.',
+                f6_t: 'Easy to learn', f6_d: 'Clear UI and high replayability — a different story every time.',
+                editions_title: 'Editions',
+                editions_sub: 'Choose how you support the launch. Pre-order from August 21.',
+                ed_std: 'The full game for all available platforms.',
+                ed_dlx: 'Game + free access to DLCs on the day they release.',
+                ed_fnd: 'Limited digital edition: special Discord name and free early access to DLCs.',
+                ed_popular: 'POPULAR',
+                ed_limited: 'ONLY 50',
+                ed_buy: 'Buy',
+                ed_benefits: 'View benefits',
+                ben_eyebrow: 'DIGITAL EDITION',
+                ben_includes: 'Includes',
+                ben_close: 'Close',
+                ben_std_title: 'Standard',
+                ben_dlx_title: 'Deluxe',
+                ben_fnd_title: 'Founders Digital Edition',
+                gallery_title: 'Screenshots',
+                gallery_sub: 'Images from the world of Little Civilizations.',
+                specs_title: 'System requirements (PC)',
+                specs_sub: 'Approximate values — may change before launch.',
+                specs_min: 'Minimum',
+                specs_rec: 'Recommended',
+                roadmap_title: 'Roadmap',
+                roadmap_sub: 'Dates announced by Game Boys Studios.',
+                rm1_when: 'AUGUST 21',
+                rm1_what: 'Pre-order opens',
+                rm1_detail: 'Standard, Deluxe, and Founders (50 units).',
+                rm2_when: 'AUGUST 27',
+                rm2_what: 'Release',
+                rm2_detail: 'Available on the announced platforms.',
+                rm3_when: 'POST-LAUNCH',
+                rm3_what: 'Updates & more languages',
+                rm3_detail: 'More languages, balance, and extra content. DLCs follow each edition plan.',
+                footer_tag: 'Little Civilizations — Madrid, Spain',
+                footer_home: 'Back to website'
+            }
+        };
+
+        let currentLang = 'es';
+
+        const BENEFITS = {
+            standard: {
+                theme: '',
+                price: '4,99 €',
+                titleKey: 'ben_std_title',
+                items: {
+                    es: [
+                        { t: 'Juego completo', d: 'Little Civilizations en todas las plataformas disponibles.' },
+                        { t: 'Actualizaciones base', d: 'Parches y mejoras del juego principal.' },
+                        { t: 'Acceso al lanzamiento', d: 'Disponible el 27 de agosto.' }
+                    ],
+                    en: [
+                        { t: 'Full game', d: 'Little Civilizations on all available platforms.' },
+                        { t: 'Base updates', d: 'Patches and improvements to the main game.' },
+                        { t: 'Launch access', d: 'Available on August 27.' }
+                    ]
+                }
+            },
+            deluxe: {
+                theme: 'theme-gold',
+                price: '9,99 €',
+                titleKey: 'ben_dlx_title',
+                items: {
+                    es: [
+                        { t: 'Juego completo', d: 'Todo el contenido de la edición Standard.' },
+                        { t: 'DLCs día de salida', d: 'Acceso gratis a los DLCs el mismo día que se publiquen.' },
+                        { t: 'Mejor valor', d: 'Ideal si quieres el juego y el contenido extra sin preocuparte después.' },
+                        { t: 'Acceso al lanzamiento', d: 'Disponible el 27 de agosto.' }
+                    ],
+                    en: [
+                        { t: 'Full game', d: 'Everything in the Standard edition.' },
+                        { t: 'DLCs on release day', d: 'Free access to DLCs on the day they launch.' },
+                        { t: 'Best value', d: 'Ideal if you want the game plus future extra content.' },
+                        { t: 'Launch access', d: 'Available on August 27.' }
+                    ]
+                }
+            },
+            founders: {
+                theme: 'theme-purple',
+                price: '19,99 €',
+                titleKey: 'ben_fnd_title',
+                items: {
+                    es: [
+                        { t: 'Solo 50 unidades', d: 'Edición digital limitada de fundadores.' },
+                        { t: 'Juego completo', d: 'Todo el contenido de la edición Standard.' },
+                        { t: 'Nombre especial en Discord', d: 'Rol / nombre destacado en el servidor oficial.' },
+                        { t: 'DLCs en early access', d: 'Acceso anticipado gratis a los DLCs.' },
+                        { t: 'Apoyo al estudio', d: 'Ayudas directas a Game Boys Studios en el lanzamiento.' }
+                    ],
+                    en: [
+                        { t: 'Only 50 units', d: 'Limited Founders digital edition.' },
+                        { t: 'Full game', d: 'Everything in the Standard edition.' },
+                        { t: 'Special Discord name', d: 'Highlighted role / name on the official server.' },
+                        { t: 'DLC early access', d: 'Free early access to DLCs.' },
+                        { t: 'Support the studio', d: 'Direct support for Game Boys Studios at launch.' }
+                    ]
+                }
+            }
+        };
+
+        function setLang(lang) {
+            currentLang = lang;
+            const pack = I18N[lang] || I18N.es;
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (pack[key] != null) el.textContent = pack[key];
+            });
+            document.getElementById('btnEs').classList.toggle('active', lang === 'es');
+            document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('lc_lang', lang); } catch (e) {}
+            // Refresh open panel if needed
+            const modal = document.getElementById('benefitsModal');
+            if (modal && modal.classList.contains('open') && modal.dataset.edition) {
+                openBenefits(modal.dataset.edition);
+            }
+        }
+
+        function openBenefits(edition) {
+            const data = BENEFITS[edition];
+            if (!data) return;
+            const pack = I18N[currentLang] || I18N.es;
+            const panel = document.getElementById('benefitsPanel');
+            const modal = document.getElementById('benefitsModal');
+            panel.classList.remove('theme-gold', 'theme-purple');
+            if (data.theme) panel.classList.add(data.theme);
+            document.getElementById('benTitle').textContent = pack[data.titleKey] || edition;
+            document.getElementById('benPrice').textContent = data.price;
+            const list = document.getElementById('benList');
+            const items = data.items[currentLang] || data.items.es;
+            list.innerHTML = items.map(item => `
+                <div class="benefit-row">
+                    <div class="benefit-check">✓</div>
+                    <div>
+                        <strong>${item.t}</strong>
+                        <span>${item.d}</span>
+                    </div>
+                </div>
+            `).join('');
+            modal.dataset.edition = edition;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeBenefits() {
+            const modal = document.getElementById('benefitsModal');
+            modal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeBenefits();
+        });
+
+        (function initLang() {
+            let lang = 'es';
+            try {
+                const saved = localStorage.getItem('lc_lang');
+                if (saved === 'en' || saved === 'es') lang = saved;
+                else if (navigator.language && navigator.language.toLowerCase().startsWith('en')) lang = 'en';
+            } catch (e) {}
+            setLang(lang);
+        })();
+    </script>
+</body>
+</html>
