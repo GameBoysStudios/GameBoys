@@ -74,11 +74,11 @@
                 <h2>Lo Más Destacado</h2>
                 <div class="highlights-grid">
                     <div class="highlight-card featured-game">
-                        <div class="highlight-image">🌵</div>
-                        <h3>Cactus: The Videogame</h3>
-                        <p class="highlight-meta">Videojuego • Próximamente en Steam</p>
-                        <p>Vivir en un planeta diferente. Descubre artilugios robóticos y enfrenta desafíos únicos.</p>
-                        <button class="btn btn-small" onclick="openCactusMenu()">Ver Detalles</button>
+                        <div class="highlight-image">🔮</div>
+                        <h3>Little Civilizatiions</h3>
+                        <p class="highlight-meta">Videojuego • Reserva ya en itch.io</p>
+                        <p>De un pequeño asentamiento a una civilización que alcance las estrellas.</p>
+                        <a class="btn btn-primary btn-full" href="little-civilizations.html">Ver Más</a>
                     </div>
                     <div class="highlight-card featured-comic">
                         <div class="highlight-image">📖</div>
@@ -600,10 +600,15 @@
             <div class="footer-section">
                 <h4>Navega</h4>
                 <ul>
-                    <li><a href="#" onclick="navigateTo('juegos')">Videojuegos</a></li>
-                    <li><a href="#" onclick="navigateTo('comics')">Cómics</a></li>
-                    <li><a href="#" onclick="navigateTo('about')">Sobre Nosotros</a></li>
-                    <li><a href="#" onclick="navigateTo('community')">Comunidad</a></li>
+                <li><a href="#home" class="nav-link" onclick="navigateTo('home')">Inicio</a></li>
+                <li><a href="#juegos" class="nav-link" onclick="navigateTo('juegos')">Juegos</a></li>
+                <li><a href="#comics" class="nav-link" onclick="navigateTo('comics')">Cómics</a></li>
+                <li><a href="#movie" class="nav-link" onclick="navigateTo('movie')">Películas</a></li>
+                <li><a href="alex.html" class="nav-link">Alex AI</a></li>
+                <li><a href="admin.html" class="nav-link" id="adminLink" style="display:none;">Admin</a></li>
+                <li><a href="#about" class="nav-link" onclick="navigateTo('about')">Sobre Nosotros</a></li>
+                <li><a href="#community" class="nav-link" onclick="navigateTo('community')">Comunidad</a></li>
+                <li><a href="#auth" class="nav-link" onclick="navigateTo('auth')">Cuenta</a></li>
                 </ul>
             </div>
             <div class="footer-section">
