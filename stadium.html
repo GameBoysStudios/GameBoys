@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stadium | Game Boys Studios</title>
+    <meta name="description" content="Stadium — la consola de Game Boys Studios. Little Civilizations, Minecraft, juegos 2D y emulación. Edición Standard 249,99 €.">
+    <meta name="theme-color" content="#0a0e1a">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070b14;
+            --bg2: #0d1225;
+            --card: #121833;
+            --border: rgba(46, 203, 113, 0.25);
+            --green: #2ecb71;
+            --green-dim: rgba(46, 203, 113, 0.12);
+            --text: #e8ecf4;
+            --muted: #9aa6c0;
+            --gold: #e8c547;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        a { color: var(--green); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .nav {
+            position: sticky; top: 0; z-index: 50;
+            backdrop-filter: blur(14px);
+            background: rgba(7, 11, 20, 0.88);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 1080px; margin: 0 auto;
+            padding: 0.85rem 1.25rem;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 1rem; flex-wrap: wrap;
+        }
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800; font-size: 0.82rem;
+            letter-spacing: 0.12em; color: var(--text);
+            text-decoration: none !important;
+        }
+        .brand span { color: var(--green); }
+        .nav-links { display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap; }
+        .nav-links a {
+            color: var(--muted); font-size: 0.9rem;
+            text-decoration: none !important;
+            padding: 0.35rem 0.55rem; border-radius: 6px;
+        }
+        .nav-links a:hover { color: var(--text); background: var(--green-dim); }
+        .lang-switch {
+            display: flex; border: 1px solid var(--border);
+            border-radius: 8px; overflow: hidden; margin-left: 0.25rem;
+        }
+        .lang-switch button {
+            background: transparent; border: none; color: var(--muted);
+            font-family: 'Orbitron', sans-serif; font-size: 0.68rem;
+            letter-spacing: 0.08em; padding: 0.4rem 0.6rem; cursor: pointer;
+        }
+        .lang-switch button.active {
+            background: var(--green); color: #050810; font-weight: 700;
+        }
+
+        .hero {
+            position: relative;
+            padding: 4.5rem 1.25rem 3.5rem;
+            text-align: center;
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse 70% 55% at 50% -15%, rgba(46, 203, 113, 0.22), transparent 55%),
+                radial-gradient(ellipse 45% 40% at 100% 90%, rgba(232, 197, 71, 0.08), transparent 50%),
+                var(--bg);
+        }
+        .hero::after {
+            content: '';
+            position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+        }
+        .badge {
+            display: inline-block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem; letter-spacing: 0.22em;
+            color: var(--green);
+            border: 1px solid rgba(46, 203, 113, 0.45);
+            background: var(--green-dim);
+            padding: 0.4rem 0.9rem; border-radius: 999px;
+            margin-bottom: 1.2rem;
+        }
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(2.4rem, 8vw, 4.2rem);
+            letter-spacing: 0.14em;
+            margin-bottom: 0.4rem;
+            background: linear-gradient(100deg, #fff, #2ecb71 55%, #a8f0c4);
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent;
+        }
+        .hero-edition {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem; letter-spacing: 0.18em;
+            color: var(--gold); margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+        .hero-tag {
+            font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+            color: var(--muted); max-width: 34rem;
+            margin: 0 auto 1.5rem; font-weight: 500;
+        }
+        .price-box {
+            display: inline-flex; flex-direction: column; align-items: center;
+            gap: 0.25rem; margin-bottom: 1.75rem;
+            padding: 1rem 1.75rem;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: rgba(13, 18, 37, 0.8);
+        }
+        .price-box .label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem; letter-spacing: 0.18em; color: var(--muted);
+        }
+        .price-box .amount {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem; font-weight: 800; color: var(--green);
+        }
+        .price-box .note { font-size: 0.85rem; color: var(--muted); }
+        .cta-row {
+            display: flex; flex-wrap: wrap; gap: 0.75rem;
+            justify-content: center;
+        }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            text-decoration: none !important;
+            padding: 0.85rem 1.35rem; border-radius: 10px;
+            border: none; cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary {
+            background: linear-gradient(135deg, #2ecb71, #1fa855);
+            color: #050810 !important;
+            box-shadow: 0 0 28px rgba(46, 203, 113, 0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text) !important;
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover { border-color: var(--green); background: var(--green-dim); }
+        .btn-disabled { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+
+        .section {
+            max-width: 1080px; margin: 0 auto;
+            padding: 3.25rem 1.25rem;
+        }
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.15rem, 3vw, 1.5rem);
+            letter-spacing: 0.08em; text-align: center;
+            text-transform: uppercase; margin-bottom: 0.5rem;
+        }
+        .section-sub {
+            text-align: center; color: var(--muted);
+            max-width: 36rem; margin: 0 auto 2rem;
+        }
+
+        .console-visual {
+            max-width: 420px; margin: 0 auto 2.5rem;
+            aspect-ratio: 16 / 10;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: linear-gradient(145deg, #151d35 0%, #0a0f1c 100%);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .console-visual::before {
+            content: '';
+            position: absolute; inset: 12% 15%;
+            border-radius: 8px;
+            background: linear-gradient(180deg, #0c1528, #050810);
+            border: 2px solid rgba(46, 203, 113, 0.3);
+        }
+        .console-visual .screen-text {
+            position: relative; z-index: 1;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem; letter-spacing: 0.2em;
+            color: var(--green);
+            text-shadow: 0 0 20px rgba(46, 203, 113, 0.5);
+        }
+        .console-visual .sub {
+            position: relative; z-index: 1;
+            font-size: 0.75rem; color: var(--muted);
+            margin-top: 0.35rem; letter-spacing: 0.12em;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        @media (max-width: 800px) {
+            .grid-3 { grid-template-columns: 1fr; }
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.35rem 1.2rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .card:hover {
+            border-color: rgba(46, 203, 113, 0.5);
+            transform: translateY(-3px);
+        }
+        .card-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem; letter-spacing: 0.06em;
+            text-transform: uppercase; margin-bottom: 0.4rem;
+        }
+        .card p { font-size: 0.92rem; color: var(--muted); margin: 0; }
+
+        .specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 640px) {
+            .specs { grid-template-columns: 1fr; }
+        }
+        .spec-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.35rem;
+        }
+        .spec-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem; letter-spacing: 0.12em;
+            color: var(--green); text-transform: uppercase;
+            margin-bottom: 0.85rem;
+        }
+        .spec-card ul { list-style: none; }
+        .spec-card li {
+            font-size: 0.92rem; color: var(--muted);
+            padding: 0.35rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .spec-card li:last-child { border-bottom: none; }
+        .spec-card strong { color: var(--text); }
+
+        .include-list {
+            max-width: 520px; margin: 0 auto;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem 1.5rem 1.25rem;
+        }
+        .include-list li {
+            list-style: none;
+            display: flex; gap: 0.75rem; align-items: flex-start;
+            padding: 0.55rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem; color: var(--muted);
+        }
+        .include-list li:last-child { border-bottom: none; }
+        .include-list .check { color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+        .timeline {
+            max-width: 560px; margin: 0 auto;
+            padding-left: 1.25rem;
+            border-left: 2px solid rgba(46, 203, 113, 0.35);
+        }
+        .timeline-item { padding: 0 0 1.45rem 1.15rem; position: relative; }
+        .timeline-item::before {
+            content: '';
+            position: absolute; left: -1.55rem; top: 0.35rem;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px rgba(46, 203, 113, 0.5);
+        }
+        .timeline-item .when {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem; letter-spacing: 0.14em;
+            color: var(--green); margin-bottom: 0.2rem;
+        }
+        .timeline-item .what { font-weight: 600; margin-bottom: 0.15rem; }
+        .timeline-item .detail { font-size: 0.9rem; color: var(--muted); }
+
+        .notice {
+            max-width: 640px; margin: 0 auto;
+            padding: 1rem 1.2rem;
+            border-left: 3px solid var(--gold);
+            background: rgba(232, 197, 71, 0.08);
+            border-radius: 0 10px 10px 0;
+            font-size: 0.92rem; color: var(--muted);
+        }
+
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem 1.25rem; text-align: center;
+            color: var(--muted); font-size: 0.9rem;
+        }
+        .footer strong {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem; letter-spacing: 0.15em;
+            color: var(--text); display: block; margin-bottom: 0.5rem;
+        }
+        .footer-links {
+            display: flex; gap: 1rem; justify-content: center;
+            flex-wrap: wrap; margin: 0.75rem 0;
+        }
+        .footer-links a { color: var(--muted); text-decoration: none !important; }
+        .footer-links a:hover { color: var(--green); }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a class="brand" href="index.html">🌵 <span>GAME BOYS</span> STUDIOS</a>
+            <div class="nav-links">
+                <a href="#features" data-i18n="nav_features">Experiencia</a>
+                <a href="#roadmap" data-i18n="nav_roadmap">Calendario</a>
+                <a href="#specs" data-i18n="nav_specs">Especificaciones</a>
+                <a href="index.html" data-i18n="nav_web">Web oficial</a>
+                <div class="lang-switch">
+                    <button type="button" id="btnEs" class="active" onclick="setLang('es')">ES</button>
+                    <button type="button" id="btnEn" onclick="setLang('en')">EN</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="badge" data-i18n="badge">CONSOLA · EDICIÓN STANDARD</div>
+        <h1>STADIUM</h1>
+        <p class="hero-edition" data-i18n="edition">Edición standard</p>
+        <p class="hero-tag" data-i18n="hero_tag">
+            La consola de Game Boys Studios. Juega a nuestros títulos, indies 2D,
+            Minecraft y emulación clásica — en tu televisor.
+        </p>
+        <div class="price-box">
+            <span class="label" data-i18n="price_label">PVP</span>
+            <span class="amount">249,99 €</span>
+            <span class="note" data-i18n="price_note">Envío nacional e internacional a cargo del comprador</span>
+        </div>
+        <div class="cta-row">
+            <span class="btn btn-primary btn-disabled" data-i18n="cta_soon">Próximamente</span>
+            <a class="btn btn-outline" href="#roadmap" data-i18n="cta_roadmap">Ver calendario</a>
+            <a class="btn btn-outline" href="little-civilizations.html">Little Civilizations</a>
+        </div>
+    </header>
+
+    <section class="section">
+        <div class="console-visual">
+            <div class="screen-text">STADIUM</div>
+            <div class="sub">GAME BOYS SYSTEM</div>
+        </div>
+        <p class="section-sub" data-i18n="visual_note">
+            Diseño de producto en desarrollo. La unidad final incluirá carcasa propia Game Boys Studios.
+        </p>
+    </section>
+
+    <section class="section" id="features">
+        <h2 class="section-title" data-i18n="feat_title">Una consola, tres mundos</h2>
+        <p class="section-sub" data-i18n="feat_sub">Biblioteca, tienda y emulación en un mismo launcher pensado para el salón.</p>
+        <div class="grid-3">
+            <div class="card">
+                <div class="card-icon">📚</div>
+                <h3 data-i18n="feat1_t">Biblioteca</h3>
+                <p data-i18n="feat1_d">Tus juegos instalados, nativos y adaptados, listos para lanzar desde el menú principal.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🛒</div>
+                <h3 data-i18n="feat2_t">Tienda Stadium</h3>
+                <p data-i18n="feat2_d">Descubre y descarga juegos de Game Boys Studios y desarrolladores de la comunidad.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🕹️</div>
+                <h3 data-i18n="feat3_t">Emular</h3>
+                <p data-i18n="feat3_d">RetroArch integrado. Tú añades tus ROMs de forma responsable; nosotros ponemos el emulador.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title" data-i18n="play_title">Pensada para jugar</h2>
+        <p class="section-sub" data-i18n="play_sub">Catálogo objetivo de la Edición Standard.</p>
+        <div class="grid-3">
+            <div class="card">
+                <div class="card-icon">🏛️</div>
+                <h3>Little Civilizations</h3>
+                <p data-i18n="play1_d">Estrategia y civilizaciones en build optimizada para Stadium.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🧱</div>
+                <h3>Minecraft</h3>
+                <p data-i18n="play2_d">Experiencia Minecraft viable en salón (edición orientada a la plataforma).</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">👾</div>
+                <h3 data-i18n="play3_t">2D + retro</h3>
+                <p data-i18n="play3_d">Indies 2D y emulación clásica (8 / 16 / 32 bits) con buen rendimiento.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="roadmap">
+        <h2 class="section-title" data-i18n="road_title">Calendario oficial</h2>
+        <p class="section-sub" data-i18n="road_sub">Fechas anunciadas del camino hasta el lanzamiento de Stadium.</p>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="when" data-i18n="r1_when">4 DE OCTUBRE</div>
+                <div class="what" data-i18n="r1_what">Anuncio y teaser oficial</div>
+                <div class="detail" data-i18n="r1_d">Salida de esta web y anuncio de la fecha de lanzamiento.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="when" data-i18n="r2_when">14 DE OCTUBRE</div>
+                <div class="what" data-i18n="r2_what">Tráiler 2 + capturas</div>
+                <div class="detail" data-i18n="r2_d">Mostramos el tráiler 2 y capturas de cómo puede verse la consola.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="when" data-i18n="r3_when">17 DE OCTUBRE</div>
+                <div class="what" data-i18n="r3_what">Extended Look</div>
+                <div class="detail" data-i18n="r3_d">UI detallada, información extensa y anuncio: las prerreservas empiezan el 21 de octubre.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="when" data-i18n="r4_when">21 DE OCTUBRE</div>
+                <div class="what" data-i18n="r4_what">Inicio de prerreservas</div>
+                <div class="detail" data-i18n="r4_d">Apertura de la prerreserva de consolas Stadium Edición Standard.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="when" data-i18n="r5_when">27 DE OCTUBRE</div>
+                <div class="what" data-i18n="r5_what">Lanzamiento y envíos</div>
+                <div class="detail" data-i18n="r5_d">Salida oficial de Stadium y comienzo de los envíos.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="specs">
+        <h2 class="section-title" data-i18n="specs_title">Especificaciones</h2>
+        <p class="section-sub" data-i18n="specs_sub">Hardware de salón (HDMI). Valores de la Edición Standard.</p>
+        <div class="specs">
+            <div class="spec-card">
+                <h3 data-i18n="specs_sys">Sistema</h3>
+                <ul>
+                    <li><strong data-i18n="s1k">Tipo:</strong> <span data-i18n="s1v">Consola de salón (TV)</span></li>
+                    <li><strong data-i18n="s2k">Vídeo:</strong> HDMI</li>
+                    <li><strong data-i18n="s3k">Audio:</strong> <span data-i18n="s3v">Por HDMI</span></li>
+                    <li><strong data-i18n="s4k">Red:</strong> <span data-i18n="s4v">Wi‑Fi integrada</span></li>
+                    <li><strong data-i18n="s5k">Mandos:</strong> <span data-i18n="s5v">USB / Bluetooth (no incluidos)</span></li>
+                </ul>
+            </div>
+            <div class="spec-card">
+                <h3 data-i18n="specs_perf">Rendimiento objetivo</h3>
+                <ul>
+                    <li><strong data-i18n="s6k">Plataforma:</strong> <span data-i18n="s6v">ARM, 4 GB+ RAM</span></li>
+                    <li><strong data-i18n="s7k">Almacenamiento:</strong> 128 GB</li>
+                    <li><strong data-i18n="s8k">Software:</strong> <span data-i18n="s8v">Launcher Stadium + tienda</span></li>
+                    <li><strong data-i18n="s9k">Cuenta:</strong> <span data-i18n="s9v">Vinculable a Game Boys</span></li>
+                    <li><strong data-i18n="s10k">Actualizaciones:</strong> <span data-i18n="s10v">Por red</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="include">
+        <h2 class="section-title" data-i18n="inc_title">Qué incluye</h2>
+        <p class="section-sub" data-i18n="inc_sub">Stadium · Edición Standard</p>
+        <ul class="include-list">
+            <li><span class="check">✓</span> <span data-i18n="inc1">Unidad Stadium (Edición Standard)</span></li>
+            <li><span class="check">✓</span> <span data-i18n="inc2">Fuente de alimentación</span></li>
+            <li><span class="check">✓</span> <span data-i18n="inc3">Cable HDMI</span></li>
+            <li><span class="check">✓</span> <span data-i18n="inc4">Almacenamiento con software Stadium preinstalado</span></li>
+            <li><span class="check">✓</span> <span data-i18n="inc5">Guía de inicio rápido</span></li>
+            <li><span class="check">✓</span> <span data-i18n="inc6">Acceso a biblioteca, tienda y emulación</span></li>
+        </ul>
+        <p class="section-sub" style="margin-top:1.25rem;" data-i18n="inc_note">No incluye mando ni tarjeta de TV. Compatible con mandos USB y Bluetooth genéricos.</p>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title" data-i18n="acc_title">Cuenta Game Boys</h2>
+        <p class="section-sub" data-i18n="acc_sub">
+            Vincula tu cuenta de la web con la consola mediante un código en pantalla.
+            Así podrás descargar juegos de la tienda y gestionar tu biblioteca.
+        </p>
+    </section>
+
+    <section class="section">
+        <div class="notice">
+            <span data-i18n="notice">Stadium está en fase de preparación. El botón de compra se activará con la prerreserva (21 de octubre). Precio de la Edición Standard: 249,99 €. Envío no incluido.</span>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <strong>GAME BOYS STUDIOS</strong>
+        <p data-i18n="footer_tag">Stadium Edición Standard — Madrid, España</p>
+        <div class="footer-links">
+            <a href="index.html" data-i18n="footer_home">Volver a la web</a>
+            <a href="little-civilizations.html">Little Civilizations</a>
+            <a href="https://discord.gg/b8F9XAaT8a" target="_blank" rel="noopener">Discord</a>
+        </div>
+        <p data-i18n="footer_copy">© 2026 Game Boys Studios</p>
+    </footer>
+
+    <script>
+        const I18N = {
+            es: {
+                nav_features: 'Experiencia',
+                nav_roadmap: 'Calendario',
+                nav_specs: 'Especificaciones',
+                nav_web: 'Web oficial',
+                badge: 'CONSOLA · EDICIÓN STANDARD',
+                edition: 'Edición standard',
+                hero_tag: 'La consola de Game Boys Studios. Juega a nuestros títulos, indies 2D, Minecraft y emulación clásica — en tu televisor.',
+                price_label: 'PVP',
+                price_note: 'Envío nacional e internacional a cargo del comprador',
+                cta_soon: 'Próximamente',
+                cta_roadmap: 'Ver calendario',
+                visual_note: 'Diseño de producto en desarrollo. La unidad final incluirá carcasa propia Game Boys Studios.',
+                feat_title: 'Una consola, tres mundos',
+                feat_sub: 'Biblioteca, tienda y emulación en un mismo launcher pensado para el salón.',
+                feat1_t: 'Biblioteca',
+                feat1_d: 'Tus juegos instalados, nativos y adaptados, listos para lanzar desde el menú principal.',
+                feat2_t: 'Tienda Stadium',
+                feat2_d: 'Descubre y descarga juegos de Game Boys Studios y desarrolladores de la comunidad.',
+                feat3_t: 'Emular',
+                feat3_d: 'RetroArch integrado. Tú añades tus ROMs de forma responsable; nosotros ponemos el emulador.',
+                play_title: 'Pensada para jugar',
+                play_sub: 'Catálogo objetivo de la Edición standard.',
+                play1_d: 'Estrategia y civilizaciones en build optimizada para Stadium.',
+                play2_d: 'Experiencia Minecraft viable en salón (edición orientada a la plataforma).',
+                play3_t: '2D + retro',
+                play3_d: 'Indies 2D y emulación clásica (8 / 16 / 32 bits) con buen rendimiento.',
+                road_title: 'Calendario oficial',
+                road_sub: 'Fechas del camino hasta el lanzamiento de Stadium.',
+                r1_when: '4 DE OCTUBRE',
+                r1_what: 'Anuncio y teaser oficial',
+                r1_d: 'Teaser oficial, publicación de esta web y anuncio de la fecha de salida.',
+                r2_when: '14 DE OCTUBRE',
+                r2_what: 'Tráiler 2 + capturas',
+                r2_d: 'Tráiler 2 y capturas de cómo puede verse la consola.',
+                r3_when: '17 DE OCTUBRE',
+                r3_what: 'Extended Look',
+                r3_d: 'UI detallada, información extensa y anuncio de prerreservas (empiezan el 21 de octubre).',
+                r4_when: '21 DE OCTUBRE',
+                r4_what: 'Inicio de prerreservas',
+                r4_d: 'Apertura de la prerreserva de consolas Stadium Edición standard.',
+                r5_when: '27 DE OCTUBRE',
+                r5_what: 'Lanzamiento y envíos',
+                r5_d: 'Salida oficial de Stadium y comienzo de los envíos.',
+                specs_title: 'Especificaciones',
+                specs_sub: 'Hardware de salón (HDMI). Valores de la Edición standard.',
+                specs_sys: 'Sistema',
+                specs_perf: 'Rendimiento objetivo',
+                s1k: 'Tipo:', s1v: 'Consola de salón (TV)',
+                s2k: 'Vídeo:', s3k: 'Audio:', s3v: 'Por HDMI',
+                s4k: 'Red:', s4v: 'Wi‑Fi integrada',
+                s5k: 'Mandos:', s5v: 'USB / Bluetooth (no incluidos)',
+                s6k: 'Plataforma:', s6v: 'ARM, 4 GB+ RAM',
+                s7k: 'Almacenamiento:',
+                s8k: 'Software:', s8v: 'Launcher Stadium + tienda',
+                s9k: 'Cuenta:', s9v: 'Vinculable a Game Boys',
+                s10k: 'Actualizaciones:', s10v: 'Por red',
+                inc_title: 'Qué incluye',
+                inc_sub: 'Stadium · Edición standard',
+                inc1: 'Unidad Stadium (Edición standard)',
+                inc2: 'Fuente de alimentación',
+                inc3: 'Cable HDMI',
+                inc4: 'Almacenamiento con software Stadium preinstalado',
+                inc5: 'Guía de inicio rápido',
+                inc6: 'Acceso a biblioteca, tienda y emulación',
+                inc_note: 'No incluye mando ni tarjeta de TV. Compatible con mandos USB y Bluetooth genéricos.',
+                acc_title: 'Cuenta Game Boys',
+                acc_sub: 'Vincula tu cuenta de la web con la consola mediante un código en pantalla. Así podrás descargar juegos de la tienda y gestionar tu biblioteca.',
+                notice: 'Stadium está en fase de preparación. El botón de compra se activará con la prerreserva (21 de octubre). Precio de la Edición standard: 249,99 €. Envío no incluido.',
+                footer_tag: 'Stadium Edición standard — Madrid, España',
+                footer_home: 'Volver a la web',
+                footer_copy: '© 2026 Game Boys Studios'
+            },
+            en: {
+                nav_features: 'Experience',
+                nav_roadmap: 'Roadmap',
+                nav_specs: 'Specs',
+                nav_web: 'Official site',
+                badge: 'CONSOLE · STANDARD EDITION',
+                edition: 'Standard Edition',
+                hero_tag: 'The Game Boys Studios console. Play our titles, 2D indies, Minecraft and classic emulation — on your TV.',
+                price_label: 'Price',
+                price_note: 'National and international shipping paid by the buyer',
+                cta_soon: 'Coming soon',
+                cta_roadmap: 'View roadmap',
+                visual_note: 'Product design in progress. The final unit will ship with a Game Boys Studios case.',
+                feat_title: 'One console, three worlds',
+                feat_sub: 'Library, store and emulation in a single living-room launcher.',
+                feat1_t: 'Library',
+                feat1_d: 'Your installed games — native and adapted — ready to launch from the home menu.',
+                feat2_t: 'Stadium Store',
+                feat2_d: 'Discover and download games from Game Boys Studios and community developers.',
+                feat3_t: 'Emulate',
+                feat3_d: 'RetroArch built in. You add your ROMs responsibly; we provide the emulator.',
+                play_title: 'Built to play',
+                play_sub: 'Target catalogue for the Standard Edition.',
+                play1_d: 'Strategy and civilizations in a build optimized for Stadium.',
+                play2_d: 'A viable living-room Minecraft experience (platform-oriented edition).',
+                play3_t: '2D + retro',
+                play3_d: '2D indies and classic emulation (8 / 16 / 32-bit) with solid performance.',
+                road_title: 'Official roadmap',
+                road_sub: 'Announced dates on the road to Stadium launch.',
+                r1_when: 'OCTOBER 4',
+                r1_what: 'Announcement & official teaser',
+                r1_d: 'This site goes live and we announce the release date.',
+                r2_when: 'OCTOBER 14',
+                r2_what: 'Trailer 2 + screenshots',
+                r2_d: 'Trailer 2 and captures of how the console may look.',
+                r3_when: 'OCTOBER 17',
+                r3_what: 'Extended Look',
+                r3_d: 'Detailed UI, full information, and announcement: pre-orders open on October 21.',
+                r4_when: 'OCTOBER 21',
+                r4_what: 'Pre-orders open',
+                r4_d: 'Stadium Standard Edition console pre-orders begin.',
+                r5_when: 'OCTOBER 27',
+                r5_what: 'Launch & shipping',
+                r5_d: 'Official Stadium release and shipping begins.',
+                specs_title: 'Specifications',
+                specs_sub: 'Living-room hardware (HDMI). Standard Edition values.',
+                specs_sys: 'System',
+                specs_perf: 'Target performance',
+                s1k: 'Type:', s1v: 'Home console (TV)',
+                s2k: 'Video:', s3k: 'Audio:', s3v: 'Via HDMI',
+                s4k: 'Network:', s4v: 'Built-in Wi‑Fi',
+                s5k: 'Controllers:', s5v: 'USB / Bluetooth (not included)',
+                s6k: 'Platform:', s6v: 'ARM, 4 GB+ RAM',
+                s7k: 'Storage:',
+                s8k: 'Software:', s8v: 'Stadium launcher + store',
+                s9k: 'Account:', s9v: 'Linkable to Game Boys',
+                s10k: 'Updates:', s10v: 'Over the network',
+                inc_title: 'What\'s included',
+                inc_sub: 'Stadium · Standard Edition',
+                inc1: 'Stadium unit (Standard Edition)',
+                inc2: 'Power supply',
+                inc3: 'HDMI cable',
+                inc4: 'Storage with Stadium software preinstalled',
+                inc5: 'Quick start guide',
+                inc6: 'Access to library, store and emulation',
+                inc_note: 'Controller and TV not included. Works with generic USB and Bluetooth controllers.',
+                acc_title: 'Game Boys account',
+                acc_sub: 'Link your website account to the console with an on-screen code. Download store games and manage your library.',
+                notice: 'Stadium is in preparation. Purchase unlocks with pre-order (October 21). Standard Edition price: 249.99 €. Shipping not included.',
+                footer_tag: 'Stadium Standard Edition — Madrid, Spain',
+                footer_home: 'Back to website',
+                footer_copy: '© 2026 Game Boys Studios'
+            }
+        };
+
+        function setLang(lang) {
+            const pack = I18N[lang] || I18N.es;
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (pack[key] != null) el.textContent = pack[key];
+            });
+            document.getElementById('btnEs').classList.toggle('active', lang === 'es');
+            document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('stadium_lang', lang); } catch (e) {}
+        }
+
+        (function init() {
+            let lang = 'es';
+            try {
+                const saved = localStorage.getItem('stadium_lang');
+                if (saved === 'en' || saved === 'es') lang = saved;
+            } catch (e) {}
+            setLang(lang);
+        })();
+    </script>
+</body>
+</html>
