@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desarrollo | Game Boys Studios</title>
+    <meta name="theme-color" content="#0a0e1a">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --bg: #070b14;
+            --bg2: #0d1225;
+            --card: #121833;
+            --border: rgba(46, 203, 113, 0.25);
+            --green: #2ecb71;
+            --green-dim: rgba(46, 203, 113, 0.12);
+            --text: #e8ecf4;
+            --muted: #9aa6c0;
+            --gold: #e8c547;
+            --red: #ff6b6b;
+            --blue: #6ba3ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.55;
+            min-height: 100vh;
+        }
+        a { color: var(--green); }
+        .nav {
+            position: sticky; top: 0; z-index: 40;
+            backdrop-filter: blur(12px);
+            background: rgba(7, 11, 20, 0.9);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 960px; margin: 0 auto;
+            padding: 0.85rem 1.25rem;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 1rem; flex-wrap: wrap;
+        }
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem; font-weight: 800;
+            letter-spacing: 0.12em; color: var(--text);
+            text-decoration: none !important;
+        }
+        .brand span { color: var(--green); }
+        .nav-actions { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+        .nav-actions a, .nav-actions span {
+            font-size: 0.88rem; color: var(--muted);
+            text-decoration: none !important;
+        }
+        .nav-actions a:hover { color: var(--text); }
+
+        .wrap { max-width: 960px; margin: 0 auto; padding: 1.75rem 1.25rem 3rem; }
+
+        .hero-line {
+            margin-bottom: 1.5rem;
+        }
+        .hero-line h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.3rem, 3vw, 1.7rem);
+            letter-spacing: 0.08em;
+            margin-bottom: 0.35rem;
+        }
+        .hero-line p { color: var(--muted); font-size: 0.95rem; }
+
+        .tabs {
+            display: flex; gap: 0.4rem; flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 0.75rem;
+        }
+        .tab {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem; letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.55rem 0.9rem;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+        }
+        .tab:hover { color: var(--text); background: var(--green-dim); }
+        .tab.active {
+            color: #050810;
+            background: var(--green);
+            font-weight: 700;
+        }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 0.7rem 1.1rem;
+            border-radius: 9px; border: none;
+            cursor: pointer; text-decoration: none !important;
+            transition: transform 0.12s ease;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary {
+            background: linear-gradient(135deg, #2ecb71, #1fa855);
+            color: #050810 !important;
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text) !important;
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover { border-color: var(--green); }
+        .btn-danger {
+            background: transparent;
+            color: var(--red) !important;
+            border: 1px solid rgba(255,107,107,0.4);
+        }
+        .btn-sm { padding: 0.45rem 0.75rem; font-size: 0.62rem; }
+        .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+
+        .auth-box { text-align: center; padding: 2.5rem 1rem; }
+        .auth-box h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem; letter-spacing: 0.08em;
+            margin-bottom: 0.5rem;
+        }
+        .auth-box p { color: var(--muted); margin-bottom: 1.25rem; }
+
+        .game-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .game-row {
+            display: grid;
+            grid-template-columns: 72px 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.85rem;
+            background: var(--bg2);
+            border: 1px solid rgba(46, 203, 113, 0.15);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .game-row:hover { border-color: rgba(46, 203, 113, 0.45); }
+        .game-row img, .game-row .ph {
+            width: 72px; height: 48px;
+            object-fit: cover; border-radius: 6px;
+            background: #0a0f1c;
+        }
+        .game-row .ph {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; color: var(--muted);
+        }
+        .game-row h3 {
+            font-size: 0.95rem; font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+        .game-row .meta { font-size: 0.8rem; color: var(--muted); }
+
+        .badge {
+            display: inline-block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.58rem; letter-spacing: 0.06em;
+            padding: 0.28rem 0.5rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .badge-draft { background: rgba(155,166,192,0.15); color: var(--muted); }
+        .badge-review { background: rgba(107,163,255,0.15); color: var(--blue); }
+        .badge-published { background: var(--green-dim); color: var(--green); }
+        .badge-rejected { background: rgba(255,107,107,0.12); color: var(--red); }
+
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 0.35rem;
+            margin-top: 0.85rem;
+        }
+        label:first-of-type { margin-top: 0; }
+        input, select, textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid rgba(46, 203, 113, 0.2);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.92rem;
+            padding: 0.65rem 0.75rem;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--green);
+        }
+        textarea { min-height: 100px; resize: vertical; }
+        .hint { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1rem;
+        }
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .game-row { grid-template-columns: 56px 1fr; }
+            .game-row .right { grid-column: 1 / -1; }
+        }
+        .full { grid-column: 1 / -1; }
+        .type-paid-only.hidden { display: none; }
+
+        .empty {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+        .msg {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .msg.show { display: block; }
+        .msg.ok { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,203,113,0.3); }
+        .msg.err { background: rgba(255,107,107,0.1); color: var(--red); border: 1px solid rgba(255,107,107,0.3); }
+
+        .detail-cover {
+            width: 100%; max-width: 280px;
+            border-radius: 10px; border: 1px solid var(--border);
+            margin-bottom: 1rem; background: #0a0f1c;
+        }
+        .detail-block { margin-bottom: 0.75rem; }
+        .detail-block .k {
+            font-size: 0.72rem; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 0.06em;
+            margin-bottom: 0.15rem;
+        }
+        .detail-block .v { font-size: 0.95rem; word-break: break-word; }
+        .reject-box {
+            background: rgba(255,107,107,0.08);
+            border: 1px solid rgba(255,107,107,0.3);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            margin: 1rem 0;
+            color: var(--red);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a class="brand" href="index.html">🌵 <span>GAME BOYS</span> STUDIOS</a>
+            <div class="nav-actions">
+                <a href="index.html">Web</a>
+                <a href="index.html#auth">Cuenta</a>
+                <span id="userLabel" style="display:none;"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="wrap">
+        <div class="hero-line">
+            <h1>Desarrollo</h1>
+            <p>Publica juegos en Stadium Store y sigue el estado de tus solicitudes.</p>
+        </div>
+
+        <div id="msg" class="msg"></div>
+
+        <!-- No login -->
+        <div id="authGate" class="card auth-box">
+            <h2>Inicia sesión</h2>
+            <p>Necesitas una cuenta de Game Boys Studios para publicar en Stadium Store.</p>
+            <a class="btn btn-primary" href="index.html#auth">Ir a Cuenta</a>
+        </div>
+
+        <!-- App -->
+        <div id="app" style="display:none;">
+            <div class="tabs">
+                <button type="button" class="tab active" data-panel="list" onclick="showPanel('list')">Mis juegos</button>
+                <button type="button" class="tab" data-panel="form" onclick="showPanel('form'); prepareNew();">Publicar juego</button>
+                <button type="button" class="tab" data-panel="detail" id="tabDetail" style="display:none;" onclick="showPanel('detail')">Solicitud</button>
+            </div>
+
+            <!-- LISTA -->
+            <div id="panel-list" class="panel active">
+                <div class="btn-row" style="margin-top:0; margin-bottom:1rem;">
+                    <button type="button" class="btn btn-primary" onclick="showPanel('form'); prepareNew();">+ Nuevo juego</button>
+                    <button type="button" class="btn btn-outline" onclick="loadMyGames()">Actualizar</button>
+                </div>
+                <div id="gameList" class="game-list">
+                    <div class="empty">Cargando…</div>
+                </div>
+            </div>
+
+            <!-- FORMULARIO -->
+            <div id="panel-form" class="panel">
+                <div class="card">
+                    <h2 id="formTitle" style="font-family:Orbitron,sans-serif;font-size:0.95rem;letter-spacing:0.06em;margin-bottom:1rem;">NUEVO JUEGO</h2>
+                    <form id="gameForm" onsubmit="return saveGame(event)">
+                        <input type="hidden" id="editId" value="">
+
+                        <div class="form-grid">
+                            <div class="full">
+                                <label for="title">Título *</label>
+                                <input id="title" required maxlength="120" placeholder="Nombre del juego">
+                            </div>
+                            <div>
+                                <label for="type">Tipo *</label>
+                                <select id="type" required onchange="togglePaidFields()">
+                                    <option value="free">Gratis</option>
+                                    <option value="paid">De pago</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="version">Versión</label>
+                                <input id="version" maxlength="40" placeholder="1.0 / Demo">
+                            </div>
+                            <div class="full">
+                                <label for="coverUrl">Portada (URL) *</label>
+                                <input id="coverUrl" type="url" required placeholder="https://...">
+                            </div>
+                            <div class="full">
+                                <label for="shortDescription">Descripción corta *</label>
+                                <input id="shortDescription" required maxlength="160" placeholder="Una o dos líneas para la tienda">
+                            </div>
+                            <div class="full">
+                                <label for="longDescription">Descripción larga *</label>
+                                <textarea id="longDescription" required maxlength="5000" placeholder="Descripción completa de la ficha"></textarea>
+                            </div>
+                            <div class="full">
+                                <label for="mainUrl" id="mainUrlLabel">URL de descarga *</label>
+                                <input id="mainUrl" type="url" required placeholder="https://...">
+                                <p class="hint" id="mainUrlHint">Enlace directo a la build (zip, itch gratis, GitHub Releases…).</p>
+                            </div>
+                            <div class="type-paid-only hidden">
+                                <label for="priceLabel">Precio mostrado</label>
+                                <input id="priceLabel" maxlength="32" placeholder="4,99 €">
+                                <p class="hint">Solo informativo. El cobro lo gestionas tú en tu enlace.</p>
+                            </div>
+                            <div>
+                                <label for="language">Idioma</label>
+                                <input id="language" maxlength="40" placeholder="ES / EN / Multi">
+                            </div>
+                            <div class="full">
+                                <label for="tags">Género / etiquetas</label>
+                                <input id="tags" maxlength="120" placeholder="Estrategia, 2D, Indie (separadas por coma)">
+                            </div>
+                            <div class="full">
+                                <label for="screenshots">Capturas (URLs)</label>
+                                <textarea id="screenshots" placeholder="Una URL por línea"></textarea>
+                            </div>
+                            <div>
+                                <label for="developerWebsite">Web del desarrollador</label>
+                                <input id="developerWebsite" type="url" placeholder="https://...">
+                            </div>
+                            <div>
+                                <label for="trailerUrl">Trailer (YouTube)</label>
+                                <input id="trailerUrl" type="url" placeholder="https://youtube.com/...">
+                            </div>
+                        </div>
+
+                        <div class="btn-row">
+                            <button type="submit" class="btn btn-outline" id="btnDraft">Guardar borrador</button>
+                            <button type="button" class="btn btn-primary" id="btnSubmit" onclick="saveGame(event, true)">Enviar a revisión</button>
+                            <button type="button" class="btn btn-outline" onclick="showPanel('list')">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- DETALLE SOLICITUD -->
+            <div id="panel-detail" class="panel">
+                <div class="card" id="detailCard">
+                    <div class="empty">Selecciona un juego.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        // Si firebase-config no define auth/db, fallback mínimo (el proyecto ya tiene config en el repo)
+        let db = null;
+        let currentUser = null;
+        let cacheGames = [];
+        let saveModeSubmit = false;
+
+        function showMsg(text, ok) {
+            const el = document.getElementById('msg');
+            el.textContent = text;
+            el.className = 'msg show ' + (ok ? 'ok' : 'err');
+            setTimeout(() => { el.classList.remove('show'); }, 5000);
+        }
+
+        function statusBadge(status) {
+            const map = {
+                draft: ['badge-draft', 'Borrador'],
+                review: ['badge-review', 'En revisión'],
+                published: ['badge-published', 'Publicado'],
+                rejected: ['badge-rejected', 'Rechazado']
+            };
+            const m = map[status] || ['badge-draft', status || '?'];
+            return `<span class="badge ${m[0]}">${m[1]}</span>`;
+        }
+
+        function togglePaidFields() {
+            const paid = document.getElementById('type').value === 'paid';
+            document.querySelectorAll('.type-paid-only').forEach(el => {
+                el.classList.toggle('hidden', !paid);
+            });
+            document.getElementById('mainUrlLabel').textContent = paid ? 'URL de compra *' : 'URL de descarga *';
+            document.getElementById('mainUrlHint').textContent = paid
+                ? 'Enlace directo a la compra (itch, Gumroad, tu web…).'
+                : 'Enlace directo a la build (zip, itch gratis, GitHub Releases…).';
+        }
+
+        function showPanel(name) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            const panel = document.getElementById('panel-' + name);
+            if (panel) panel.classList.add('active');
+            const tab = document.querySelector(`.tab[data-panel="${name}"]`);
+            if (tab) tab.classList.add('active');
+            if (name === 'detail') {
+                document.getElementById('tabDetail').style.display = 'inline-block';
+            }
+        }
+
+        function prepareNew() {
+            document.getElementById('gameForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('formTitle').textContent = 'NUEVO JUEGO';
+            document.getElementById('btnDraft').style.display = '';
+            document.getElementById('btnSubmit').style.display = '';
+            togglePaidFields();
+            document.querySelectorAll('#gameForm input, #gameForm select, #gameForm textarea').forEach(el => {
+                el.disabled = false;
+            });
+        }
+
+        function parseScreenshots(text) {
+            return (text || '').split('\n').map(s => s.trim()).filter(Boolean);
+        }
+
+        function parseTags(text) {
+            return (text || '').split(',').map(s => s.trim()).filter(Boolean);
+        }
+
+        function fillForm(g) {
+            document.getElementById('editId').value = g.id || '';
+            document.getElementById('title').value = g.title || '';
+            document.getElementById('type').value = g.type === 'paid' ? 'paid' : 'free';
+            document.getElementById('version').value = g.version || '';
+            document.getElementById('coverUrl').value = g.coverUrl || '';
+            document.getElementById('shortDescription').value = g.shortDescription || '';
+            document.getElementById('longDescription').value = g.longDescription || '';
+            document.getElementById('mainUrl').value = g.mainUrl || '';
+            document.getElementById('priceLabel').value = g.priceLabel || '';
+            document.getElementById('language').value = g.language || '';
+            document.getElementById('tags').value = (g.tags || []).join(', ');
+            document.getElementById('screenshots').value = (g.screenshots || []).join('\n');
+            document.getElementById('developerWebsite').value = g.developerWebsite || '';
+            document.getElementById('trailerUrl').value = g.trailerUrl || '';
+            togglePaidFields();
+
+            const locked = g.status === 'review' || g.status === 'published';
+            document.querySelectorAll('#gameForm input, #gameForm select, #gameForm textarea').forEach(el => {
+                el.disabled = locked;
+            });
+            document.getElementById('btnDraft').style.display = locked ? 'none' : '';
+            document.getElementById('btnSubmit').style.display = (g.status === 'review' || g.status === 'published') ? 'none' : '';
+            document.getElementById('formTitle').textContent = locked ? 'JUEGO (solo lectura)' : (g.id ? 'EDITAR JUEGO' : 'NUEVO JUEGO');
+        }
+
+        function openDetail(id) {
+            const g = cacheGames.find(x => x.id === id);
+            if (!g) return;
+            const card = document.getElementById('detailCard');
+            const cover = g.coverUrl
+                ? `<img class="detail-cover" src="${escapeAttr(g.coverUrl)}" alt="">`
+                : '';
+            const reject = g.status === 'rejected' && g.rejectReason
+                ? `<div class="reject-box"><strong>Motivo del rechazo:</strong><br>${escapeHtml(g.rejectReason)}</div>`
+                : '';
+            const canEdit = g.status === 'draft' || g.status === 'rejected';
+            const canResubmit = g.status === 'rejected' || g.status === 'draft';
+
+            card.innerHTML = `
+                ${cover}
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem;">
+                    <h2 style="font-family:Orbitron,sans-serif;font-size:1.1rem;letter-spacing:0.04em;">${escapeHtml(g.title || '')}</h2>
+                    ${statusBadge(g.status)}
+                </div>
+                ${reject}
+                <div class="detail-block"><div class="k">Tipo</div><div class="v">${g.type === 'paid' ? 'De pago' : 'Gratis'}${g.priceLabel ? ' · ' + escapeHtml(g.priceLabel) : ''}</div></div>
+                <div class="detail-block"><div class="k">Descripción corta</div><div class="v">${escapeHtml(g.shortDescription || '')}</div></div>
+                <div class="detail-block"><div class="k">Descripción larga</div><div class="v">${escapeHtml(g.longDescription || '')}</div></div>
+                <div class="detail-block"><div class="k">${g.type === 'paid' ? 'URL de compra' : 'URL de descarga'}</div><div class="v"><a href="${escapeAttr(g.mainUrl || '#')}" target="_blank" rel="noopener">${escapeHtml(g.mainUrl || '')}</a></div></div>
+                <div class="detail-block"><div class="k">Versión</div><div class="v">${escapeHtml(g.version || '—')}</div></div>
+                <div class="detail-block"><div class="k">Idioma</div><div class="v">${escapeHtml(g.language || '—')}</div></div>
+                <div class="detail-block"><div class="k">Etiquetas</div><div class="v">${escapeHtml((g.tags || []).join(', ') || '—')}</div></div>
+                <div class="detail-block"><div class="k">Web del desarrollador</div><div class="v">${g.developerWebsite ? `<a href="${escapeAttr(g.developerWebsite)}" target="_blank" rel="noopener">${escapeHtml(g.developerWebsite)}</a>` : '—'}</div></div>
+                <div class="detail-block"><div class="k">Trailer</div><div class="v">${g.trailerUrl ? `<a href="${escapeAttr(g.trailerUrl)}" target="_blank" rel="noopener">${escapeHtml(g.trailerUrl)}</a>` : '—'}</div></div>
+                <div class="btn-row">
+                    ${canEdit ? `<button type="button" class="btn btn-outline" onclick="editGame('${g.id}')">Editar</button>` : ''}
+                    ${canResubmit ? `<button type="button" class="btn btn-primary" onclick="submitForReview('${g.id}')">Enviar a revisión</button>` : ''}
+                    <button type="button" class="btn btn-outline" onclick="showPanel('list')">Volver a mis juegos</button>
+                </div>
+            `;
+            document.getElementById('tabDetail').style.display = 'inline-block';
+            showPanel('detail');
+        }
+
+        function editGame(id) {
+            const g = cacheGames.find(x => x.id === id);
+            if (!g) return;
+            if (g.status === 'review' || g.status === 'published') {
+                showMsg('Este juego no se puede editar en su estado actual.', false);
+                return;
+            }
+            fillForm(g);
+            showPanel('form');
+        }
+
+        function escapeHtml(s) {
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+        function escapeAttr(s) {
+            return escapeHtml(s).replace(/'/g, '&#39;');
+        }
+
+        function renderList() {
+            const root = document.getElementById('gameList');
+            if (!cacheGames.length) {
+                root.innerHTML = '<div class="empty">Aún no tienes juegos. Pulsa «Nuevo juego» para publicar el primero.</div>';
+                return;
+            }
+            root.innerHTML = cacheGames.map(g => `
+                <div class="game-row" onclick="openDetail('${g.id}')">
+                    ${g.coverUrl
+                        ? `<img src="${escapeAttr(g.coverUrl)}" alt="" onerror="this.style.display='none'">`
+                        : `<div class="ph">N/A</div>`}
+                    <div>
+                        <h3>${escapeHtml(g.title || 'Sin título')}</h3>
+                        <div class="meta">${g.type === 'paid' ? 'De pago' : 'Gratis'}${g.priceLabel ? ' · ' + escapeHtml(g.priceLabel) : ''}</div>
+                    </div>
+                    <div class="right">${statusBadge(g.status)}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadMyGames() {
+            if (!db || !currentUser) return;
+            const root = document.getElementById('gameList');
+            root.innerHTML = '<div class="empty">Cargando…</div>';
+            try {
+                const snap = await db.collection('stadium_games')
+                    .where('developerId', '==', currentUser.uid)
+                    .get();
+                cacheGames = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                cacheGames.sort((a, b) => {
+                    const ta = (a.updatedAt && a.updatedAt.toMillis) ? a.updatedAt.toMillis() : 0;
+                    const tb = (b.updatedAt && b.updatedAt.toMillis) ? b.updatedAt.toMillis() : 0;
+                    return tb - ta;
+                });
+                renderList();
+            } catch (e) {
+                console.error(e);
+                root.innerHTML = '<div class="empty">No se pudieron cargar los juegos. Revisa las reglas de Firestore.</div>';
+                showMsg('Error al cargar: ' + e.message, false);
+            }
+        }
+
+        function collectForm() {
+            return {
+                title: document.getElementById('title').value.trim(),
+                type: document.getElementById('type').value === 'paid' ? 'paid' : 'free',
+                coverUrl: document.getElementById('coverUrl').value.trim(),
+                shortDescription: document.getElementById('shortDescription').value.trim(),
+                longDescription: document.getElementById('longDescription').value.trim(),
+                mainUrl: document.getElementById('mainUrl').value.trim(),
+                priceLabel: document.getElementById('priceLabel').value.trim(),
+                version: document.getElementById('version').value.trim(),
+                language: document.getElementById('language').value.trim(),
+                tags: parseTags(document.getElementById('tags').value),
+                screenshots: parseScreenshots(document.getElementById('screenshots').value),
+                developerWebsite: document.getElementById('developerWebsite').value.trim(),
+                trailerUrl: document.getElementById('trailerUrl').value.trim()
+            };
+        }
+
+        async function saveGame(ev, submit) {
+            if (ev && ev.preventDefault) ev.preventDefault();
+            if (!currentUser || !db) {
+                showMsg('Debes iniciar sesión.', false);
+                return false;
+            }
+            const data = collectForm();
+            if (!data.title || !data.coverUrl || !data.shortDescription || !data.longDescription || !data.mainUrl) {
+                showMsg('Rellena los campos obligatorios.', false);
+                return false;
+            }
+
+            const editId = document.getElementById('editId').value;
+            const now = firebase.firestore.FieldValue.serverTimestamp();
+            const payload = {
+                ...data,
+                developerId: currentUser.uid,
+                developerName: currentUser.displayName || currentUser.email || '',
+                updatedAt: now
+            };
+
+            if (submit) {
+                payload.status = 'review';
+                payload.submittedAt = now;
+                payload.rejectReason = '';
+            }
+
+            try {
+                if (editId) {
+                    const ref = db.collection('stadium_games').doc(editId);
+                    const existing = await ref.get();
+                    if (!existing.exists || existing.data().developerId !== currentUser.uid) {
+                        showMsg('No puedes editar este juego.', false);
+                        return false;
+                    }
+                    const st = existing.data().status;
+                    if (st === 'review' || st === 'published') {
+                        showMsg('No se puede modificar mientras está en revisión o publicado.', false);
+                        return false;
+                    }
+                    if (!submit) payload.status = 'draft';
+                    await ref.set(payload, { merge: true });
+                } else {
+                    payload.status = submit ? 'review' : 'draft';
+                    payload.createdAt = now;
+                    if (!submit) payload.status = 'draft';
+                    await db.collection('stadium_games').add(payload);
+                }
+                showMsg(submit ? 'Enviado a revisión.' : 'Borrador guardado.', true);
+                await loadMyGames();
+                showPanel('list');
+            } catch (e) {
+                console.error(e);
+                showMsg('Error al guardar: ' + e.message, false);
+            }
+            return false;
+        }
+
+        async function submitForReview(id) {
+            if (!db || !currentUser) return;
+            try {
+                const ref = db.collection('stadium_games').doc(id);
+                const doc = await ref.get();
+                if (!doc.exists || doc.data().developerId !== currentUser.uid) {
+                    showMsg('No autorizado.', false);
+                    return;
+                }
+                await ref.set({
+                    status: 'review',
+                    submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    rejectReason: '',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                showMsg('Enviado a revisión.', true);
+                await loadMyGames();
+                openDetail(id);
+            } catch (e) {
+                showMsg('Error: ' + e.message, false);
+            }
+        }
+
+        function initFirebase() {
+            try {
+                if (typeof firebase === 'undefined') return false;
+                // firebase-config.js del repo suele inicializar app; si no, no podemos adivinar keys
+                if (!firebase.apps.length) {
+                    console.warn('Firebase no inicializado: revisa firebase-config.js');
+                    return false;
+                }
+                db = firebase.firestore();
+                return true;
+            } catch (e) {
+                console.error(e);
+                return false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            togglePaidFields();
+            const ok = initFirebase();
+            if (!ok || typeof firebase === 'undefined') {
+                document.getElementById('authGate').innerHTML = `
+                    <h2>Firebase no disponible</h2>
+                    <p>Asegúrate de subir este archivo junto a <code>firebase-config.js</code> en el repo.</p>
+                    <a class="btn btn-primary" href="index.html">Volver</a>`;
+                return;
+            }
+
+            firebase.auth().onAuthStateChanged(user => {
+                currentUser = user;
+                if (!user) {
+                    document.getElementById('authGate').style.display = 'block';
+                    document.getElementById('app').style.display = 'none';
+                    document.getElementById('userLabel').style.display = 'none';
+                    return;
+                }
+                document.getElementById('authGate').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                const ul = document.getElementById('userLabel');
+                ul.style.display = 'inline';
+                ul.textContent = user.email || user.uid;
+                loadMyGames();
+            });
+        });
+    </script>
+</body>
+</html>
