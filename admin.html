@@ -435,6 +435,7 @@
                 <button class="nav-item" data-tab="tasks"><span class="nav-icon">✅</span><span>Tareas</span></button>
                 <button class="nav-item" data-tab="mail"><span class="nav-icon">✉️</span><span>Correo</span></button>
                 <button class="nav-item" data-tab="docs"><span class="nav-icon">📄</span><span>Documentos</span></button>
+                <button class="nav-item" data-tab="stadium"><span class="nav-icon">🎮</span><span>Juegos Store</span></button>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info-box">
@@ -680,6 +681,27 @@
                     </div>
                 </div>
 
+
+                <!-- STADIUM STORE · JUEGOS SOLICITADOS -->
+                <div id="tab-stadium" class="tab-panel">
+                    <div class="page-header">
+                        <h1>Juegos Store</h1>
+                        <p>Solicitudes de Stadium Store · aprobar o rechazar fichas</p>
+                    </div>
+                    <div class="actions-bar">
+                        <button class="btn btn-outline btn-sm" onclick="loadStadiumGames('review')">En revisión</button>
+                        <button class="btn btn-outline btn-sm" onclick="loadStadiumGames('published')">Publicados</button>
+                        <button class="btn btn-outline btn-sm" onclick="loadStadiumGames('rejected')">Rechazados</button>
+                        <button class="btn btn-outline btn-sm" onclick="loadStadiumGames('all')">Todos</button>
+                    </div>
+                    <div class="section-card">
+                        <h2>📋 Cola de solicitudes</h2>
+                        <div id="stadiumGamesList">
+                            <div class="empty-state"><div class="icon">🎮</div><p>Cargando...</p></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -828,6 +850,19 @@
                 <button class="btn btn-outline" onclick="closeModal('modalJustificante')">Cancelar</button>
                 <button class="btn btn-primary" onclick="generateJustificante()">Generar PDF</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Revisar juego Stadium -->
+    <div class="modal-bg" id="modalStadiumGame">
+        <div class="modal" style="max-width:560px">
+            <h3 id="stadModalTitle">Revisar juego</h3>
+            <div id="stadModalBody" style="font-size:0.9rem;color:var(--color-light);line-height:1.5"></div>
+            <div class="form-group" id="stadRejectBox" style="display:none;margin-top:1rem">
+                <label>Motivo del rechazo</label>
+                <textarea id="stadRejectReason" placeholder="Explica qué debe corregir el desarrollador"></textarea>
+            </div>
+            <div class="modal-actions" id="stadModalActions"></div>
         </div>
     </div>
 
@@ -1047,7 +1082,8 @@
         // ===== NAVEGACIÓN =====
         const tabTitles = {
             home: 'Home', earnings: 'Ganancias Empresa', contacts: 'Contactos',
-            clients: 'Clientes', calendar: 'Calendario', tasks: 'Tareas', mail: 'Correo', docs: 'Documentos'
+            clients: 'Clientes', calendar: 'Calendario', tasks: 'Tareas', mail: 'Correo', docs: 'Documentos',
+            stadium: 'Juegos Store'
         };
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1071,6 +1107,7 @@
             loadTasks();
             initMail();
             initDocs();
+            loadStadiumGames('review');
         }
 
         // ===== DOCUMENTOS OFICIALES =====
@@ -2347,6 +2384,155 @@
                 loadTasks();
             } catch (err) {
                 alert('Error: ' + err.message);
+            }
+        }
+
+
+        // ===== STADIUM STORE · REVISIÓN =====
+        let stadiumFilter = 'review';
+        let stadiumCache = [];
+
+        function escapeHtmlAdmin(s) {
+            return String(s || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function stadiumStatusBadge(status) {
+            if (status === 'review') return '<span class="badge badge-progress">En revisión</span>';
+            if (status === 'published') return '<span class="badge badge-done">Publicado</span>';
+            if (status === 'rejected') return '<span class="badge badge-expense">Rechazado</span>';
+            if (status === 'draft') return '<span class="badge badge-pending">Borrador</span>';
+            return '<span class="badge">' + escapeHtmlAdmin(status) + '</span>';
+        }
+
+        async function loadStadiumGames(filter) {
+            stadiumFilter = filter || stadiumFilter || 'review';
+            const wrap = document.getElementById('stadiumGamesList');
+            if (!wrap) return;
+            wrap.innerHTML = '<div class="empty-state"><div class="icon">🎮</div><p>Cargando...</p></div>';
+            try {
+                let snap;
+                if (stadiumFilter === 'all') {
+                    snap = await db.collection('stadium_games').get();
+                } else {
+                    snap = await db.collection('stadium_games').where('status', '==', stadiumFilter).get();
+                }
+                stadiumCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                stadiumCache.sort((a, b) => {
+                    const ta = a.submittedAt && a.submittedAt.toMillis ? a.submittedAt.toMillis() : 0;
+                    const tb = b.submittedAt && b.submittedAt.toMillis ? b.submittedAt.toMillis() : 0;
+                    return tb - ta;
+                });
+                if (!stadiumCache.length) {
+                    wrap.innerHTML = '<div class="empty-state"><div class="icon">🎮</div><p>No hay juegos en este filtro.</p></div>';
+                    return;
+                }
+                let html = '<table><thead><tr><th>Portada</th><th>Título</th><th>Tipo</th><th>Dev</th><th>Estado</th><th>Enviado</th><th></th></tr></thead><tbody>';
+                stadiumCache.forEach(g => {
+                    const cover = g.coverUrl
+                        ? `<img src="${escapeHtmlAdmin(g.coverUrl)}" alt="" style="width:56px;height:36px;object-fit:cover;border-radius:4px;background:#0a0e1a">`
+                        : '—';
+                    const tipo = g.type === 'paid' ? ('De pago' + (g.priceLabel ? ' · ' + g.priceLabel : '')) : 'Gratis';
+                    html += `<tr>
+                        <td>${cover}</td>
+                        <td><strong>${escapeHtmlAdmin(g.title)}</strong></td>
+                        <td>${escapeHtmlAdmin(tipo)}</td>
+                        <td>${escapeHtmlAdmin(g.developerName || g.developerId || '—')}</td>
+                        <td>${stadiumStatusBadge(g.status)}</td>
+                        <td>${formatDate(g.submittedAt)}</td>
+                        <td><button class="btn btn-outline btn-sm" onclick="openStadiumReview('${g.id}')">Revisar</button></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                wrap.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                wrap.innerHTML = '<div class="empty-state"><p>Error al cargar. Revisa reglas de Firestore (stadium_games).</p></div>';
+            }
+        }
+
+        function openStadiumReview(id) {
+            const g = stadiumCache.find(x => x.id === id);
+            if (!g) return;
+            document.getElementById('stadModalTitle').textContent = g.title || 'Revisar juego';
+            document.getElementById('stadRejectBox').style.display = 'none';
+            document.getElementById('stadRejectReason').value = '';
+
+            const mainLabel = g.type === 'paid' ? 'URL de compra' : 'URL de descarga';
+            const body = document.getElementById('stadModalBody');
+            body.innerHTML = `
+                ${g.coverUrl ? `<img src="${escapeHtmlAdmin(g.coverUrl)}" alt="" style="max-width:100%;max-height:160px;border-radius:8px;margin-bottom:0.75rem">` : ''}
+                <p style="margin-bottom:0.5rem">${stadiumStatusBadge(g.status)} · ${g.type === 'paid' ? 'De pago' : 'Gratis'}${g.priceLabel ? ' · ' + escapeHtmlAdmin(g.priceLabel) : ''}</p>
+                <p style="color:var(--color-muted);margin-bottom:0.5rem"><strong>Dev:</strong> ${escapeHtmlAdmin(g.developerName || '')} · ${escapeHtmlAdmin(g.developerId || '')}</p>
+                <p style="margin-bottom:0.5rem"><strong>Corta:</strong> ${escapeHtmlAdmin(g.shortDescription || '')}</p>
+                <p style="margin-bottom:0.75rem"><strong>Larga:</strong><br>${escapeHtmlAdmin(g.longDescription || '')}</p>
+                <p style="margin-bottom:0.5rem"><strong>${mainLabel}:</strong><br>
+                    <a href="${escapeHtmlAdmin(g.mainUrl || '#')}" target="_blank" rel="noopener" style="color:var(--color-cactus)">${escapeHtmlAdmin(g.mainUrl || '')}</a>
+                </p>
+                <p style="margin-bottom:0.35rem"><strong>Versión:</strong> ${escapeHtmlAdmin(g.version || '—')} · <strong>Idioma:</strong> ${escapeHtmlAdmin(g.language || '—')}</p>
+                <p style="margin-bottom:0.35rem"><strong>Tags:</strong> ${escapeHtmlAdmin((g.tags || []).join(', ') || '—')}</p>
+                ${g.rejectReason ? `<p style="color:var(--color-orange);margin-top:0.5rem"><strong>Motivo rechazo anterior:</strong> ${escapeHtmlAdmin(g.rejectReason)}</p>` : ''}
+            `;
+
+            const actions = document.getElementById('stadModalActions');
+            if (g.status === 'review') {
+                actions.innerHTML = `
+                    <button class="btn btn-outline" onclick="closeModal('modalStadiumGame')">Cerrar</button>
+                    <button class="btn btn-outline" onclick="showStadiumRejectUI()">Rechazar…</button>
+                    <button class="btn btn-primary" onclick="approveStadiumGame('${g.id}')">Aprobar</button>
+                    <button class="btn btn-danger" style="display:none" id="stadConfirmReject" onclick="rejectStadiumGame('${g.id}')">Confirmar rechazo</button>
+                `;
+            } else {
+                actions.innerHTML = `
+                    <button class="btn btn-outline" onclick="closeModal('modalStadiumGame')">Cerrar</button>
+                    ${g.status === 'published' ? `<button class="btn btn-danger" onclick="rejectStadiumGame('${g.id}', true)">Despublicar</button>` : ''}
+                `;
+            }
+            openModal('modalStadiumGame');
+        }
+
+        function showStadiumRejectUI() {
+            document.getElementById('stadRejectBox').style.display = 'block';
+            const btn = document.getElementById('stadConfirmReject');
+            if (btn) btn.style.display = 'inline-block';
+        }
+
+        async function approveStadiumGame(id) {
+            try {
+                await db.collection('stadium_games').doc(id).set({
+                    status: 'published',
+                    reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reviewedBy: currentUser.uid,
+                    rejectReason: ''
+                }, { merge: true });
+                closeModal('modalStadiumGame');
+                loadStadiumGames(stadiumFilter);
+            } catch (err) {
+                alert('Error al aprobar: ' + err.message);
+            }
+        }
+
+        async function rejectStadiumGame(id, skipReason) {
+            let reason = (document.getElementById('stadRejectReason').value || '').trim();
+            if (!skipReason && !reason) {
+                showStadiumRejectUI();
+                return alert('Escribe el motivo del rechazo.');
+            }
+            if (skipReason && !reason) reason = 'Despublicado por administración';
+            try {
+                await db.collection('stadium_games').doc(id).set({
+                    status: 'rejected',
+                    rejectReason: reason,
+                    reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reviewedBy: currentUser.uid
+                }, { merge: true });
+                closeModal('modalStadiumGame');
+                loadStadiumGames(stadiumFilter);
+            } catch (err) {
+                alert('Error al rechazar: ' + err.message);
             }
         }
 
