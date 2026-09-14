@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Pase — Game Boys Studios</title>
+
+<!--
+  Firebase 9.23.0: misma versión usada en el resto del sitio (firebase-config.js original).
+  Si tu index.html usa otra versión, cambia SOLO el número "9.23.0" de las 2 líneas de abajo
+  para que coincida exactamente.
+-->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<!-- Generador de QR, sin backend, todo en el navegador -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+  :root{
+    --bg-0:#070b08;
+    --bg-1:#0d140f;
+    --neon:#39ff6a;
+    --neon-dim:#1c8f3d;
+    --ink:#eafff0;
+    --ink-dim:#8fae97;
+    --danger:#ff5a5a;
+    --card-radius:22px;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% -10%, rgba(57,255,106,.10), transparent 45%),
+      radial-gradient(circle at 90% 110%, rgba(57,255,106,.06), transparent 45%),
+      var(--bg-0);
+    color:var(--ink);
+    font-family:'Courier New', ui-monospace, monospace;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 64px;
+  }
+
+  .topbar{
+    width:100%;
+    max-width:480px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:28px;
+    font-size:13px;
+  }
+
+  .topbar a{
+    color:var(--ink-dim);
+    text-decoration:none;
+    border:1px solid rgba(255,255,255,.08);
+    padding:6px 12px;
+    border-radius:999px;
+    transition:.2s;
+  }
+  .topbar a:hover{ color:var(--neon); border-color:var(--neon-dim); }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--neon);
+    font-weight:bold;
+    letter-spacing:.04em;
+  }
+
+  h1{
+    font-size:15px;
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    color:var(--ink-dim);
+    margin:0 0 22px;
+    font-weight:normal;
+  }
+
+  /* ---------- LOGIN GATE ---------- */
+  #gate{
+    width:100%;
+    max-width:420px;
+    background:var(--bg-1);
+    border:1px solid rgba(57,255,106,.15);
+    border-radius:var(--card-radius);
+    padding:36px 28px;
+    text-align:center;
+  }
+  #gate p{ color:var(--ink-dim); font-size:14px; line-height:1.6; }
+  #gate button{
+    margin-top:18px;
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid var(--neon-dim);
+    background:transparent;
+    color:var(--neon);
+    font-family:inherit;
+    font-size:14px;
+    letter-spacing:.05em;
+    cursor:pointer;
+    transition:.2s;
+  }
+  #gate button:hover{ background:rgba(57,255,106,.08); }
+  #gateError{
+    display:none;
+    margin-top:14px;
+    color:var(--danger);
+    font-size:12.5px;
+  }
+
+  /* ---------- PASE ---------- */
+  #pase{
+    display:none;
+    width:100%;
+    max-width:420px;
+  }
+
+  .card{
+    position:relative;
+    background:linear-gradient(160deg, #0f1a12 0%, #0a120c 100%);
+    border:1px solid rgba(57,255,106,.25);
+    border-radius:var(--card-radius);
+    padding:26px 26px 22px;
+    overflow:hidden;
+    box-shadow:0 0 0 1px rgba(0,0,0,.4), 0 20px 60px -20px rgba(57,255,106,.25);
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(57,255,106,.035) 0px, rgba(57,255,106,.035) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+  }
+
+  .card-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:18px;
+  }
+
+  .studio-mark{
+    font-size:11px;
+    letter-spacing:.16em;
+    color:var(--neon);
+    text-transform:uppercase;
+  }
+  .studio-mark span{ display:block; color:var(--ink-dim); font-size:10px; letter-spacing:.1em; margin-top:2px;}
+
+  .pass-type{
+    font-size:10px;
+    letter-spacing:.14em;
+    color:var(--bg-0);
+    background:var(--neon);
+    padding:4px 10px;
+    border-radius:999px;
+    text-transform:uppercase;
+    font-weight:bold;
+  }
+
+  .qr-wrap{
+    background:#eafff0;
+    border-radius:16px;
+    padding:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:6px 0 20px;
+  }
+  #qrcode{ line-height:0; }
+  #qrcode img, #qrcode canvas{ border-radius:6px; display:block; }
+
+  .identity{
+    border-top:1px dashed rgba(57,255,106,.25);
+    padding-top:16px;
+  }
+
+  .identity .email{
+    font-size:14px;
+    color:var(--ink);
+    word-break:break-all;
+    margin-bottom:10px;
+  }
+
+  .uid-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(57,255,106,.06);
+    border:1px solid rgba(57,255,106,.15);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+
+  .uid-row .label{
+    font-size:9px;
+    letter-spacing:.1em;
+    color:var(--ink-dim);
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+
+  .uid-row code{
+    flex:1;
+    font-size:11.5px;
+    color:var(--neon);
+    word-break:break-all;
+  }
+
+  .uid-row button{
+    flex-shrink:0;
+    background:transparent;
+    border:1px solid var(--neon-dim);
+    color:var(--ink-dim);
+    border-radius:8px;
+    padding:6px 9px;
+    font-size:10px;
+    cursor:pointer;
+    font-family:inherit;
+    transition:.2s;
+  }
+  .uid-row button:hover{ color:var(--neon); border-color:var(--neon); }
+
+  .hint{
+    margin-top:16px;
+    font-size:11.5px;
+    color:var(--ink-dim);
+    line-height:1.6;
+    text-align:center;
+  }
+
+  .actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  .actions button{
+    flex:1;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.1);
+    background:transparent;
+    color:var(--ink-dim);
+    font-family:inherit;
+    font-size:12.5px;
+    cursor:pointer;
+    transition:.2s;
+  }
+  .actions button:hover{ color:var(--ink); border-color:rgba(255,255,255,.25); }
+  .actions button.danger:hover{ color:var(--danger); border-color:rgba(255,90,90,.4); }
+
+  @media print{
+    body{ background:#fff; padding:0; }
+    .topbar, .actions, .hint{ display:none !important; }
+    .card{ box-shadow:none; border-color:#000; }
+    .card::before{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">🌵 GAME BOYS</div>
+    <a href="index.html">← Volver al sitio</a>
+  </div>
+
+  <h1>Pase digital de socio</h1>
+
+  <!-- ---------- BANNER DE ERROR (visible si algo falla, no solo en consola) ---------- -->
+  <div id="fatalError" style="display:none; width:100%; max-width:420px; background:rgba(255,90,90,.08); border:1px solid rgba(255,90,90,.35); border-radius:14px; padding:16px 18px; margin-bottom:18px; font-size:12.5px; color:#ffb3b3; line-height:1.6;">
+    <strong>⚠ No se ha podido cargar el sistema de cuenta.</strong>
+    <div id="fatalErrorDetail" style="margin-top:6px; color:#ff8a8a; word-break:break-word;"></div>
+  </div>
+
+  <!-- ---------- GATE: si no hay sesión ---------- -->
+  <div id="gate">
+    <p>
+      Tu pase se genera a partir de tu cuenta de Game Boys Studios.<br>
+      Inicia sesión para verlo.
+    </p>
+    <button id="btnLogin">Iniciar sesión con Google</button>
+    <p id="gateError"></p>
+  </div>
+
+  <!-- ---------- PASE: si hay sesión ---------- -->
+  <div id="pase">
+    <div class="card">
+      <div class="card-head">
+        <div class="studio-mark">
+          Game Boys Studios
+          <span>Pase de socio</span>
+        </div>
+        <div class="pass-type">Miembro</div>
+      </div>
+
+      <div class="qr-wrap">
+        <div id="qrcode"></div>
+      </div>
+
+      <div class="identity">
+        <div class="email" id="userEmail">—</div>
+        <div class="uid-row">
+          <span class="label">UID</span>
+          <code id="userUid">—</code>
+          <button id="btnCopy" type="button">Copiar</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="hint">
+      Muestra este código al staff en eventos de Game Boys Studios para verificar tu cuenta.
+      Este QR contiene únicamente tu identificador de usuario, sin datos sensibles.
+    </p>
+
+    <div class="actions">
+      <button id="btnPrint" type="button">Imprimir / Guardar</button>
+      <button id="btnLogout" type="button" class="danger">Cerrar sesión</button>
+    </div>
+  </div>
+
+<script>
+  const fatalBox = document.getElementById('fatalError');
+  const fatalDetail = document.getElementById('fatalErrorDetail');
+
+  function showFatalError(message) {
+    fatalDetail.textContent = message;
+    fatalBox.style.display = 'block';
+  }
+
+  // 1) Comprobar que las librerías externas han cargado ANTES de usarlas.
+  //    Si algo bloquea gstatic.com o cdnjs.cloudflare.com (adblocker, red del
+  //    colegio/empresa, firewall), lo veremos aquí en vez de fallar en silencio.
+  if (typeof firebase === 'undefined') {
+    showFatalError('No se pudo cargar Firebase (revisa tu conexión o un bloqueador de anuncios/scripts).');
+  } else if (typeof QRCode === 'undefined') {
+    showFatalError('No se pudo cargar el generador de QR (revisa tu conexión o un bloqueador de anuncios/scripts).');
+  } else {
+    try {
+      // ==================== FIREBASE CONFIG (Game Boys Studios) ====================
+      const firebaseConfig = {
+        apiKey: "AIzaSyA_pDpQKsqDmyl47FthsPlBTtNXU6MwmBI",
+        authDomain: "game-boys-studios.firebaseapp.com",
+        projectId: "game-boys-studios",
+        storageBucket: "game-boys-studios.firebasestorage.app",
+        messagingSenderId: "296679716982",
+        appId: "1:296679716982:web:542775f96fca966e154757"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+      const gate = document.getElementById('gate');
+      const pase = document.getElementById('pase');
+      const gateError = document.getElementById('gateError');
+
+      function renderPase(user) {
+        gate.style.display = 'none';
+        pase.style.display = 'block';
+
+        document.getElementById('userEmail').textContent = user.email || '(sin email público)';
+        document.getElementById('userUid').textContent = user.uid;
+
+        const qrBox = document.getElementById('qrcode');
+        qrBox.innerHTML = '';
+        new QRCode(qrBox, {
+          text: user.uid,
+          width: 200,
+          height: 200,
+          colorDark: "#070b08",
+          colorLight: "#eafff0",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+
+      function renderGate() {
+        pase.style.display = 'none';
+        gate.style.display = 'block';
+      }
+
+      // Estado de sesión: reutiliza la MISMA cuenta que en el resto de la web
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          renderPase(user);
+        } else {
+          renderGate();
+        }
+      }, (err) => {
+        showFatalError('Error de sesión: ' + err.message);
+      });
+
+      document.getElementById('btnLogin').addEventListener('click', () => {
+        gateError.style.display = 'none';
+        auth.signInWithPopup(googleProvider).catch((err) => {
+          console.error('Error al iniciar sesión con Google:', err);
+          gateError.textContent = 'Error (' + err.code + '): ' + err.message;
+          gateError.style.display = 'block';
+        });
+      });
+
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        auth.signOut();
+      });
+
+      document.getElementById('btnPrint').addEventListener('click', () => {
+        window.print();
+      });
+
+      document.getElementById('btnCopy').addEventListener('click', () => {
+        const uid = document.getElementById('userUid').textContent;
+        navigator.clipboard.writeText(uid).then(() => {
+          const btn = document.getElementById('btnCopy');
+          const original = btn.textContent;
+          btn.textContent = '✓';
+          setTimeout(() => { btn.textContent = original; }, 1200);
+        });
+      });
+
+    } catch (err) {
+      // Cualquier fallo de inicialización de Firebase (config mal formada,
+      // proyecto no encontrado, etc.) se muestra aquí en vez de romper la página.
+      console.error('Error fatal inicializando la página:', err);
+      showFatalError(err.message);
+    }
+  }
+</script>
+</body>
+</html>
