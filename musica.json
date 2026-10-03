@@ -1,0 +1,6 @@
+{
+  "tracks": [
+    { "title": "Ejemplo 1", "artist": "Artista", "youtube": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+    { "title": "Ejemplo 2", "artist": "Artista", "youtube": "https://youtu.be/jfKfPfyJRdk" }
+  ]
+}

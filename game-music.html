@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game Music · GameBoys</title>
+<style>
+:root{--bg:#0a0b12;--card:#12141f;--line:#232744;--tx:#e8eaff;--mut:#8a8fb5;--a:#00f0ff;--b:#b000ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding-bottom:300px}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+h1{font-size:1.3rem;margin:8px 0;letter-spacing:.12em;text-transform:uppercase;background:linear-gradient(90deg,var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:1rem;color:var(--mut);margin:20px 0 10px;font-weight:600}
+.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#181b2c;color:var(--tx);cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--a)}
+.btn.main{border:0;background:linear-gradient(135deg,var(--a),var(--b));color:#fff}
+input{width:100%;padding:11px;margin-bottom:10px;border-radius:10px;border:1px solid var(--line);background:#0b0d17;color:var(--tx);font-size:.95rem}
+.box{max-width:380px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 0 24px rgba(176,0,255,.12)}
+.err{color:#ff5c7a;font-size:.85rem;min-height:1.2em;margin:4px 0}
+.link{color:var(--a);cursor:pointer;font-size:.85rem;text-align:center;margin-top:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.t{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:.15s}
+.t:hover,.t.on{border-color:var(--a);box-shadow:0 0 14px rgba(0,240,255,.3)}
+.t img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#000}
+.t div{padding:8px 10px}
+.t b{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t span{font-size:.78rem;color:var(--mut)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0d0f1a;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.bar .in{max-width:900px;margin:auto}
+iframe{width:100%;height:200px;border:0;border-radius:10px;background:#000}
+.ctl{display:flex;gap:10px;align-items:center;margin-top:8px}
+.ctl .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.9rem}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="auth" class="box hide">
+  <h1 style="text-align:center">Game Music</h1>
+  <input id="em" type="email" placeholder="Correo electrónico" autocomplete="email">
+  <input id="pw" type="password" placeholder="Contraseña (mín. 6)" autocomplete="current-password">
+  <div class="err" id="err"></div>
+  <button class="btn main" id="go" style="width:100%">Entrar</button>
+  <div class="link" id="sw">¿No tienes cuenta? Regístrate</div>
+  <div class="link" id="rs">Olvidé mi contraseña</div>
+</div>
+
+<!-- APP -->
+<div id="app" class="wrap hide">
+  <header><h1>🎮 Game Music</h1><div><span id="who" style="color:var(--mut);font-size:.8rem;margin-right:8px"></span><button class="btn" id="out">Salir</button></div></header>
+  <h2>Para ti</h2>
+  <div class="grid" id="grid"></div>
+  <div class="bar hide" id="bar"><div class="in">
+    <iframe id="yt" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <div class="ctl"><button class="btn" id="pv">⏮</button><div class="nm" id="nm"></div><button class="btn" id="nx">⏭</button></div>
+  </div></div>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// 1) PEGA AQUÍ TU CONFIG (Firebase Console > Configuración del proyecto > Tus apps > Web)
+const firebaseConfig = {
+  apiKey: "AIzaSyA_pDpQKsqDmyl47FthsPlBTtNXU6MwmBI",
+  authDomain: "game-boys-studios.firebaseapp.com",
+  projectId: "game-boys-studios",
+  appId: "1:296679716982:web:542775f96fca966e154757"
+};
+// 2) Ruta del JSON con la música
+const JSON_URL = "musica.json";
+
+const $=id=>document.getElementById(id);
+const auth=getAuth(initializeApp(firebaseConfig));
+let reg=false,tracks=[],cur=-1;
+
+const msgs={"auth/invalid-credential":"Correo o contraseña incorrectos.","auth/email-already-in-use":"Ese correo ya está registrado.","auth/weak-password":"La contraseña debe tener al menos 6 caracteres.","auth/invalid-email":"Correo no válido.","auth/too-many-requests":"Demasiados intentos. Espera un poco."};
+const showErr=e=>{$('err').textContent=msgs[e.code]||("Error: "+(e.code||e.message))};
+
+$('sw').onclick=()=>{reg=!reg;$('go').textContent=reg?'Crear cuenta':'Entrar';$('sw').textContent=reg?'¿Ya tienes cuenta? Entra':'¿No tienes cuenta? Regístrate';$('err').textContent=''};
+$('go').onclick=async()=>{
+  $('err').textContent='';
+  try{reg?await createUserWithEmailAndPassword(auth,$('em').value.trim(),$('pw').value):await signInWithEmailAndPassword(auth,$('em').value.trim(),$('pw').value)}catch(e){showErr(e)}
+};
+$('rs').onclick=async()=>{
+  const m=$('em').value.trim();if(!m){$('err').textContent='Escribe tu correo arriba.';return}
+  try{await sendPasswordResetEmail(auth,m);$('err').style.color='#00f0ff';$('err').textContent='Te hemos enviado un correo para restablecerla.'}catch(e){showErr(e)}
+};
+$('out').onclick=()=>signOut(auth);
+
+onAuthStateChanged(auth,u=>{
+  $('auth').classList.toggle('hide',!!u);$('app').classList.toggle('hide',!u);
+  if(u){$('who').textContent=u.email;loadTracks()}else{$('yt').src='';$('bar').classList.add('hide');cur=-1}
+});
+
+function ytId(u){const m=String(u).match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);return m?m[1]:(/^[\w-]{11}$/.test(String(u).trim())?String(u).trim():null)}
+
+async function loadTracks(){
+  try{
+    const r=await fetch(JSON_URL+'?t='+Date.now());const d=await r.json();
+    tracks=(d.tracks||[]).map(t=>({...t,id:ytId(t.youtube)})).filter(t=>t.id);
+  }catch(e){tracks=[]}
+  const g=$('grid');g.innerHTML='';
+  if(!tracks.length){g.innerHTML='<p style="color:var(--mut)">No hay música todavía.</p>';return}
+  tracks.forEach((t,i)=>{
+    const c=document.createElement('div');c.className='t';c.dataset.i=i;
+    c.innerHTML='<img loading="lazy" src="https://i.ytimg.com/vi/'+t.id+'/mqdefault.jpg" alt=""><div><b></b><span></span></div>';
+    c.querySelector('b').textContent=t.title||'Sin título';c.querySelector('span').textContent=t.artist||'';
+    c.onclick=()=>play(i);g.appendChild(c);
+  });
+}
+
+function play(i){
+  if(!tracks.length)return;
+  cur=(i+tracks.length)%tracks.length;const t=tracks[cur];
+  $('yt').src='https://www.youtube-nocookie.com/embed/'+t.id+'?enablejsapi=1&autoplay=1&rel=0&playsinline=1';
+  $('nm').textContent=(t.title||'')+(t.artist?' — '+t.artist:'');
+  $('bar').classList.remove('hide');
+  document.querySelectorAll('.t').forEach(e=>e.classList.toggle('on',+e.dataset.i===cur));
+}
+$('pv').onclick=()=>play(cur-1);$('nx').onclick=()=>play(cur+1);
+
+// Avanza solo al terminar (estado 0 = ended)
+$('yt').addEventListener('load',()=>setTimeout(()=>{try{$('yt').contentWindow.postMessage(JSON.stringify({event:'listening',id:1}),'*')}catch(e){}},600));
+window.addEventListener('message',e=>{
+  if(!e.origin.includes('youtube'))return;
+  try{const d=typeof e.data==='string'?JSON.parse(e.data):e.data;
+    if((d.event==='onStateChange'&&d.info===0)||(d.info&&d.info.playerState===0))play(cur+1)}catch(x){}
+});
+</script>
+</body>
+</html>
