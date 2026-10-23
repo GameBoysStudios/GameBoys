@@ -69,6 +69,217 @@
                 </div>
             </div>
 
+            <!-- ================================================================
+                MÓDULO: SPOOKY TIMES — sábado 31 de octubre, 12:00 (hora de Madrid), YouTube
+                Autocontenido: no necesita tocar styles.css ni script.js.
+                Usa las variables del Index anterior (--color-orange, --color-dark, --font-display...)
+                con valores de reserva por si alguna no existe.
+                ================================================================ -->
+
+            <style>
+            .spooky-banner{
+                position:relative;
+                margin:0 0 4rem;
+                padding:2.6rem 2.4rem;
+                border-radius:16px;
+                overflow:hidden;
+                border:2px solid rgba(255,107,53,.5);
+                background:
+                    radial-gradient(circle at 88% 12%, rgba(255,107,53,.26), transparent 45%),
+                    radial-gradient(circle at 8% 100%, rgba(138,43,226,.22), transparent 50%),
+                    linear-gradient(135deg, #120a1f 0%, var(--color-dark, #0a0e27) 60%, #1a0f12 100%);
+                box-shadow:0 0 40px rgba(255,107,53,.16);
+                color:var(--color-light, #e8e8e8);
+            }
+            .spooky-banner__pumpkin{
+                position:absolute;
+                right:1.6rem; top:1.2rem;
+                font-size:5.5rem;
+                line-height:1;
+                opacity:.9;
+                filter:drop-shadow(0 0 22px rgba(255,107,53,.55));
+                pointer-events:none;
+            }
+            .spooky-banner__inner{ position:relative; z-index:1; max-width:640px; }
+
+            .spooky-banner__title{
+                font-family:var(--font-display, 'Orbitron', sans-serif);
+                font-size:2.6rem;
+                font-weight:900;
+                letter-spacing:.06em;
+                color:var(--color-orange, #ff6b35);
+                text-shadow:0 0 22px rgba(255,107,53,.45);
+                margin:0 0 .5rem;
+                line-height:1.05;
+            }
+            .spooky-banner__text{ margin:0 0 .4rem; line-height:1.7; color:var(--color-light, #e8e8e8); }
+            .spooky-banner__when{ margin:0 0 1.6rem; color:var(--color-gray, #999); font-size:.95rem; }
+            .spooky-banner__when strong{ color:var(--color-light, #e8e8e8); font-weight:600; }
+
+            /* El contador es el elemento protagonista del módulo */
+            .spooky-countdown{ display:flex; gap:.8rem; flex-wrap:wrap; margin-bottom:1.8rem; }
+            .spooky-unit{
+                min-width:84px;
+                padding:.9rem .8rem .7rem;
+                text-align:center;
+                border-radius:12px;
+                background:rgba(5,8,19,.55);
+                border:1px solid rgba(255,107,53,.4);
+            }
+            .spooky-unit__num{
+                display:block;
+                font-family:var(--font-display, 'Orbitron', sans-serif);
+                font-size:2.3rem;
+                font-weight:900;
+                line-height:1;
+                color:var(--color-orange, #ff6b35);
+                text-shadow:0 0 16px rgba(255,107,53,.5);
+                font-variant-numeric:tabular-nums;
+            }
+            .spooky-unit__lbl{ display:block; margin-top:.35rem; font-size:.78rem; color:var(--color-gray, #999); }
+
+            .spooky-live{
+                display:none;
+                margin:0 0 1.8rem;
+                font-family:var(--font-display, 'Orbitron', sans-serif);
+                font-size:1.4rem;
+                color:var(--color-orange, #ff6b35);
+            }
+
+            .spooky-actions{ display:flex; gap:.9rem; flex-wrap:wrap; }
+            .spooky-btn{
+                display:inline-flex; align-items:center; justify-content:center;
+                padding:.85rem 1.7rem;
+                border-radius:6px;
+                font-family:var(--font-body, 'Inter', sans-serif);
+                font-weight:600; font-size:.95rem;
+                text-decoration:none; cursor:pointer;
+                border:2px solid var(--color-orange, #ff6b35);
+                transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+            }
+            .spooky-btn--primary{ background:var(--color-orange, #ff6b35); color:#0a0e1a; }
+            .spooky-btn--primary:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(255,107,53,.4); }
+            .spooky-btn--ghost{ background:transparent; color:var(--color-orange, #ff6b35); }
+            .spooky-btn--ghost:hover{ background:rgba(255,107,53,.12); }
+            .spooky-btn[aria-disabled="true"]{ opacity:.55; cursor:default; pointer-events:none; }
+            .spooky-btn:focus-visible{ outline:3px solid #fff; outline-offset:3px; }
+
+            @media (max-width:600px){
+                .spooky-banner{ padding:2rem 1.3rem; }
+                .spooky-banner__title{ font-size:1.9rem; }
+                .spooky-banner__pumpkin{ font-size:3.4rem; right:1rem; top:.8rem; }
+                .spooky-unit{ min-width:68px; }
+                .spooky-unit__num{ font-size:1.8rem; }
+                .spooky-actions .spooky-btn{ width:100%; }
+            }
+            </style>
+
+            <section class="spooky-banner" id="spookyBanner" aria-labelledby="spookyTitle">
+                <div class="spooky-banner__pumpkin" aria-hidden="true">🎃</div>
+
+                <div class="spooky-banner__inner">
+                    <h2 class="spooky-banner__title" id="spookyTitle">Spooky Times</h2>
+                    <p class="spooky-banner__text">El directo de Halloween de Game Boys Studios, en nuestro canal de YouTube.</p>
+                    <p class="spooky-banner__when">
+                        <strong id="spookyWhen">Sábado 31 de octubre, 12:00</strong> (hora de Madrid)
+                    </p>
+
+                    <div class="spooky-countdown" id="spookyCountdown" role="timer" aria-live="off">
+                        <div class="spooky-unit"><span class="spooky-unit__num" id="spDays">00</span><span class="spooky-unit__lbl">días</span></div>
+                        <div class="spooky-unit"><span class="spooky-unit__num" id="spHours">00</span><span class="spooky-unit__lbl">horas</span></div>
+                        <div class="spooky-unit"><span class="spooky-unit__num" id="spMins">00</span><span class="spooky-unit__lbl">minutos</span></div>
+                        <div class="spooky-unit"><span class="spooky-unit__num" id="spSecs">00</span><span class="spooky-unit__lbl">segundos</span></div>
+                    </div>
+                    <p class="spooky-live" id="spookyLive">🎃 Estamos en directo</p>
+
+                    <div class="spooky-actions">
+                        <a class="spooky-btn spooky-btn--primary" id="spookyYt" href="#" target="_blank" rel="noopener">Ver en YouTube</a>
+                        <a class="spooky-btn spooky-btn--ghost" id="spookyCal" href="#" target="_blank" rel="noopener">Añadir al calendario</a>
+                    </div>
+                </div>
+            </section>
+
+            <script>
+            (function () {
+                // ====== CONFIGURA AQUÍ ======
+                var YOUTUBE_URL = "";   // <-- pega aquí el enlace del directo cuando lo tengas (https://www.youtube.com/live/...)
+                // 31 oct 2026, 12:00 hora de Madrid. Tras el cambio horario del 25 oct, Madrid = UTC+1,
+                // así que 12:00 en Madrid = 11:00 UTC. Así sale la misma hora para todo el mundo,
+                // sin depender del reloj ni de la zona horaria del visitante.
+                var TARGET = Date.UTC(2026, 9, 31, 11, 0, 0);
+                var DURATION_H = 1;     // duración que se guarda en el calendario
+                var HIDE_AFTER_H = 24;  // el módulo se oculta solo 24 h después del inicio
+                // ============================
+
+                var $ = function (id) { return document.getElementById(id); };
+                var banner = $('spookyBanner');
+                if (!banner) return;
+
+                var pad = function (n) { return String(n).padStart(2, '0'); };
+
+                // Botón de YouTube
+                var yt = $('spookyYt');
+                if (YOUTUBE_URL) {
+                    yt.href = YOUTUBE_URL;
+                } else {
+                    yt.textContent = 'Enlace del directo próximamente';
+                    yt.setAttribute('aria-disabled', 'true');
+                    yt.removeAttribute('target');
+                    yt.addEventListener('click', function (e) { e.preventDefault(); });
+                }
+
+                // Enlace "Añadir al calendario" (Google Calendar, en UTC para que cuadre en cualquier zona)
+                var fmt = function (ms) { return new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
+                var details = 'Directo de Halloween de Game Boys Studios en YouTube.' + (YOUTUBE_URL ? ' ' + YOUTUBE_URL : '');
+                $('spookyCal').href = 'https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=MGRpdGd2Z3RiMTQ0aDBtYWw3dmNkYjlvMG4gZ2FtZWJveXN0dWRpbzI1QG0&tmsrc=gameboystudio25%40gmail.com'
+                    + '&text=' + encodeURIComponent('Spooky Times - Game Boys Studios')
+                    + '&dates=' + fmt(TARGET) + '/' + fmt(TARGET + DURATION_H * 3600000)
+                    + '&details=' + encodeURIComponent(details)
+                    + '&location=' + encodeURIComponent('YouTube');
+
+                // Fecha en la hora del visitante, por si no está en España
+                try {
+                    var local = new Date(TARGET).toLocaleString('es-ES', {
+                        weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+                    });
+                    $('spookyWhen').textContent = local.charAt(0).toUpperCase() + local.slice(1);
+                    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    if (tz && tz !== 'Europe/Madrid') {
+                        $('spookyWhen').parentNode.lastChild.textContent = ' (tu hora local, ' + tz + ')';
+                    }
+                } catch (e) { /* si falla, se queda el texto fijo */ }
+
+                var timer = setInterval(tick, 1000);
+                tick();
+
+                function tick() {
+                    var now = Date.now();
+                    var diff = TARGET - now;
+
+                    if (now > TARGET + HIDE_AFTER_H * 3600000) {   // el evento ya pasó: se oculta solo
+                        banner.style.display = 'none';
+                        clearInterval(timer);
+                        return;
+                    }
+                    if (diff <= 0) {                                // en directo
+                        $('spookyCountdown').style.display = 'none';
+                        $('spookyLive').style.display = 'block';
+                        return;
+                    }
+                    var d = Math.floor(diff / 86400000); diff -= d * 86400000;
+                    var h = Math.floor(diff / 3600000);  diff -= h * 3600000;
+                    var m = Math.floor(diff / 60000);    diff -= m * 60000;
+                    var s = Math.floor(diff / 1000);
+                    $('spDays').textContent  = pad(d);
+                    $('spHours').textContent = pad(h);
+                    $('spMins').textContent  = pad(m);
+                    $('spSecs').textContent  = pad(s);
+                }
+            })();
+            </script>
+            <!-- ================= FIN MÓDULO SPOOKY TIMES ================= -->
+
+            
             <!-- Destacados -->
             <section class="highlights-section">
                 <h2>Lo Más Destacado</h2>
