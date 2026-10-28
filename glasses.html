@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Glasses — Game Boys Studios</title>
+<meta name="description" content="Game Glasses: gafas con pantalla AR en desarrollo por Game Boys Studios. Prototipo, galería, especificaciones y lista de espera.">
+<link rel="stylesheet" href="styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+.dv-wrap{max-width:1200px;margin:0 auto;padding:3rem 2rem 5rem;position:relative;z-index:1}
+.dv-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:3rem;align-items:center;padding:1rem 0 2rem}
+.dv-lead{font-size:1.1rem;max-width:540px;margin:0 0 1.4rem}
+.dv-actions{display:flex;gap:.9rem;flex-wrap:wrap}
+.dv-small{font-size:.8rem;margin:1rem 0 0}
+.dv-date{display:inline-flex;gap:.4rem;flex-wrap:wrap;padding:.5rem 1rem;border-radius:999px;font-size:.85rem;margin-bottom:1.3rem}
+.dv-crumbs{font-size:.85rem;margin-bottom:1rem}.dv-crumbs a{text-decoration:none}.dv-crumbs span{opacity:.6;margin:0 .3rem}
+.dv-section{margin:4.5rem 0}
+.dv-head{text-align:center;margin-bottom:2rem}.dv-head p{max-width:640px;margin:0 auto}
+.dv-sm{padding:.55rem 1.2rem;font-size:.82rem}
+/* hueco de foto */
+.photo-slot{position:relative;margin:0;aspect-ratio:var(--ratio,4/3);display:grid;place-items:center;overflow:hidden;text-align:center;border-radius:16px}
+.photo-slot::before{content:"📷\A" attr(data-label) "\A" attr(data-file) "\A" attr(data-size);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.78rem;line-height:1.7;padding:1rem}
+.photo-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo-slot figcaption{display:none}
+.photo-slot img~figcaption{display:block;position:absolute;left:.7rem;bottom:.7rem;font-size:.72rem;font-weight:600;padding:.25rem .6rem;border-radius:999px}
+.dv-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;margin-top:1rem}
+.dv-stat{text-align:center;padding:1.3rem 1rem;border-radius:16px}
+.dv-stat .n{display:block;font-size:1.9rem;font-weight:700;line-height:1.1}.dv-stat .l{font-size:.82rem}
+.dv-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.8rem}
+.dv-card{display:flex;flex-direction:column;border-radius:18px;overflow:hidden;transition:all .3s ease}
+.dv-card:hover{transform:translateY(-6px)}
+.dv-card-media{position:relative}.dv-card-media .photo-slot{border-radius:0}
+.dv-badge{position:absolute;top:.9rem;right:.9rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.35rem .7rem;border-radius:999px;z-index:2}
+.dv-card-body{padding:1.5rem;display:flex;flex-direction:column;gap:.7rem;flex:1}
+.dv-card-body h3{margin:0;font-size:1.3rem}.dv-card-body p{margin:0;font-size:.92rem;flex:1}
+.dv-meta{font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.dv-tags{display:flex;flex-wrap:wrap;gap:.5rem}.dv-tags span{font-size:.74rem;padding:.3rem .65rem;border-radius:999px}
+.dv-card-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.dv-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem}
+.dv-steps li{padding:1.5rem;border-radius:16px}.dv-steps h3{margin:.6rem 0 .3rem;font-size:1.1rem}.dv-steps p{margin:0;font-size:.88rem}
+.dv-steps .num{display:inline-flex;width:2rem;height:2rem;border-radius:50%;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
+.dv-principles,.dv-features,.dv-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.4rem}
+.dv-principle,.dv-feature,.dv-control{padding:1.6rem;border-radius:16px;display:flex;flex-direction:column;gap:.5rem}
+.dv-principle h3,.dv-feature h3,.dv-control h3{margin:0;font-size:1.1rem}.dv-principle p,.dv-feature p,.dv-control p{margin:0;font-size:.9rem;flex:1}
+.ico{font-size:2rem}
+.dv-chip{align-self:flex-start;margin-top:.3rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.3rem .7rem;border-radius:999px}
+.dv-control .key{align-self:flex-start;font-weight:700;font-size:1.1rem;padding:.3rem .9rem;border-radius:10px}
+.dv-gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}.dv-gallery .g-wide{grid-column:1/-1}
+.dv-video{margin-top:1rem}
+.dv-ui-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1rem}
+.dv-ui-item .photo-slot{background:#000!important;color:#9fb0c3!important}
+.dv-table-wrap{overflow-x:auto;border-radius:16px}
+.dv-table{width:100%;border-collapse:collapse;min-width:520px}
+.dv-table th,.dv-table td{text-align:left;padding:.95rem 1.2rem;vertical-align:top;font-size:.92rem}
+.dv-table th{width:30%;white-space:nowrap}
+.dv-timeline{list-style:none;margin:0 auto;padding:0 0 0 1.6rem;max-width:760px;position:relative}
+.dv-timeline li{position:relative;padding:0 0 1.8rem 1.6rem}
+.dv-timeline li::before{content:"";position:absolute;left:-.45rem;top:.35rem;width:.9rem;height:.9rem;border-radius:50%}
+.dv-timeline li::after{content:"";position:absolute;left:-.02rem;top:1.3rem;bottom:-.2rem;width:2px}
+.dv-timeline li:last-child::after{display:none}
+.dv-timeline h3{margin:.2rem 0 .3rem;font-size:1.1rem}.dv-timeline p{margin:0;font-size:.92rem}
+.dv-timeline .when{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.dv-faq{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:.8rem}
+.dv-faq details{border-radius:14px;padding:1rem 1.3rem}
+.dv-faq summary{cursor:pointer;font-weight:600;list-style:none}.dv-faq summary::-webkit-details-marker{display:none}
+.dv-faq summary::after{content:"+";float:right;font-weight:700}.dv-faq details[open] summary::after{content:"–"}
+.dv-faq p{margin:.8rem 0 0;font-size:.92rem}
+.dv-cta{display:flex;flex-wrap:wrap;gap:2rem;align-items:center;justify-content:space-between;padding:2.6rem 2.4rem;border-radius:24px;margin-top:4.5rem}
+.dv-cta h2{margin:.3rem 0 .4rem;font-size:2rem}.dv-cta p{margin:0;max-width:440px}
+.dv-card.is-soon .photo-slot{filter:saturate(.6)}
+@media (max-width:920px){.dv-hero{grid-template-columns:1fr}.dv-wrap{padding:2rem 1.2rem 4rem}.dv-gallery{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ===== Pantalla de espera / bloqueo hasta fecha ===== */
+#page-lock{
+  position:fixed;inset:0;z-index:99999;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 30%,#0a1628 0%,#050813 70%);
+  color:var(--color-light, #e8f0f8);
+  font-family:var(--font-body, Inter, system-ui, sans-serif);
+  text-align:center;padding:2rem;
+  transition:opacity .6s ease, visibility .6s ease;
+}
+#page-lock.is-gone{opacity:0;visibility:hidden;pointer-events:none}
+#page-lock .lock-inner{max-width:480px}
+#page-lock .lock-kicker{
+  display:inline-block;text-transform:uppercase;letter-spacing:3px;
+  font-size:.75rem;color:var(--color-orange,#ff6b35);font-weight:700;margin-bottom:1rem
+}
+#page-lock .lock-title{
+  font-family:var(--font-display, Orbitron, sans-serif);
+  font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;letter-spacing:2px;
+  color:var(--color-cactus,#2ecb71);
+  text-shadow:0 0 20px rgba(46,203,113,.5);margin:0 0 1rem
+}
+#page-lock .lock-lead{color:var(--color-gray,#9fb0c3);font-size:1rem;margin:0 0 2rem;line-height:1.5}
+#page-lock .lock-timer{
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem
+}
+#page-lock .lock-unit{
+  background:linear-gradient(135deg,rgba(46,203,113,.12),rgba(255,107,53,.06));
+  border:1px solid rgba(46,203,113,.35);border-radius:14px;
+  min-width:72px;padding:1rem .8rem
+}
+#page-lock .lock-unit .n{
+  display:block;font-family:var(--font-display, Orbitron, sans-serif);
+  font-size:1.8rem;font-weight:700;color:var(--color-orange,#ff6b35);line-height:1.1
+}
+#page-lock .lock-unit .l{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gray,#9fb0c3)}
+#page-lock .lock-date{font-size:.85rem;color:var(--color-cactus,#2ecb71);opacity:.9}
+body.is-locked{overflow:hidden}
+
+/* ===== Dispositivos · diseño og (neón) ===== */
+.dv-kicker{display:inline-block;text-transform:uppercase;letter-spacing:3px;font-size:.75rem;color:var(--color-orange);font-weight:700;margin-bottom:.8rem}
+.dv-title{font-family:var(--font-display);font-size:clamp(2.2rem,5vw,4rem);font-weight:900;line-height:1.1;letter-spacing:3px;margin:0 0 1rem;color:var(--color-cactus);text-shadow:0 0 20px rgba(46,203,113,.6),0 0 40px rgba(46,203,113,.3)}
+.dv-title .accent{color:var(--color-orange);text-shadow:0 0 20px rgba(255,107,53,.5)}
+.dv-lead{color:var(--color-light)}.dv-small,.dv-head p,.dv-card-body p,.dv-feature p,.dv-control p,.dv-principle p,.dv-steps p,.dv-timeline p,.dv-faq p{color:var(--color-gray)}
+.dv-status{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--color-dark);background:linear-gradient(135deg,var(--color-orange),#e55426);padding:.45rem 1rem;border-radius:20px;margin-bottom:1rem}
+.dv-date{background:rgba(46,203,113,.08);border:1px solid var(--color-cactus);color:var(--color-cactus)}
+.dv-crumbs,.dv-crumbs a{color:var(--color-gray)}.dv-crumbs a:hover{color:var(--color-cactus)}
+.dv-head h2{font-family:var(--font-display);font-size:2.2rem;margin:0 0 .6rem;color:var(--color-cactus)}
+.photo-slot{background:linear-gradient(135deg,rgba(46,203,113,.08),rgba(255,107,53,.04));border:2px dashed rgba(46,203,113,.4);color:var(--color-gray);border-radius:12px}
+.photo-slot:has(img){border-style:solid;border-color:var(--color-border)}
+.photo-slot img~figcaption{background:rgba(5,8,19,.85);color:var(--color-cactus);border:1px solid var(--color-border)}
+.dv-stat,.dv-card,.dv-steps li,.dv-principle,.dv-feature,.dv-control,.dv-faq details,.dv-table-wrap{background:linear-gradient(135deg,rgba(46,203,113,.08),rgba(255,107,53,.04));border:1px solid var(--color-border);border-radius:12px}
+.dv-stat .n{font-family:var(--font-display);color:var(--color-orange)}.dv-stat .l{color:var(--color-light)}
+.dv-card:hover,.dv-feature:hover,.dv-principle:hover{border-color:var(--color-cactus);box-shadow:0 10px 30px rgba(46,203,113,.2)}
+.dv-card.is-soon{border-style:dashed}
+.dv-badge{background:linear-gradient(135deg,var(--color-orange),#e55426);color:var(--color-dark)}
+.dv-meta{color:var(--color-orange)}.dv-card-body h3,.dv-steps h3,.dv-principle h3,.dv-feature h3,.dv-control h3,.dv-timeline h3{color:var(--color-cactus)}
+.dv-tags span{background:rgba(46,203,113,.1);color:var(--color-cactus);border:1px solid rgba(46,203,113,.3)}
+.dv-steps .num{background:rgba(255,255,255,.06);color:var(--color-light)}
+.dv-steps li.is-current{border-color:var(--color-cactus);box-shadow:0 0 25px rgba(46,203,113,.25)}.dv-steps li.is-current .num{background:var(--color-cactus);color:var(--color-dark)}
+.dv-chip.is-dev{background:rgba(46,203,113,.12);color:var(--color-cactus);border:1px solid var(--color-cactus)}
+.dv-chip.is-later{background:rgba(255,255,255,.05);color:var(--color-gray);border:1px solid var(--color-border)}
+.dv-chip.is-concept{background:rgba(255,107,53,.12);color:var(--color-orange);border:1px solid var(--color-orange)}
+.dv-control .key{background:var(--color-darker);color:var(--color-cactus);font-family:var(--font-display);border:1px solid var(--color-cactus)}
+.dv-table th{color:var(--color-orange)}.dv-table td{color:var(--color-light)}.dv-table tr+tr th,.dv-table tr+tr td{border-top:1px solid var(--color-border)}
+.dv-timeline li::before{background:var(--color-dark);border:2px solid var(--color-cactus)}.dv-timeline li::after{background:var(--color-border)}
+.dv-timeline li.is-now::before{background:var(--color-cactus);box-shadow:0 0 12px rgba(46,203,113,.7)}
+.dv-timeline .when{color:var(--color-orange)}
+.dv-faq summary{color:var(--color-light)}.dv-faq summary::after{color:var(--color-cactus)}
+.dv-cta{background:linear-gradient(135deg,#07102a 0%,#0b1224 100%);border:2px solid rgba(46,203,113,.25);box-shadow:0 0 60px rgba(46,203,113,.08) inset}
+.dv-cta .dv-kicker{color:var(--color-orange)}.dv-cta h2{font-family:var(--font-display);color:var(--color-cactus)}.dv-cta p{color:var(--color-gray)}
+</style>
+</head>
+<body class="is-locked">
+<!-- Pantalla de espera: se oculta automáticamente el 31 oct 2026 a las 16:05 -->
+<div id="page-lock" role="dialog" aria-modal="true" aria-label="Página bloqueada hasta la fecha de revelación">
+  <div class="lock-inner">
+    <span class="lock-kicker">Game Glasses</span>
+    <h1 class="lock-title">Próximamente</h1>
+    <p class="lock-lead">Esta página se desbloqueará el 31 de octubre de 2026 a las 16:05.</p>
+    <div class="lock-timer" id="lockTimer" aria-live="polite">
+      <div class="lock-unit"><span class="n" id="lockD">--</span><span class="l">días</span></div>
+      <div class="lock-unit"><span class="n" id="lockH">--</span><span class="l">horas</span></div>
+      <div class="lock-unit"><span class="n" id="lockM">--</span><span class="l">min</span></div>
+      <div class="lock-unit"><span class="n" id="lockS">--</span><span class="l">seg</span></div>
+    </div>
+    <p class="lock-date">31 oct 2026 · 16:05</p>
+  </div>
+</div>
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="index.html" class="logo" style="text-decoration:none">
+            <span class="cactus-icon">🌵</span>
+            <span class="logo-text">GAME BOYS<br><small>STUDIOS</small></span>
+        </a>
+        <ul class="nav-menu">
+            <li><a href="index.html#home" class="nav-link">Inicio</a></li>
+            <li><a href="index.html#juegos" class="nav-link">Juegos</a></li>
+            <li><a href="index.html#comics" class="nav-link">Cómics</a></li>
+            <li><a href="index.html#movie" class="nav-link">Películas</a></li>
+            <li><a href="devices.html" class="nav-link" style="color:var(--color-cactus)">Dispositivos</a></li>
+            <li><a href="index.html#about" class="nav-link">Sobre Nosotros</a></li>
+            <li><a href="index.html#community" class="nav-link">Comunidad</a></li>
+            <li><a href="index.html#auth" class="nav-link">Cuenta</a></li>
+        </ul>
+    </div>
+</nav>
+<main class="dv-wrap">
+    <nav class="dv-crumbs" aria-label="Migas"><a href="devices.html">Dispositivos</a> <span>›</span> Game Glasses</nav>
+
+    <header class="dv-hero">
+        <div>
+            <span class="dv-status">● Prototipo en desarrollo · no está a la venta</span>
+            <h1 class="dv-title">Game <span class="accent">Glasses</span></h1>
+            <p class="dv-lead">Unas gafas con una pequeña pantalla AR en una lente. Mira la hora, recibe avisos del móvil
+            y muévete por el menú con tres botones en las patillas, sin sacar el teléfono.</p>
+            <div class="dv-date">📅 Lista de espera: 21 de diciembre · The Gold Decade <span id="gwCount" class="dv-count"></span></div>
+            <div class="dv-actions">
+                <!-- TODO: cambia este enlace por la página de itch.io de Game Glasses cuando exista -->
+                <a href="https://game-boys-studios.itch.io/" class="btn btn-primary" target="_blank" rel="noopener">Unirme a la lista de espera</a>
+                <a href="#galeria" class="btn btn-secondary">Ver galería</a>
+            </div>
+            <p class="dv-small">La lista de espera es gratuita y no pide pago. Precio y entrega: por confirmar.</p>
+        </div>
+        <figure class="photo-slot is-hero" style="--ratio:5/4" data-label="Render principal · vista 3/4" data-file="devices/glasses/hero.jpg" data-size="1600 × 1280 px">
+  <img src="devices/glasses/hero.jpg" alt="Game Glasses, vista de tres cuartos (render)" loading="lazy" onerror="this.remove()">
+  <figcaption>Render · concepto</figcaption>
+</figure>
+    </header>
+
+    <section class="dv-section" id="funciones">
+        <div class="dv-head">
+            <h2>Qué hará</h2>
+            <p>Cada función indica en qué punto está. No prometemos nada que todavía no exista.</p>
+        </div>
+        <div class="dv-features">
+            <div class="dv-feature"><span class="ico">🕒</span><h3>Reloj y fecha</h3><p>Hora siempre visible en la lente, sincronizada con tu móvil.</p><span class="dv-chip is-dev">En desarrollo</span></div>
+            <div class="dv-feature"><span class="ico">💬</span><h3>Notificaciones</h3><p>Avisos cortos del iPhone en la pantalla de las gafas. Aún por validar.</p><span class="dv-chip is-dev">En desarrollo</span></div>
+            <div class="dv-feature"><span class="ico">🎛️</span><h3>Tres botones</h3><p>Control sencillo con un botón en el brazo izquierdo y dos en el derecho.</p><span class="dv-chip is-dev">En desarrollo</span></div>
+            <div class="dv-feature"><span class="ico">🎙️</span><h3>Asistente de voz</h3><p>Habla y recibe la respuesta en texto. Necesita el móvil o internet para funcionar.</p><span class="dv-chip is-later">Más adelante</span></div>
+            <div class="dv-feature"><span class="ico">🎧</span><h3>Grabadora</h3><p>Graba notas de voz y envíalas al móvil.</p><span class="dv-chip is-later">Más adelante</span></div>
+            <div class="dv-feature"><span class="ico">🕹️</span><h3>Mini-juegos</h3><p>Pequeños juegos para la pantalla AR. Es una idea de diseño por ahora.</p><span class="dv-chip is-concept">Concepto</span></div>
+        </div>
+    </section>
+
+    <section class="dv-section" id="galeria">
+        <div class="dv-head">
+            <h2>Galería</h2>
+            <p>Renders del diseño y, cuando los tengamos, fotos del prototipo real.</p>
+        </div>
+        <div class="dv-gallery">
+            <div class="g-wide"><figure class="photo-slot " style="--ratio:16/9" data-label="Render · vista frontal" data-file="devices/glasses/render-frontal.jpg" data-size="1920 × 1080 px">
+  <img src="devices/glasses/render-frontal.jpg" alt="Game Glasses vista frontal" loading="lazy" onerror="this.remove()">
+  <figcaption>Render · frontal</figcaption>
+</figure></div>
+            <div><figure class="photo-slot " style="--ratio:4/3" data-label="Render · vista 3/4" data-file="devices/glasses/render-3-4.jpg" data-size="1600 × 1200 px">
+  <img src="devices/glasses/render-3-4.jpg" alt="Game Glasses vista 3/4" loading="lazy" onerror="this.remove()">
+  <figcaption>Render · 3/4</figcaption>
+</figure></div>
+            <div><figure class="photo-slot " style="--ratio:4/3" data-label="Primer plano · botones" data-file="devices/glasses/botones.jpg" data-size="1600 × 1200 px">
+  <img src="devices/glasses/botones.jpg" alt="Botones de la patilla" loading="lazy" onerror="this.remove()">
+  <figcaption>Render · botones</figcaption>
+</figure></div>
+            <div><figure class="photo-slot " style="--ratio:4/3" data-label="Vista interior · pantalla AR" data-file="devices/glasses/pantalla-ar.jpg" data-size="1600 × 1200 px">
+  <img src="devices/glasses/pantalla-ar.jpg" alt="Pantalla AR dentro de la lente" loading="lazy" onerror="this.remove()">
+  <figcaption>Render · pantalla AR</figcaption>
+</figure></div>
+            <div><figure class="photo-slot " style="--ratio:4/3" data-label="Gafas plegadas" data-file="devices/glasses/plegadas.jpg" data-size="1600 × 1200 px">
+  <img src="devices/glasses/plegadas.jpg" alt="Game Glasses plegadas" loading="lazy" onerror="this.remove()">
+  <figcaption>Render · plegadas</figcaption>
+</figure></div>
+            <div class="g-wide"><figure class="photo-slot " style="--ratio:16/9" data-label="FOTO DEL PROTOTIPO REAL (sustituir cuando exista)" data-file="devices/glasses/prototipo-real.jpg" data-size="1920 × 1080 px">
+  <img src="devices/glasses/prototipo-real.jpg" alt="Prototipo real de Game Glasses" loading="lazy" onerror="this.remove()">
+  <figcaption>Foto · prototipo real</figcaption>
+</figure></div>
+        </div>
+        <div class="dv-video">
+            <!-- Cuando tengas el vídeo demo, sustituye este bloque por un <iframe> de YouTube con tu ID de vídeo -->
+            <figure class="photo-slot " style="--ratio:16/9" data-label="Hueco del vídeo demo (16:9)" data-file="devices/glasses/video-demo.jpg" data-size="1920 × 1080 px">
+  <img src="devices/glasses/video-demo.jpg" alt="Vídeo demo de Game Glasses" loading="lazy" onerror="this.remove()">
+  <figcaption>Vídeo demo</figcaption>
+</figure>
+        </div>
+    </section>
+
+    <section class="dv-section" id="controles">
+        <div class="dv-head">
+            <h2>Controles</h2>
+            <p>Tres botones, una sola forma de moverse: avanzar, elegir y volver.</p>
+        </div>
+        <div class="dv-controls">
+            <div class="dv-control"><span class="key">L1</span><h3>Brazo izquierdo</h3><p><strong>Pulsación corta:</strong> atrás / cerrar.<br><strong>Mantener 1,2 s:</strong> apagar.</p></div>
+            <div class="dv-control"><span class="key">R1</span><h3>Brazo derecho · arriba</h3><p><strong>Pulsación corta:</strong> siguiente.</p></div>
+            <div class="dv-control"><span class="key">R2</span><h3>Brazo derecho · abajo</h3><p><strong>Pulsación corta:</strong> OK / elegir.</p></div>
+        </div>
+    </section>
+
+    <section class="dv-section" id="interfaz">
+        <div class="dv-head">
+            <h2>Interfaz (concepto)</h2>
+            <p>Simulación de la interfaz en el navegador. <strong>No es la pantalla real del prototipo:</strong> la interfaz final dependerá de la pantalla que se use.</p>
+        </div>
+        <div class="dv-ui-grid">
+<div class="dv-ui-item"><figure class="photo-slot " style="--ratio:8/5" data-label="Concept UI · Reloj" data-file="devices/glasses/ui/01_reloj.png" data-size="1280 × 800 px">
+  <img src="devices/glasses/ui/01_reloj.png" alt="Concept UI: Reloj" loading="lazy" onerror="this.remove()">
+  <figcaption>Concept UI · Reloj</figcaption>
+</figure></div>
+<div class="dv-ui-item"><figure class="photo-slot " style="--ratio:8/5" data-label="Concept UI · Menú" data-file="devices/glasses/ui/02_menu.png" data-size="1280 × 800 px">
+  <img src="devices/glasses/ui/02_menu.png" alt="Concept UI: Menú" loading="lazy" onerror="this.remove()">
+  <figcaption>Concept UI · Menú</figcaption>
+</figure></div>
+<div class="dv-ui-item"><figure class="photo-slot " style="--ratio:8/5" data-label="Concept UI · Notificación" data-file="devices/glasses/ui/03_notificacion.png" data-size="1280 × 800 px">
+  <img src="devices/glasses/ui/03_notificacion.png" alt="Concept UI: Notificación" loading="lazy" onerror="this.remove()">
+  <figcaption>Concept UI · Notificación</figcaption>
+</figure></div>
+<div class="dv-ui-item"><figure class="photo-slot " style="--ratio:8/5" data-label="Concept UI · Asistente" data-file="devices/glasses/ui/04_asistente_escuchando.png" data-size="1280 × 800 px">
+  <img src="devices/glasses/ui/04_asistente_escuchando.png" alt="Concept UI: Asistente" loading="lazy" onerror="this.remove()">
+  <figcaption>Concept UI · Asistente</figcaption>
+</figure></div>
+<div class="dv-ui-item"><figure class="photo-slot " style="--ratio:8/5" data-label="Concept UI · Grabadora" data-file="devices/glasses/ui/06_grabadora.png" data-size="1280 × 800 px">
+  <img src="devices/glasses/ui/06_grabadora.png" alt="Concept UI: Grabadora" loading="lazy" onerror="this.remove()">
+  <figcaption>Concept UI · Grabadora</figcaption>
+</figure></div>
+<div class="dv-ui-item"><figure class="photo-slot " style="--ratio:8/5" data-label="Concept UI · Juegos" data-file="devices/glasses/ui/07_juegos.png" data-size="1280 × 800 px">
+  <img src="devices/glasses/ui/07_juegos.png" alt="Concept UI: Juegos" loading="lazy" onerror="this.remove()">
+  <figcaption>Concept UI · Juegos</figcaption>
+</figure></div>
+        </div>
+    </section>
+
+    <section class="dv-section" id="specs">
+        <div class="dv-head">
+            <h2>Especificaciones</h2>
+            <p>Valores orientativos del prototipo. Pueden cambiar antes de un producto final.</p>
+        </div>
+        <div class="dv-table-wrap">
+        <table class="dv-table">
+            <tbody>
+                <tr><th>Estado</th><td>Prototipo en desarrollo</td></tr>
+                <tr><th>Tipo</th><td>Gafas con pantalla AR monocular (lente derecha)</td></tr>
+                <tr><th>Pantalla</th><td>Prototipo: OLED monocromo 128 × 64 px · Producto final: por definir</td></tr>
+                <tr><th>Procesador</th><td>ESP32-S3</td></tr>
+                <tr><th>Conectividad</th><td>Bluetooth LE</td></tr>
+                <tr><th>Control</th><td>3 botones en las patillas (L1, R1, R2)</td></tr>
+                <tr><th>Audio</th><td>Micrófono y altavoz en fases posteriores</td></tr>
+                <tr><th>Carga</th><td>USB-C</td></tr>
+                <tr><th>Batería</th><td>LiPo de unos 400 mAh · estimación de 4 a 7 h de uso mixto (aún sin medir)</td></tr>
+                <tr><th>Compatibilidad</th><td>iPhone primero · Android por valorar</td></tr>
+                <tr><th>Peso y medidas</th><td>Por medir</td></tr>
+                <tr><th>Precio y entrega</th><td>Por confirmar</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    <section class="dv-section" id="roadmap">
+        <div class="dv-head">
+            <h2>Hoja de ruta</h2>
+            <p>Previsión sujeta a cambios.</p>
+        </div>
+        <ol class="dv-timeline">
+            <li class="is-now"><span class="when">Oct – Nov 2026</span><h3>Prototipo funcional</h3><p>Pantalla, botones, hora y notificaciones funcionando en el prototipo.</p></li>
+            <li><span class="when">21 dic 2026</span><h3>The Gold Decade</h3><p>Presentación de Game Glasses con vídeo demo y apertura de la lista de espera.</p></li>
+            <li><span class="when">2027 · por confirmar</span><h3>Diseño de producto</h3><p>Placa propia, carcasa y cumplimiento de la normativa necesaria para poder vender.</p></li>
+            <li><span class="when">Más adelante</span><h3>Venta</h3><p>Solo con precio, condiciones y fecha de entrega claros.</p></li>
+        </ol>
+    </section>
+
+    <section class="dv-section">
+        <div class="dv-head"><h2>Preguntas frecuentes</h2></div>
+        <div class="dv-faq">
+            <details><summary>¿Puedo comprar Game Glasses ya?</summary><p>No. Es un prototipo. La lista de espera es gratuita y no te pide pago.</p></details>
+            <details><summary>¿Cuánto cuestan y cuándo llegan?</summary><p>Todavía no hay precio ni fecha. Los publicaremos solo cuando sean firmes.</p></details>
+            <details><summary>¿Funcionan con Android?</summary><p>Estamos empezando por iPhone. Android lo valoraremos más adelante.</p></details>
+            <details><summary>¿Las imágenes son reales?</summary><p>Los renders y la interfaz son conceptos y están marcados como tales. Las fotos del prototipo real se etiquetarán como "Foto".</p></details>
+            <details><summary>¿Se verá bien a pleno sol?</summary><p>Es una de las cosas que estamos probando. No queremos prometerlo hasta comprobarlo con el prototipo.</p></details>
+        </div>
+    </section>
+
+    <section class="dv-cta">
+        <div>
+            <span class="dv-kicker">Lista de espera</span>
+            <h2>Sé de los primeros en saber más</h2>
+            <p>Apúntate gratis y sigue el desarrollo en Discord y YouTube.</p>
+        </div>
+        <div class="dv-actions">
+            <a href="https://game-boys-studios.itch.io/" class="btn btn-primary" target="_blank" rel="noopener">Lista de espera</a>
+            <a href="https://discord.gg/b8F9XAaT8a" class="btn btn-secondary" target="_blank" rel="noopener">Discord</a>
+            <a href="https://www.youtube.com/channel/UCzpzKxcMGj8rDplhZzBddjw" class="btn btn-secondary" target="_blank" rel="noopener">YouTube</a>
+        </div>
+    </section>
+
+    <script>
+    (function(){
+        // Temporizador de desbloqueo de página: 31 oct 2026, 16:05 (hora local del visitante)
+        var unlockAt = new Date(2026, 9, 31, 16, 5, 0); // mes 9 = octubre
+        var lockEl = document.getElementById('page-lock');
+        var dEl = document.getElementById('lockD');
+        var hEl = document.getElementById('lockH');
+        var mEl = document.getElementById('lockM');
+        var sEl = document.getElementById('lockS');
+
+        function unlock(){
+            if(!lockEl) return;
+            lockEl.classList.add('is-gone');
+            document.body.classList.remove('is-locked');
+            setTimeout(function(){ lockEl.remove(); }, 700);
+        }
+
+        function tickLock(){
+            var ms = unlockAt - new Date();
+            if(ms <= 0){
+                unlock();
+                return;
+            }
+            var d = Math.floor(ms / 86400000);
+            var h = Math.floor((ms % 86400000) / 3600000);
+            var m = Math.floor((ms % 3600000) / 60000);
+            var s = Math.floor((ms % 60000) / 1000);
+            if(dEl) dEl.textContent = d;
+            if(hEl) hEl.textContent = String(h).padStart(2,'0');
+            if(mEl) mEl.textContent = String(m).padStart(2,'0');
+            if(sEl) sEl.textContent = String(s).padStart(2,'0');
+            setTimeout(tickLock, 1000);
+        }
+
+        if(new Date() >= unlockAt){
+            unlock();
+        } else {
+            tickLock();
+        }
+    })();
+
+    // Contador lista de espera (21 dic)
+    (function(){
+        var el = document.getElementById('gwCount'); if(!el) return;
+        var target = new Date(2026, 11, 21, 12, 0, 0);
+        function tick(){
+            var ms = target - new Date();
+            if(ms <= 0){ el.textContent = '· ¡Abierta!'; return; }
+            var d = Math.floor(ms/86400000), h = Math.floor(ms%86400000/3600000);
+            el.textContent = '· faltan ' + d + ' d ' + h + ' h';
+        }
+        tick(); setInterval(tick, 60000);
+    })();
+    </script>
+</main>
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section"><h4>Game Boys Studios</h4><p>© 2026 Game Boys Studios. Todos los derechos reservados.</p><p class="footer-tagline">Creando experiencias únicas en videojuegos y cómics.</p></div>
+        <div class="footer-section"><h4>Navega</h4><ul>
+            <li><a href="index.html#juegos">Videojuegos</a></li><li><a href="index.html#comics">Cómics</a></li>
+            <li><a href="devices.html">Dispositivos</a></li><li><a href="index.html#about">Sobre Nosotros</a></li><li><a href="index.html#community">Comunidad</a></li></ul></div>
+        <div class="footer-section"><h4>Síguenos</h4><div class="social-links">
+            <a href="https://discord.gg/b8F9XAaT8a" target="_blank">Discord</a>
+            <a href="https://www.youtube.com/channel/UCzpzKxcMGj8rDplhZzBddjw" target="_blank">YouTube</a></div></div>
+        <div class="footer-section"><h4>Información</h4><ul>
+            <li><a href="privacidad.html">Política de Privacidad</a></li><li><a href="cookies.html">Política de Cookies</a></li>
+            <li><a href="terminos.html">Términos de Servicio</a></li><li><a href="mailto:gameboystudio25@gmail.com">Contacto</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><p>Made by Game Boys Studios</p></div>
+</footer>
+</body>
+</html>
