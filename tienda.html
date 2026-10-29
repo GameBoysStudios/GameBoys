@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="og">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merch oficial — Game Boys Studios</title>
+<meta name="description" content="Merch oficial de Game Boys Studios: sudadera, gorra, botella, mochila y alfombrilla. Elige tus piezas y envía el pedido con el formulario.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: radial-gradient(circle at 80% 0%, rgba(46, 203, 113, .08), transparent 45%), #0a0e27;
+    --bg-solid: #0a0e27;
+    --text: #e8e8e8;
+    --muted: #999999;
+    --surface: linear-gradient(135deg, rgba(46, 203, 113, .08), rgba(255, 107, 53, .04));
+    --surface-2: rgba(46, 203, 113, .10);
+    --border: #1a1f3a;
+    --accent: #2ecb71;
+    --accent-2: #ff6b35;
+    --btn-bg: linear-gradient(135deg, #2ecb71, #23a057);
+    --btn-fg: #0a0e27;
+    --ok: #2ecb71;
+    --radius-card: 12px;
+    --radius-btn: 8px;
+    --radius-img: 8px;
+    --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+    --font-display: 'Orbitron', sans-serif;
+    --display-weight: 900;
+    --display-tracking: 2px;
+    --display-transform: uppercase;
+    --header-bg: linear-gradient(135deg, #0a0e27, #050813);
+    --cta-bg: linear-gradient(135deg, #07102a, #0b1224);
+    --cta-fg: #e8e8e8;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);background-color:var(--bg-solid);min-height:100vh;line-height:1.6}
+a{color:inherit}
+img{max-width:100%;display:block}
+button,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 1.5rem}
+
+#gate{
+    position:fixed;inset:0;z-index:9999;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 30%,rgba(46,203,113,.12),transparent 50%),#0a0e27;
+    padding:1.5rem;text-align:center;
+}
+#gate.hidden{display:none}
+.gate-inner{max-width:420px}
+.gate-inner .brand-mark{font-size:3rem;filter:drop-shadow(0 0 16px rgba(46,203,113,.7));margin-bottom:.5rem}
+.gate-inner h1{
+    font-family:var(--font-display);font-weight:900;letter-spacing:2px;text-transform:uppercase;
+    color:var(--accent);font-size:clamp(1.4rem,4vw,1.9rem);margin:0 0 .6rem;
+    text-shadow:0 0 22px rgba(46,203,113,.5);
+}
+.gate-inner p{color:var(--muted);margin:0 0 1.5rem;font-size:1rem}
+.countdown{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
+.countdown div{
+    background:rgba(46,203,113,.08);border:1px solid var(--border);
+    border-radius:10px;padding:.7rem .9rem;min-width:4.2rem;
+}
+.countdown span{display:block;font-family:var(--font-display);font-weight:900;font-size:1.6rem;color:var(--accent);line-height:1.1}
+.countdown small{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.gate-date{margin-top:1.4rem;font-size:.85rem;color:var(--muted)}
+
+.site-header{position:sticky;top:0;z-index:50;background:var(--header-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.site-header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-top:.8rem;padding-bottom:.8rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.brand-mark{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:transparent;font-size:1.6rem;filter:drop-shadow(0 0 8px rgba(46,203,113,.6))}
+.brand-name{font-family:var(--font-display);font-weight:var(--display-weight);letter-spacing:var(--display-tracking);text-transform:var(--display-transform);line-height:1.1;font-size:1.05rem}
+.brand-name small{display:block;font-family:'Inter',sans-serif;font-weight:500;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+.back-link{font-size:.88rem;text-decoration:none;color:var(--muted)}.back-link:hover{color:var(--accent)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.8rem 1.5rem;border-radius:var(--radius-btn);border:1px solid transparent;font-weight:600;font-size:.92rem;cursor:pointer;text-decoration:none;transition:transform .2s,box-shadow .2s,opacity .2s}
+.btn-primary{background:var(--btn-bg);color:var(--btn-fg)}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 26px -12px var(--accent)}
+.btn-ghost{background:transparent;color:var(--accent);border-color:var(--accent)}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-sm{padding:.55rem 1.1rem;font-size:.82rem}
+
+.hero{padding:4rem 0 2rem;max-width:760px}
+.hero h1{font-family:var(--font-display);font-weight:var(--display-weight);letter-spacing:var(--display-tracking);text-transform:var(--display-transform);font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.05;margin:0 0 1rem;color:var(--accent);text-shadow:0 0 22px rgba(46,203,113,.5)}
+.hero p{font-size:1.1rem;color:var(--muted);margin:0;max-width:560px}
+.steps{list-style:none;display:flex;gap:1rem;flex-wrap:wrap;margin:2rem 0 0;padding:0}
+.steps li{display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem .55rem .6rem;border:1px solid var(--border);border-radius:var(--radius-btn);background:var(--surface);font-size:.88rem}
+.steps .n{display:grid;place-items:center;width:1.6rem;height:1.6rem;border-radius:50%;background:var(--btn-bg);color:var(--btn-fg);font-weight:700;font-size:.8rem}
+
+.section{margin:3.5rem 0}
+.section-title{font-family:var(--font-display);font-weight:var(--display-weight);letter-spacing:var(--display-tracking);text-transform:var(--display-transform);font-size:clamp(1.6rem,3vw,2.2rem);margin:0 0 .4rem;color:var(--accent)}
+.section-sub{color:var(--muted);margin:0 0 1.8rem;max-width:620px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.8rem}
+.card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden;box-shadow:var(--shadow)}
+.gallery .main{position:relative;aspect-ratio:1/1;background:#fff;overflow:hidden}
+.gallery .main img{width:100%;height:100%;object-fit:cover}
+.thumbs{display:flex;gap:.5rem;padding:.7rem .9rem 0;overflow-x:auto}
+.thumbs button{flex:0 0 52px;width:52px;height:52px;padding:0;border:2px solid transparent;border-radius:var(--radius-img);overflow:hidden;cursor:pointer;background:#fff;opacity:.7}
+.thumbs button[aria-current="true"]{border-color:var(--accent);opacity:1}
+.thumbs img{width:100%;height:100%;object-fit:cover}
+.card-body{display:flex;flex-direction:column;gap:.7rem;padding:1.2rem 1.3rem 1.4rem;flex:1}
+.card-body h3{font-family:var(--font-display);font-weight:var(--display-weight);letter-spacing:var(--display-tracking);text-transform:var(--display-transform);margin:0;font-size:1.05rem;line-height:1.15;color:var(--accent)}
+.price{font-weight:700;font-size:1.15rem;color:var(--accent-2)}
+.card-body p{margin:0;color:var(--muted);font-size:.92rem;flex:1}
+.field{display:flex;flex-direction:column;gap:.25rem;font-size:.8rem;color:var(--muted)}
+.field select{padding:.55rem .7rem;border-radius:var(--radius-img);border:1px solid var(--border);background:var(--bg-solid);cursor:pointer}
+.card-actions{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:var(--radius-btn);overflow:hidden}
+.stepper button{width:2.2rem;height:2.4rem;border:0;background:transparent;cursor:pointer;font-size:1.1rem}
+.stepper button:hover{background:var(--surface-2)}
+.stepper output{min-width:2rem;text-align:center;font-weight:600}
+.card-actions .btn{flex:1;min-width:150px}
+
+.order{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:1.6rem;box-shadow:var(--shadow)}
+.order-empty{margin:0;color:var(--muted);padding:1rem 0}
+.line{display:grid;grid-template-columns:56px 1fr auto auto;gap:.9rem;align-items:center;padding:.8rem 0;border-top:1px solid var(--border)}
+.line:first-child{border-top:0}
+.line img{width:56px;height:56px;border-radius:var(--radius-img);object-fit:cover;background:#fff}
+.line .name{font-weight:600;font-size:.95rem}
+.line .meta{font-size:.8rem;color:var(--muted)}
+.line .line-price{font-weight:600;font-size:.9rem;text-align:right}
+.line .remove{border:0;background:transparent;cursor:pointer;color:var(--muted);font-size:.8rem;text-decoration:underline}
+.line .remove:hover{color:var(--accent-2)}
+.order-foot{display:flex;gap:.8rem;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--border)}
+.order-total{font-weight:600}
+.order-total strong{font-size:1.15rem;color:var(--accent)}
+.order-btns{display:flex;gap:.7rem;flex-wrap:wrap}
+.toast{min-height:1.3rem;font-size:.85rem;color:var(--ok);margin-top:.6rem}
+
+.form-card{background:var(--cta-bg);color:var(--cta-fg);border-radius:var(--radius-card);padding:2rem;box-shadow:var(--shadow);border:1px solid var(--border)}
+.form-card .section-title{color:var(--accent)}
+.form-card p{color:inherit;opacity:.85}
+.form-box{margin-top:1.4rem;background:#fff;border-radius:var(--radius-img);overflow:hidden;min-height:260px}
+.form-box iframe{display:block;width:100%;border:0;min-height:600px}
+.legal{font-size:.8rem;margin-top:1rem;opacity:.8}.legal a{color:var(--accent-2)}
+
+.mobile-bar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 1.2rem calc(.8rem + env(safe-area-inset-bottom,0px));background:var(--header-bg);backdrop-filter:blur(12px);border-top:1px solid var(--border)}
+.mobile-bar.show{display:flex}
+.site-footer{margin-top:4rem;padding:2rem 0 5rem;border-top:1px solid var(--border);color:var(--muted);font-size:.85rem}
+.site-footer .wrap{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:space-between}
+.site-footer a{text-decoration:none}.site-footer a:hover{color:var(--accent)}
+
+@media (min-width:821px){.mobile-bar.show{display:none}}
+@media (max-width:620px){.line{grid-template-columns:48px 1fr auto}.line .remove{grid-column:2/4;justify-self:start}.line .line-price{grid-column:3;grid-row:1}.grid{grid-template-columns:1fr}.wrap{padding:0 1.1rem}.form-card{padding:1.3rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="gate-inner">
+        <div class="brand-mark" aria-hidden="true">🌵</div>
+        <h1 id="gateTitle">Apertura inminente</h1>
+        <p>La tienda OG de Game Boys Studios abre el <strong>31 de octubre a las 16:05</strong>.</p>
+        <div class="countdown" id="countdown" aria-live="polite">
+            <div><span id="cd-d">--</span><small>días</small></div>
+            <div><span id="cd-h">--</span><small>horas</small></div>
+            <div><span id="cd-m">--</span><small>min</small></div>
+            <div><span id="cd-s">--</span><small>seg</small></div>
+        </div>
+        <p class="gate-date">31 oct 2026 · 16:05 (hora peninsular)</p>
+    </div>
+</div>
+
+<div id="shop" hidden>
+<header class="site-header">
+    <div class="wrap">
+        <a class="brand" href="index.html" aria-label="Game Boys Studios, inicio">
+            <span class="brand-mark">🌵</span>
+            <span class="brand-name">Game Boys<small>Studios</small></span>
+        </a>
+        <div class="header-right">
+            <a class="back-link" href="index.html">Volver al inicio</a>
+        </div>
+    </div>
+</header>
+
+<main class="wrap">
+    <section class="hero">
+        <h1>Merch oficial de Game Boys Studios</h1>
+        <p>Una sudadera, una gorra, una botella, una mochila y una alfombrilla con nuestro logo. Elige tus piezas y envía el pedido con el formulario.</p>
+        <ol class="steps" aria-label="Cómo pedir">
+            <li><span class="n">1</span>Elige tus piezas</li>
+            <li><span class="n">2</span>Revisa tu pedido</li>
+            <li><span class="n">3</span>Envía el formulario</li>
+        </ol>
+    </section>
+
+    <section class="section" id="productos">
+        <h2 class="section-title">Productos</h2>
+        <p class="section-sub">Toca una miniatura para ver más fotos de cada pieza.</p>
+        <div class="grid" id="grid"></div>
+    </section>
+
+    <section class="section" id="resumen">
+        <h2 class="section-title">Tu pedido</h2>
+        <div class="order" aria-live="polite">
+            <div id="orderList"></div>
+            <div class="order-foot">
+                <span class="order-total" id="orderTotal">0 artículos · <strong>0,00 €</strong></span>
+                <div class="order-btns">
+                    <button type="button" class="btn btn-ghost btn-sm" id="copyBtn" disabled>Copiar resumen</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="continueBtn" disabled>Continuar al formulario</button>
+                </div>
+            </div>
+            <div class="toast" id="toast" role="status"></div>
+        </div>
+    </section>
+
+    <section class="section" id="pedido">
+        <div class="form-card">
+            <h2 class="section-title">Envía tu pedido</h2>
+            <p>Rellena el formulario con tus datos. Si el campo del pedido no se rellena solo, pulsa «Copiar resumen» arriba y pégalo. Te contactaremos para confirmar el pago.</p>
+            <div class="form-box" id="formBox"></div>
+            <p class="legal">Al enviar el formulario aceptas nuestra <a href="privacidad.html">Política de Privacidad</a>. El formulario lo gestiona Google Forms.</p>
+        </div>
+    </section>
+</main>
+
+<div class="mobile-bar" id="mobileBar">
+    <span id="mobileCount">0 artículos</span>
+    <a class="btn btn-primary btn-sm" href="#resumen">Ver pedido</a>
+</div>
+
+<footer class="site-footer">
+    <div class="wrap">
+        <span>© 2016–2026 Game Boys Studios</span>
+        <span><a href="privacidad.html">Privacidad</a> · <a href="terminos.html">Términos</a> · <a href="mailto:gameboystudio25@gmail.com">Contacto</a></span>
+    </div>
+</footer>
+</div>
+
+<script>
+var UNLOCK_AT = new Date("2026-10-31T16:05:00+02:00").getTime();
+
+function unlockShop(){
+    var gate = document.getElementById("gate");
+    var shop = document.getElementById("shop");
+    if(gate) gate.classList.add("hidden");
+    if(shop) shop.hidden = false;
+    initShop();
+}
+
+function tickGate(){
+    var now = Date.now();
+    var left = UNLOCK_AT - now;
+    if(left <= 0){ unlockShop(); return; }
+    var s = Math.floor(left / 1000);
+    var d = Math.floor(s / 86400); s %= 86400;
+    var h = Math.floor(s / 3600); s %= 3600;
+    var m = Math.floor(s / 60); s %= 60;
+    function pad(n){ return n < 10 ? "0"+n : String(n); }
+    document.getElementById("cd-d").textContent = pad(d);
+    document.getElementById("cd-h").textContent = pad(h);
+    document.getElementById("cd-m").textContent = pad(m);
+    document.getElementById("cd-s").textContent = pad(s);
+    setTimeout(tickGate, 1000);
+}
+
+if(Date.now() >= UNLOCK_AT){
+    unlockShop();
+} else {
+    tickGate();
+}
+
+var shopInited = false;
+function initShop(){
+    if(shopInited) return;
+    shopInited = true;
+
+var CONFIG = {
+    FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLSdbm9I79_vKiJunPbhpB9NDM_FAFF9ByesNJFuOYELm_ynxyw/viewform",
+    ENTRY_PEDIDO: "",
+    FORM_HEIGHT: 1500
+};
+
+var PRODUCTS = [
+    { id: "sudadera", name: "Sudadera con capucha",
+      sizes: ["S","M","L","XL","2XL","3XL","4XL","5XL"],
+      prices: { "S":26.99, "M":26.99, "L":27.99, "XL":28.99, "2XL":29.99, "3XL":30.99, "4XL":31.99, "5XL":32.99 },
+      desc: "Sudadera unisex azul marino con «Game Boys Studios» en el pecho y el logo en la espalda.",
+      images: ["merch/hoodie-1.png","merch/hoodie-2.png","merch/hoodie-3.png","merch/hoodie-4.png","merch/hoodie-5.png","merch/hoodie-6.png"] },
+    { id: "gorra", name: "Gorra trucker retro", price: 13.99,
+      desc: "Gorra trucker azul marino con el logo de Game Boys Studios en la parte frontal.",
+      images: ["merch/gorra-1.png"] },
+    { id: "botella", name: "Botella de acero inoxidable (17 oz)", price: 19.99,
+      desc: "Botella de acero inoxidable de 17 oz con el logo en una banda negra.",
+      images: ["merch/botella-1.png","merch/botella-2.png","merch/botella-3.png"] },
+    { id: "mochila", name: "Mochila de cuerdas", price: 17.99,
+      desc: "Mochila de cuerdas negra con el logo de Game Boys Studios.",
+      images: ["merch/mochila-1.png","merch/mochila-2.png"] },
+    { id: "alfombrilla", name: "Alfombrilla de ratón", price: 10.99,
+      desc: "Alfombrilla de ratón negra con el logo a todo color.",
+      images: ["merch/alfombrilla-1.png","merch/alfombrilla-2.png"] }
+];
+
+var cart = [];
+
+function $(s,r){return (r||document).querySelector(s);}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function plural(n){return n+(n===1?" artículo":" artículos");}
+function byId(id){return PRODUCTS.filter(function(p){return p.id===id;})[0];}
+function unitPrice(p, size){
+    if(p.prices && size) return p.prices[size] || p.prices["S"] || 0;
+    return p.price || 0;
+}
+function fmt(n){ return n.toFixed(2).replace(".", ",") + " €"; }
+function priceLabel(p){
+    if(p.prices){
+        var vals = Object.keys(p.prices).map(function(k){return p.prices[k];});
+        var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+        if(min === max) return fmt(min);
+        return fmt(min) + " – " + fmt(max);
+    }
+    return fmt(p.price || 0);
+}
+
+function renderGrid(){
+    $("#grid").innerHTML = PRODUCTS.map(function(p){
+        var thumbs = p.images.length>1 ? '<div class="thumbs">'+p.images.map(function(src,i){
+            return '<button type="button" data-thumb="'+i+'" aria-label="Ver foto '+(i+1)+' de '+esc(p.name)+'"'+(i===0?' aria-current="true"':'')+'><img src="'+src+'" alt="" loading="lazy"></button>';
+        }).join("")+'</div>' : "";
+        var size = p.sizes ? '<label class="field">Talla<select data-size>'+p.sizes.map(function(s){return '<option value="'+s+'">'+s+(p.prices?' — '+fmt(p.prices[s]):'')+'</option>';}).join("")+'</select></label>' : "";
+        return '<article class="card" data-id="'+p.id+'">'+
+          '<div class="gallery"><div class="main"><img src="'+p.images[0]+'" alt="'+esc(p.name)+'" data-main></div>'+thumbs+'</div>'+
+          '<div class="card-body"><h3>'+esc(p.name)+'</h3><div class="price">'+priceLabel(p)+'</div><p>'+esc(p.desc)+'</p>'+size+
+          '<div class="card-actions"><div class="stepper" role="group" aria-label="Cantidad"><button type="button" data-dec aria-label="Menos">−</button><output data-qty>1</output><button type="button" data-inc aria-label="Más">+</button></div>'+
+          '<button type="button" class="btn btn-primary" data-add>Añadir al pedido</button></div></div></article>';
+    }).join("");
+}
+$("#grid").addEventListener("click", function(e){
+    var card = e.target.closest(".card"); if(!card) return;
+    var p = byId(card.getAttribute("data-id"));
+    var th = e.target.closest("[data-thumb]");
+    if(th){
+        var i = +th.getAttribute("data-thumb");
+        $("[data-main]",card).src = p.images[i];
+        card.querySelectorAll("[data-thumb]").forEach(function(b){ b.removeAttribute("aria-current"); });
+        th.setAttribute("aria-current","true"); return;
+    }
+    var out = $("[data-qty]",card), q = +out.textContent;
+    if(e.target.closest("[data-inc]")){ out.textContent = Math.min(10,q+1); return; }
+    if(e.target.closest("[data-dec]")){ out.textContent = Math.max(1,q-1); return; }
+    var add = e.target.closest("[data-add]");
+    if(add){
+        var sel = $("[data-size]",card), size = sel ? sel.value : "";
+        addToCart(p.id, size, q);
+        out.textContent = 1;
+        var old = add.textContent; add.textContent = "Añadido ✓"; add.disabled = true;
+        setTimeout(function(){ add.textContent = old; add.disabled = false; }, 1200);
+    }
+});
+
+function addToCart(id,size,qty){
+    var hit = cart.filter(function(l){return l.id===id && l.size===size;})[0];
+    if(hit) hit.qty = Math.min(20, hit.qty+qty); else cart.push({id:id,size:size,qty:qty});
+    renderCart();
+}
+function changeQty(i,d){ cart[i].qty = Math.max(1,Math.min(20,cart[i].qty+d)); renderCart(); }
+function removeLine(i){ cart.splice(i,1); renderCart(); }
+function totalItems(){ return cart.reduce(function(n,l){return n+l.qty;},0); }
+function totalEuros(){
+    return cart.reduce(function(s,l){
+        var p = byId(l.id);
+        return s + unitPrice(p, l.size) * l.qty;
+    }, 0);
+}
+function summaryText(){
+    var lines = cart.map(function(l){
+        var p = byId(l.id);
+        var up = unitPrice(p, l.size);
+        return l.qty+" x "+p.name+(l.size?" (talla "+l.size+")":"")+" — "+fmt(up*l.qty);
+    });
+    lines.push("");
+    lines.push("Total: "+fmt(totalEuros()));
+    return lines.join("\n");
+}
+function renderCart(){
+    var n = totalItems(), list = $("#orderList"), euros = totalEuros();
+    if(!cart.length){
+        list.innerHTML = '<p class="order-empty">Todavía no has añadido nada. Elige una pieza en Productos.</p>';
+    } else {
+        list.innerHTML = cart.map(function(l,i){
+            var p = byId(l.id);
+            var up = unitPrice(p, l.size);
+            return '<div class="line"><img src="'+p.images[0]+'" alt="">'+
+              '<div><div class="name">'+esc(p.name)+'</div><div class="meta">'+(l.size?'Talla '+esc(l.size):'Talla única')+' · '+fmt(up)+'/ud</div></div>'+
+              '<div class="stepper" role="group" aria-label="Cantidad de '+esc(p.name)+'"><button type="button" data-line-dec="'+i+'" aria-label="Menos">−</button><output>'+l.qty+'</output><button type="button" data-line-inc="'+i+'" aria-label="Más">+</button></div>'+
+              '<div><div class="line-price">'+fmt(up*l.qty)+'</div><button type="button" class="remove" data-line-del="'+i+'">Quitar</button></div></div>';
+        }).join("");
+    }
+    $("#orderTotal").innerHTML = plural(n) + " · <strong>" + fmt(euros) + "</strong>";
+    $("#mobileCount").textContent = plural(n) + (n ? " · " + fmt(euros) : "");
+    $("#mobileBar").classList.toggle("show", n>0);
+    $("#copyBtn").disabled = $("#continueBtn").disabled = !cart.length;
+}
+$("#orderList").addEventListener("click", function(e){
+    var b;
+    if((b=e.target.closest("[data-line-inc]"))) changeQty(+b.getAttribute("data-line-inc"),1);
+    else if((b=e.target.closest("[data-line-dec]"))) changeQty(+b.getAttribute("data-line-dec"),-1);
+    else if((b=e.target.closest("[data-line-del]"))) removeLine(+b.getAttribute("data-line-del"));
+});
+function say(msg){ var t=$("#toast"); t.textContent=msg; clearTimeout(say._t); say._t=setTimeout(function(){t.textContent="";},3500); }
+$("#copyBtn").addEventListener("click", function(){
+    var txt = summaryText();
+    function fallback(){ var a=document.createElement("textarea"); a.value=txt; document.body.appendChild(a); a.select();
+        try{ document.execCommand("copy"); say("Resumen copiado. Pégalo en el formulario."); }catch(e){ say("No se pudo copiar. Selecciona el pedido a mano."); }
+        document.body.removeChild(a); }
+    if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(txt).then(function(){ say("Resumen copiado. Pégalo en el formulario."); }, fallback); }
+    else fallback();
+});
+$("#continueBtn").addEventListener("click", function(){
+    loadForm(true);
+    $("#pedido").scrollIntoView({behavior:"smooth"});
+});
+
+function formSrc(withPrefill){
+    var url = CONFIG.FORM_URL.split("?")[0];
+    var params = ["embedded=true"];
+    if(withPrefill && CONFIG.ENTRY_PEDIDO && cart.length){
+        var key = /^entry\./.test(CONFIG.ENTRY_PEDIDO) ? CONFIG.ENTRY_PEDIDO : "entry."+CONFIG.ENTRY_PEDIDO;
+        params.push("usp=pp_url", key+"="+encodeURIComponent(summaryText()));
+    }
+    return url+"?"+params.join("&");
+}
+function loadForm(withPrefill){
+    var box = $("#formBox");
+    if(!CONFIG.FORM_URL){
+        box.innerHTML = '<div class="form-setup"><strong>Falta enlazar tu Google Form.</strong></div>';
+        return;
+    }
+    var src = formSrc(withPrefill), f = box.querySelector("iframe");
+    if(!f){
+        box.innerHTML = '<iframe title="Formulario de pedido" loading="lazy" style="height:'+CONFIG.FORM_HEIGHT+'px">Cargando…</iframe>';
+        f = box.querySelector("iframe");
+    }
+    if(f.getAttribute("src")!==src) f.setAttribute("src", src);
+}
+
+renderGrid(); renderCart(); loadForm(false);
+}
+</script>
+</body>
+</html>
