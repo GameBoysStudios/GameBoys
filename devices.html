@@ -161,24 +161,31 @@ body.is-locked{overflow:hidden}
     <p class="lock-date">31 oct 2026 · 16:05</p>
   </div>
 </div>
-<nav class="navbar">
-    <div class="nav-container">
-        <a href="index.html" class="logo" style="text-decoration:none">
-            <span class="cactus-icon">🌵</span>
-            <span class="logo-text">GAME BOYS<br><small>STUDIOS</small></span>
-        </a>
-        <ul class="nav-menu">
-            <li><a href="index.html#home" class="nav-link">Inicio</a></li>
-            <li><a href="index.html#juegos" class="nav-link">Juegos</a></li>
-            <li><a href="index.html#comics" class="nav-link">Cómics</a></li>
-            <li><a href="index.html#movie" class="nav-link">Películas</a></li>
-            <li><a href="devices.html" class="nav-link" style="color:var(--color-cactus)">Dispositivos</a></li>
-            <li><a href="index.html#about" class="nav-link">Sobre Nosotros</a></li>
-            <li><a href="index.html#community" class="nav-link">Comunidad</a></li>
-            <li><a href="index.html#auth" class="nav-link">Cuenta</a></li>
-        </ul>
-    </div>
-</nav>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="navigateTo('home')">
+                <img src="logo.png" width="40" height="40" alt="Game Boys Studios" class="logo-image">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link" onclick="navigateTo('home')">Inicio</a></li>
+                <li><a href="#juegos" class="nav-link" onclick="navigateTo('juegos')">Juegos</a></li>
+                <li><a href="#comics" class="nav-link" onclick="navigateTo('comics')">Cómics</a></li>
+                <li><a href="#movie" class="nav-link" onclick="navigateTo('movie')">Películas</a></li>
+                <li><a href="devices.html" class="nav-link">Dispositivos</a></li>
+                <li><a href="tienda.html" class="nav-link">Merchandising</a></li>
+                <li><a href="alex.html" class="nav-link">Alex AI</a></li>
+                <li><a href="admin.html" class="nav-link" id="adminLink" style="display:none;">Admin</a></li>
+                <li><a href="desarrolladores.html" class="nav-link">Desarrollo</a></li>
+                <li><a href="#about" class="nav-link" onclick="navigateTo('about')">Sobre Nosotros</a></li>
+                <li><a href="#community" class="nav-link" onclick="navigateTo('community')">Comunidad</a></li>
+                <li><a href="#auth" class="nav-link" onclick="navigateTo('auth')">Cuenta</a></li>
+            </ul>
+            <div class="user-badge" id="userBadge" style="display:none;">
+                <span id="userEmail"></span>
+                <button onclick="logout()" class="logout-btn">Salir</button>
+            </div>
+        </div>
+    </nav>
 <main class="dv-wrap">
     <header class="dv-hero">
         <div>
@@ -225,29 +232,8 @@ body.is-locked{overflow:hidden}
                     <p>Gafas con una pequeña pantalla AR para ver la hora, notificaciones del móvil y más, controladas con tres botones en las patillas.</p>
                     <div class="dv-tags"><span>Pantalla AR</span><span>iPhone</span><span>3 botones</span><span>USB-C</span></div>
                     <div class="dv-card-actions">
-                        <a href="glasses.html" class="btn btn-primary dv-sm">Ver más</a>
-                        <a href="https://game-boys-studios.itch.io/" class="btn btn-outline dv-sm" target="_blank" rel="noopener">Lista de espera</a>
-                    </div>
-                </div>
-            </article>
-
-            <!-- ===== PLANTILLA PARA EL SIGUIENTE DISPOSITIVO =====
-            Copia el bloque <article class="dv-card"> de arriba, cambia nombre, texto, imagen
-            (devices/NOMBRE/card.jpg) y enlace (NOMBRE.html), y borra esta tarjeta de "Próximamente". -->
-            <article class="dv-card is-soon">
-                <div class="dv-card-media">
-                    <figure class="photo-slot " style="--ratio:4/3" data-label="Próximo dispositivo" data-file="devices/proximo/card.jpg" data-size="1200 × 900 px">
-  <img src="devices/proximo/card.jpg" alt="Próximo dispositivo" loading="lazy" onerror="this.remove()">
-  <figcaption>Próximo dispositivo</figcaption>
-</figure>
-                    <span class="dv-badge">Próximamente</span>
-                </div>
-                <div class="dv-card-body">
-                    <span class="dv-meta">Aún sin anunciar</span>
-                    <h3>Aquí irá el siguiente</h3>
-                    <p>Estamos trabajando en más ideas. Cuando una tenga prototipo, aparecerá aquí con su estado real.</p>
-                    <div class="dv-card-actions">
-                        <a href="https://discord.gg/b8F9XAaT8a" class="btn btn-outline dv-sm" target="_blank" rel="noopener">Síguelo en Discord</a>
+                        <a href="glasses.html" class="btn btn-primary">Ver más</a>
+                        <a class="btn btn-primary" data-waitlist-mail>Unirme a la lista de espera</a>
                     </div>
                 </div>
             </article>
@@ -330,6 +316,29 @@ body.is-locked{overflow:hidden}
         document.body.classList.remove('is-locked');
         setTimeout(function(){ lockEl.remove(); }, 700);
     }
+
+        // Abrir app de correo con el modelo elegido (lista de espera)
+    function openWaitlistMail(){
+        var subject = "Lista de espera Game Glasses";
+        var body =
+        "Hola Game Boys Studios,\n\n" +
+        "Quiero unirme a la lista de espera de Game Glasses.\n\n" +
+        
+        "Mi nombre: \n" +
+        "Comentarios: \n";
+        var url = "mailto:gameboystudio25@gmail.com?subject=" + encodeURIComponent(subject) +
+        "&body=" + encodeURIComponent(body);
+        window.location.href = url;
+    }
+
+    var waitBtn = document.getElementById("waitlistMailBtn");
+    if(waitBtn) waitBtn.addEventListener("click", openWaitlistMail);
+    document.querySelectorAll("[data-waitlist-mail]").forEach(function(a){
+        a.addEventListener("click", function(e){
+        e.preventDefault();
+        openWaitlistMail();
+        });
+    });
 
     function tickLock(){
         var ms = unlockAt - new Date();
