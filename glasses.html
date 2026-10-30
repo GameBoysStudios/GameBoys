@@ -143,6 +143,48 @@ body.is-locked{overflow:hidden}
 .dv-faq summary{color:var(--color-light)}.dv-faq summary::after{color:var(--color-cactus)}
 .dv-cta{background:linear-gradient(135deg,#07102a 0%,#0b1224 100%);border:2px solid rgba(46,203,113,.25);box-shadow:0 0 60px rgba(46,203,113,.08) inset}
 .dv-cta .dv-kicker{color:var(--color-orange)}.dv-cta h2{font-family:var(--font-display);color:var(--color-cactus)}.dv-cta p{color:var(--color-gray)}
+
+/* ----- configurador + lista de deseos ----- */
+.cfg{margin:4.5rem 0}
+.cfg-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:1.8rem;align-items:start}
+@media(max-width:900px){.cfg-grid{grid-template-columns:1fr}}
+.cfg-panel{padding:1.5rem;border-radius:16px}
+.cfg-group{margin-bottom:1.4rem}
+.cfg-group h3{margin:0 0 .7rem;font-size:1.05rem}
+.cfg-opts{display:flex;flex-direction:column;gap:.5rem}
+.cfg-opt{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:12px;cursor:pointer;border:1px solid transparent;transition:border-color .2s,background .2s}
+.cfg-opt input{accent-color:var(--cfg-accent,#c9a24b);width:1.1rem;height:1.1rem;flex-shrink:0}
+.cfg-opt .lab{flex:1;font-size:.92rem}
+.cfg-opt .prc{font-weight:700;font-size:.9rem;white-space:nowrap}
+.cfg-summary{padding:1.5rem;border-radius:16px;position:sticky;top:5rem}
+.cfg-summary h3{margin:0 0 1rem;font-size:1.1rem}
+.cfg-lines{font-size:.9rem;margin:0 0 1rem;padding:0;list-style:none}
+.cfg-lines li{display:flex;justify-content:space-between;gap:1rem;padding:.35rem 0;border-bottom:1px solid rgba(128,128,128,.15)}
+.cfg-total{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;font-size:1.25rem;margin:1rem 0 1.2rem}
+.cfg-actions{display:flex;flex-direction:column;gap:.6rem}
+.cfg-note{font-size:.78rem;opacity:.8;margin:.8rem 0 0}
+.wish{margin-top:1.5rem}
+.wish h3{margin:0 0 .8rem;font-size:1.05rem}
+.wish-empty{font-size:.9rem;opacity:.75;margin:0}
+.wish-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.7rem}
+.wish-item{padding:1rem 1.1rem;border-radius:12px;display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center;justify-content:space-between}
+.wish-item .w-info{flex:1;min-width:180px;font-size:.88rem}
+.wish-item .w-info strong{display:block;margin-bottom:.2rem}
+.wish-item .w-price{font-weight:700;white-space:nowrap}
+.wish-item .w-del{border:0;background:transparent;cursor:pointer;text-decoration:underline;font-size:.8rem;opacity:.8}
+
+.cfg-panel,.cfg-summary,.wish-item{background:linear-gradient(135deg,rgba(46,203,113,.08),rgba(255,107,53,.04));border:1px solid var(--color-border,#1a1f3a)}
+.cfg-group h3,.cfg-summary h3,.wish h3{font-family:var(--font-display,Orbitron,sans-serif);color:var(--color-cactus,#2ecb71);text-transform:uppercase;letter-spacing:1px;font-size:.95rem}
+.cfg-opt{background:rgba(0,0,0,.25);border-color:var(--color-border,#1a1f3a);color:var(--color-light,#e8e8e8)}
+.cfg-opt.is-on,.cfg-opt:has(input:checked){border-color:var(--color-cactus,#2ecb71);box-shadow:0 0 12px rgba(46,203,113,.2)}
+.cfg-opt .prc{color:var(--color-orange,#ff6b35)}
+.cfg-total{color:var(--color-light,#e8e8e8)}
+.cfg-total span:last-child{color:var(--color-cactus,#2ecb71)}
+.wish-item .w-price{color:var(--color-orange,#ff6b35)}
+.wish-item .w-del{color:var(--color-gray,#999)}
+.wish-item .w-del:hover{color:var(--color-orange,#ff6b35)}
+.cfg-note{color:var(--color-gray,#999)}
+
 </style>
 </head>
 <body class="is-locked">
@@ -161,24 +203,31 @@ body.is-locked{overflow:hidden}
     <p class="lock-date">31 oct 2026 · 16:05</p>
   </div>
 </div>
-<nav class="navbar">
-    <div class="nav-container">
-        <a href="index.html" class="logo" style="text-decoration:none">
-            <span class="cactus-icon">🌵</span>
-            <span class="logo-text">GAME BOYS<br><small>STUDIOS</small></span>
-        </a>
-        <ul class="nav-menu">
-            <li><a href="index.html#home" class="nav-link">Inicio</a></li>
-            <li><a href="index.html#juegos" class="nav-link">Juegos</a></li>
-            <li><a href="index.html#comics" class="nav-link">Cómics</a></li>
-            <li><a href="index.html#movie" class="nav-link">Películas</a></li>
-            <li><a href="devices.html" class="nav-link" style="color:var(--color-cactus)">Dispositivos</a></li>
-            <li><a href="index.html#about" class="nav-link">Sobre Nosotros</a></li>
-            <li><a href="index.html#community" class="nav-link">Comunidad</a></li>
-            <li><a href="index.html#auth" class="nav-link">Cuenta</a></li>
-        </ul>
-    </div>
-</nav>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="navigateTo('home')">
+                <img src="logo.png" width="40" height="40" alt="Game Boys Studios" class="logo-image">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link" onclick="navigateTo('home')">Inicio</a></li>
+                <li><a href="#juegos" class="nav-link" onclick="navigateTo('juegos')">Juegos</a></li>
+                <li><a href="#comics" class="nav-link" onclick="navigateTo('comics')">Cómics</a></li>
+                <li><a href="#movie" class="nav-link" onclick="navigateTo('movie')">Películas</a></li>
+                <li><a href="devices.html" class="nav-link">Dispositivos</a></li>
+                <li><a href="tienda.html" class="nav-link">Merchandising</a></li>
+                <li><a href="alex.html" class="nav-link">Alex AI</a></li>
+                <li><a href="admin.html" class="nav-link" id="adminLink" style="display:none;">Admin</a></li>
+                <li><a href="desarrolladores.html" class="nav-link">Desarrollo</a></li>
+                <li><a href="#about" class="nav-link" onclick="navigateTo('about')">Sobre Nosotros</a></li>
+                <li><a href="#community" class="nav-link" onclick="navigateTo('community')">Comunidad</a></li>
+                <li><a href="#auth" class="nav-link" onclick="navigateTo('auth')">Cuenta</a></li>
+            </ul>
+            <div class="user-badge" id="userBadge" style="display:none;">
+                <span id="userEmail"></span>
+                <button onclick="logout()" class="logout-btn">Salir</button>
+            </div>
+        </div>
+    </nav>
 <main class="dv-wrap">
     <nav class="dv-crumbs" aria-label="Migas"><a href="devices.html">Dispositivos</a> <span>›</span> Game Glasses</nav>
 
@@ -188,13 +237,14 @@ body.is-locked{overflow:hidden}
             <h1 class="dv-title">Game <span class="accent">Glasses</span></h1>
             <p class="dv-lead">Unas gafas con una pequeña pantalla AR en una lente. Mira la hora, recibe avisos del móvil
             y muévete por el menú con tres botones en las patillas, sin sacar el teléfono.</p>
-            <div class="dv-date">📅 Lista de espera: 21 de diciembre · The Gold Decade <span id="gwCount" class="dv-count"></span></div>
+            <div class="dv-date">📅 Lista de espera: 21 de diciembre<span id="gwCount" class="dv-count"></span></div>
             <div class="dv-actions">
                 <!-- TODO: cambia este enlace por la página de itch.io de Game Glasses cuando exista -->
-                <a href="https://game-boys-studios.itch.io/" class="btn btn-primary" target="_blank" rel="noopener">Unirme a la lista de espera</a>
+                <a href="#configurador" class="btn btn-primary" data-waitlist-mail>Unirme a la lista de espera</a>
+                <a href="#configurador" class="btn btn-secondary">Configurar modelo</a>
                 <a href="#galeria" class="btn btn-secondary">Ver galería</a>
             </div>
-            <p class="dv-small">La lista de espera es gratuita y no pide pago. Precio y entrega: por confirmar.</p>
+            <p class="dv-small">La lista de espera es gratuita: se abre tu correo con el modelo elegido. Precio y entrega: por confirmar.</p>
         </div>
         <figure class="photo-slot is-hero" style="--ratio:5/4" data-label="Render principal · vista 3/4" data-file="devices/glasses/hero.jpg" data-size="1600 × 1280 px">
   <img src="devices/glasses/hero.jpg" alt="Game Glasses, vista de tres cuartos (render)" loading="lazy" onerror="this.remove()">
@@ -351,6 +401,49 @@ body.is-locked{overflow:hidden}
         </div>
     </section>
 
+    
+    <section class="dv-section cfg" id="configurador">
+        <div class="dv-head">
+            <h2>Configura tu modelo</h2>
+            <p>Elige lentes, montura y funda. Guarda el modelo exacto en tu lista de deseos (se guarda en este dispositivo).</p>
+        </div>
+        <div class="cfg-grid">
+            <div class="cfg-panel" id="cfgPanel">
+                <div class="cfg-group">
+                    <h3>Lentes</h3>
+                    <div class="cfg-opts" id="optLentes" role="radiogroup" aria-label="Lentes"></div>
+                </div>
+                <div class="cfg-group">
+                    <h3>Montura</h3>
+                    <div class="cfg-opts" id="optMontura" role="radiogroup" aria-label="Montura"></div>
+                </div>
+                <div class="cfg-group">
+                    <h3>Funda</h3>
+                    <div class="cfg-opts" id="optFunda" role="radiogroup" aria-label="Funda"></div>
+                </div>
+            </div>
+            <div>
+                <div class="cfg-summary" id="cfgSummary">
+                    <h3>Tu modelo</h3>
+                    <ul class="cfg-lines" id="cfgLines"></ul>
+                    <div class="cfg-total"><span>Total orientativo</span><span id="cfgTotal">0,00 €</span></div>
+                    <div class="cfg-actions">
+                        <button type="button" class="btn btn-primary" id="waitlistMailBtn">Unirme a la lista de espera (email)</button>
+                        <button type="button" class="btn btn-secondary" id="wishSave">Guardar en lista de deseos</button>
+                        <button type="button" class="btn btn-secondary" id="wishCopy">Copiar resumen</button>
+                    </div>
+                    <p class="cfg-note">Precios orientativos. Game Glasses aún no está a la venta. La lista de deseos se guarda solo en tu navegador.</p>
+                    <p class="cfg-note" id="wishToast" role="status" style="min-height:1.2em;color:inherit"></p>
+                </div>
+                <div class="wish" id="wishBox">
+                    <h3>Lista de deseos <span id="wishCount"></span></h3>
+                    <p class="wish-empty" id="wishEmpty">Aún no has guardado ningún modelo.</p>
+                    <ul class="wish-list" id="wishList"></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="dv-cta">
         <div>
             <span class="dv-kicker">Lista de espera</span>
@@ -358,7 +451,7 @@ body.is-locked{overflow:hidden}
             <p>Apúntate gratis y sigue el desarrollo en Discord y YouTube.</p>
         </div>
         <div class="dv-actions">
-            <a href="https://game-boys-studios.itch.io/" class="btn btn-primary" target="_blank" rel="noopener">Lista de espera</a>
+            <a href="#configurador" class="btn btn-primary" data-waitlist-mail>Lista de espera</a>
             <a href="https://discord.gg/b8F9XAaT8a" class="btn btn-secondary" target="_blank" rel="noopener">Discord</a>
             <a href="https://www.youtube.com/channel/UCzpzKxcMGj8rDplhZzBddjw" class="btn btn-secondary" target="_blank" rel="noopener">YouTube</a>
         </div>
@@ -367,7 +460,7 @@ body.is-locked{overflow:hidden}
     <script>
     (function(){
         // Temporizador de desbloqueo de página: 31 oct 2026, 16:05 (hora local del visitante)
-        var unlockAt = new Date(2026, 9, 31, 16, 5, 0); // mes 9 = octubre
+        var unlockAt = new Date("2026-10-31T16:05:00+01:00"); // 31 oct 2026 16:05 hora peninsular (CET)
         var lockEl = document.getElementById('page-lock');
         var dEl = document.getElementById('lockD');
         var hEl = document.getElementById('lockH');
@@ -418,6 +511,188 @@ body.is-locked{overflow:hidden}
         tick(); setInterval(tick, 60000);
     })();
     </script>
+<script>
+
+(function(){
+  var LENTES = [
+    {id:"sin", name:"Sin cristal", price:54.99},
+    {id:"negro", name:"Cristal negro polarizado", price:59.99},
+    {id:"azul", name:"Cristal azul polarizado", price:59.99},
+    {id:"founders-lente", name:"Founders Limited Edition", price:69.99}
+  ];
+  var MONTURA = [
+    {id:"negra", name:"Negra", price:0},
+    {id:"dorada", name:"Dorada", price:5},
+    {id:"founders-montura", name:"Founders Limited Edition", price:10}
+  ];
+  var FUNDA = [
+    {id:"ninguna", name:"Ninguna", price:0},
+    {id:"3d", name:"Modelado 3D", price:10}
+  ];
+  var KEY = "gbs-glasses-wishlist";
+  var sel = {lente: LENTES[0].id, montura: MONTURA[0].id, funda: FUNDA[0].id};
+
+  function $(id){ return document.getElementById(id); }
+  function fmt(n){ return n.toFixed(2).replace(".", ",") + " €"; }
+  function byId(arr, id){ for(var i=0;i<arr.length;i++) if(arr[i].id===id) return arr[i]; return arr[0]; }
+  function total(){
+    return byId(LENTES,sel.lente).price + byId(MONTURA,sel.montura).price + byId(FUNDA,sel.funda).price;
+  }
+  function modelLabel(){
+    return byId(LENTES,sel.lente).name + " · " + byId(MONTURA,sel.montura).name + " · " + byId(FUNDA,sel.funda).name;
+  }
+  function modelKey(){ return sel.lente+"|"+sel.montura+"|"+sel.funda; }
+
+  function renderOpts(containerId, arr, group, current){
+    var box = $(containerId); if(!box) return;
+    box.innerHTML = arr.map(function(o){
+      var checked = o.id===current ? " checked" : "";
+      var extra = o.price>0 ? ("+" + fmt(o.price)) : (group==="lente" ? fmt(o.price) : "Incluido");
+      if(group==="lente") extra = fmt(o.price);
+      return '<label class="cfg-opt"><input type="radio" name="'+group+'" value="'+o.id+'"'+checked+'>'+
+        '<span class="lab">'+o.name+'</span><span class="prc">'+extra+'</span></label>';
+    }).join("");
+    box.querySelectorAll("input").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        sel[group==="lente"?"lente":group==="montura"?"montura":"funda"] = inp.value;
+        updateSummary();
+        highlight();
+      });
+    });
+  }
+  function highlight(){
+    document.querySelectorAll(".cfg-opt").forEach(function(lab){
+      var inp = lab.querySelector("input");
+      lab.classList.toggle("is-on", inp && inp.checked);
+    });
+  }
+  function updateSummary(){
+    var L = byId(LENTES,sel.lente), M = byId(MONTURA,sel.montura), F = byId(FUNDA,sel.funda);
+    $("cfgLines").innerHTML =
+      "<li><span>Lentes: "+L.name+"</span><span>"+fmt(L.price)+"</span></li>"+
+      "<li><span>Montura: "+M.name+"</span><span>"+(M.price?fmt(M.price):"0,00 €")+"</span></li>"+
+      "<li><span>Funda: "+F.name+"</span><span>"+(F.price?fmt(F.price):"0,00 €")+"</span></li>";
+    $("cfgTotal").textContent = fmt(total());
+    highlight();
+  }
+
+  function loadWish(){
+    try{ return JSON.parse(localStorage.getItem(KEY)||"[]"); }catch(e){ return []; }
+  }
+  function saveWish(list){
+    try{ localStorage.setItem(KEY, JSON.stringify(list)); }catch(e){}
+  }
+  function toast(msg){
+    var t=$("wishToast"); if(!t) return;
+    t.textContent=msg;
+    clearTimeout(toast._t);
+    toast._t=setTimeout(function(){t.textContent="";},3200);
+  }
+  function renderWish(){
+    var list = loadWish();
+    var empty = $("wishEmpty"), ul = $("wishList"), cnt = $("wishCount");
+    if(cnt) cnt.textContent = list.length ? "("+list.length+")" : "";
+    if(!list.length){
+      if(empty) empty.style.display = "";
+      if(ul) ul.innerHTML = "";
+      return;
+    }
+    if(empty) empty.style.display = "none";
+    ul.innerHTML = list.map(function(item, i){
+      return '<li class="wish-item" data-i="'+i+'">'+
+        '<div class="w-info"><strong>'+item.label+'</strong>'+
+        '<span>'+item.lenteName+' · '+item.monturaName+' · '+item.fundaName+'</span></div>'+
+        '<span class="w-price">'+fmt(item.total)+'</span>'+
+        '<button type="button" class="w-del" data-del="'+i+'">Quitar</button></li>';
+    }).join("");
+  }
+
+  if(!$("optLentes")) return;
+  renderOpts("optLentes", LENTES, "lente", sel.lente);
+  renderOpts("optMontura", MONTURA, "montura", sel.montura);
+  renderOpts("optFunda", FUNDA, "funda", sel.funda);
+  updateSummary();
+  renderWish();
+
+  $("wishSave").addEventListener("click", function(){
+    var list = loadWish();
+    var k = modelKey();
+    if(list.some(function(x){return x.key===k;})){
+      toast("Este modelo ya está en tu lista de deseos.");
+      return;
+    }
+    list.push({
+      key: k,
+      lente: sel.lente, montura: sel.montura, funda: sel.funda,
+      lenteName: byId(LENTES,sel.lente).name,
+      monturaName: byId(MONTURA,sel.montura).name,
+      fundaName: byId(FUNDA,sel.funda).name,
+      label: "Game Glasses",
+      total: total(),
+      savedAt: new Date().toISOString()
+    });
+    saveWish(list);
+    renderWish();
+    toast("Modelo guardado en la lista de deseos.");
+  });
+
+  $("wishCopy").addEventListener("click", function(){
+    var txt = "Game Glasses\n"+
+      "Lentes: "+byId(LENTES,sel.lente).name+"\n"+
+      "Montura: "+byId(MONTURA,sel.montura).name+"\n"+
+      "Funda: "+byId(FUNDA,sel.funda).name+"\n"+
+      "Total orientativo: "+fmt(total());
+    function ok(){ toast("Resumen copiado."); }
+    function fail(){
+      var a=document.createElement("textarea"); a.value=txt; document.body.appendChild(a); a.select();
+      try{ document.execCommand("copy"); ok(); }catch(e){ toast("No se pudo copiar."); }
+      document.body.removeChild(a);
+    }
+    if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(ok, fail);
+    else fail();
+  });
+
+  $("wishList").addEventListener("click", function(e){
+    var b = e.target.closest("[data-del]");
+    if(!b) return;
+    var i = +b.getAttribute("data-del");
+    var list = loadWish();
+    list.splice(i,1);
+    saveWish(list);
+    renderWish();
+    toast("Eliminado de la lista de deseos.");
+  });
+
+  // Abrir app de correo con el modelo elegido (lista de espera)
+  function openWaitlistMail(){
+    var L = byId(LENTES, sel.lente), M = byId(MONTURA, sel.montura), F = byId(FUNDA, sel.funda);
+    var subject = "Lista de espera Game Glasses";
+    var body =
+      "Hola Game Boys Studios,\n\n" +
+      "Quiero unirme a la lista de espera de Game Glasses.\n\n" +
+      "Modelo que me interesa:\n" +
+      "- Lentes: " + L.name + " (" + fmt(L.price) + ")\n" +
+      "- Montura: " + M.name + " (" + (M.price ? fmt(M.price) : "incluido") + ")\n" +
+      "- Funda: " + F.name + " (" + (F.price ? fmt(F.price) : "incluido") + ")\n" +
+      "- Total orientativo: " + fmt(total()) + "\n\n" +
+      "Mi nombre: \n" +
+      "Comentarios: \n";
+    var url = "mailto:gameboystudio25@gmail.com?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+    window.location.href = url;
+  }
+  var waitBtn = document.getElementById("waitlistMailBtn");
+  if(waitBtn) waitBtn.addEventListener("click", openWaitlistMail);
+  document.querySelectorAll("[data-waitlist-mail]").forEach(function(a){
+    a.addEventListener("click", function(e){
+      e.preventDefault();
+      openWaitlistMail();
+    });
+  });
+
+})();
+
+</script>
 </main>
 <footer class="footer">
     <div class="footer-content">
