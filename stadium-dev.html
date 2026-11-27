@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de desarrollo | Stadium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/stadium-ui.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+  .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+  @media (max-width: 700px) { .editor-grid { grid-template-columns: 1fr; } }
+  .cover-preview { width: 96px; height: 128px; border-radius: 8px; object-fit: cover; background: var(--color-card); border: 1px solid var(--color-border); }
+  .reject-box { display: none; border-left: 3px solid var(--color-orange); background: rgba(255,107,53,.1); padding: .7rem .9rem; border-radius: 0 8px 8px 0; font-size: .88rem; margin-bottom: 1rem; }
+  .device-card { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    border: 1px solid var(--color-border); border-radius: 10px; padding: .85rem 1rem; background: rgba(5,8,16,.45); }
+  .device-card + .device-card { margin-top: .7rem; }
+  .device-card h3 { margin: 0 0 .2rem; font-size: .98rem; }
+  .device-card code { color: var(--color-muted); font-size: .76rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; }
+  .chip { border: 1px solid var(--color-border); border-radius: 999px; padding: .18rem .55rem; font-size: .74rem; color: var(--color-muted); }
+  .chip b { color: var(--color-text); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate"></div>
+
+<div id="app" style="display:none">
+  <div id="headerHost"></div>
+  <main class="wrap">
+    <div class="page-head">
+      <div>
+        <h1>Panel de desarrollo</h1>
+        <p>Publica tus juegos en la tienda de la consola Stadium.</p>
+      </div>
+      <button class="btn btn-primary" id="btnNew">+ Nuevo juego</button>
+    </div>
+
+    <div class="note" style="margin-bottom:1.2rem">
+      Guarda un borrador y envíalo a revisión cuando la ficha y el paquete estén listos.
+      El equipo de Game Boys revisa cada envío antes de que aparezca en las consolas.
+    </div>
+
+    <div id="list" class="games-list"></div>
+
+    <section class="card" id="devicesCard" style="display:none;margin-top:1.6rem">
+      <div class="page-head" style="margin-bottom:.6rem">
+        <div>
+          <h2>Consolas conectadas</h2>
+          <p class="hint" style="margin:0">Estado real de cada Stadium: vinculación, ajustes y última sincronización.</p>
+        </div>
+        <button class="btn btn-outline btn-sm" id="btnReloadDevices">Actualizar</button>
+      </div>
+      <div id="devicesList"></div>
+    </section>
+  </main>
+</div>
+
+<!-- EDITOR -->
+<div class="modal-bg" id="editor">
+  <div class="modal">
+    <h2 id="editorTitle">Nuevo juego</h2>
+    <div class="reject-box" id="rejectBox"></div>
+    <form id="gameForm">
+      <div class="field">
+        <label for="fTitle">Título *</label>
+        <input id="fTitle" maxlength="80" required>
+      </div>
+      <div class="editor-grid">
+        <div class="field">
+          <label for="fShort">Descripción corta (ES) *</label>
+          <input id="fShort" maxlength="140" placeholder="Una línea que enganche">
+        </div>
+        <div class="field">
+          <label for="fLongEn">Short description (EN)</label>
+          <input id="fLongEn" maxlength="140" placeholder="Optional English tagline">
+        </div>
+      </div>
+      <div class="field">
+        <label for="fLong">Descripción larga (ES) *</label>
+        <textarea id="fLong" maxlength="2000"></textarea>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="fPrice">Precio en euros (0 = gratis) *</label>
+          <input id="fPrice" type="number" min="0" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <label for="fFormat">Formato</label>
+          <select id="fFormat">
+            <option value="native">Juego completo</option>
+            <option value="demo">Demo</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fVersion">Versión</label>
+          <input id="fVersion" maxlength="20" placeholder="1.0.0">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="fLang">Idioma</label>
+          <input id="fLang" maxlength="40" placeholder="Español / English">
+        </div>
+        <div class="field">
+          <label for="fTags">Etiquetas</label>
+          <input id="fTags" maxlength="120" placeholder="aventura, retro, 1 jugador">
+        </div>
+      </div>
+      <div class="field">
+        <label for="fCover">URL de portada * <span class="sub">(vertical 3:4, mínimo 600×800)</span></label>
+        <div style="display:flex;gap:1rem;align-items:flex-start">
+          <input id="fCover" placeholder="https://…/portada.jpg" style="flex:1">
+          <img id="coverPreview" class="cover-preview" alt="">
+        </div>
+      </div>
+      <div class="field">
+        <label for="fShots">Capturas (una URL por línea)</label>
+        <textarea id="fShots" placeholder="https://…/captura1.jpg"></textarea>
+      </div>
+      <div class="field">
+        <label for="fMain" id="mainLabel">URL de descarga * <span class="sub">(ZIP del juego)</span></label>
+        <input id="fMain" placeholder="https://…/mi-juego-1.0.zip">
+        <div class="sub" id="mainHelp">En juegos gratis la consola descarga y descomprime este ZIP.</div>
+      </div>
+      <div class="field">
+        <label for="fSha">SHA-256 del paquete (opcional, recomendado)</label>
+        <input id="fSha" placeholder="a1b2c3…">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="btnClose">Cerrar</button>
+        <button type="button" class="btn btn-outline" id="btnDraft">Guardar borrador</button>
+        <button type="submit" class="btn btn-primary" id="btnReview">Enviar a revisión</button>
+      </div>
+      <p class="sub" id="saveHint" style="text-align:right;margin:.6rem 0 0"></p>
+    </form>
+  </div>
+</div>
+
+<script src="assets/stadium-web.js"></script>
+<script>
+(() => {
+  const state = { user: null, role: 'user', games: [], editing: null };
+
+  const list = document.getElementById('list');
+  const modal = document.getElementById('editor');
+  const form = document.getElementById('gameForm');
+  const preview = document.getElementById('coverPreview');
+  const priceInput = document.getElementById('fPrice');
+  const mainLabel = document.getElementById('mainLabel');
+  const mainHelp = document.getElementById('mainHelp');
+  const rejectBox = document.getElementById('rejectBox');
+  const saveHint = document.getElementById('saveHint');
+
+  SW.mountGate(async (user) => {
+    state.user = user;
+    state.role = await SW.ensureDeveloper(user);
+    document.getElementById('headerHost').innerHTML = SW.header(user, 'DEV · STADIUM');
+    document.getElementById('swLogout').addEventListener('click', SW.signOut);
+    await loadGames();
+    loadDevices();
+  }, { title: 'PANEL DE DESARROLLO', subtitle: 'Publica y gestiona tus juegos de Stadium.' });
+
+  document.getElementById('btnReloadDevices').addEventListener('click', () => loadDevices());
+
+  async function loadDevices() {
+    const card = document.getElementById('devicesCard');
+    const host = document.getElementById('devicesList');
+    if (!state.role || !['admin', 'developer'].includes(state.role)) return;
+    card.style.display = 'block';
+    host.innerHTML = '<div class="empty"><div class="icon">⏳</div><p>Cargando consolas…</p></div>';
+    try {
+      const snap = await SW.db.collection(SW.COL_DEVICES).limit(50).get();
+      const devices = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      devices.sort((a, b) => (b.lastSeen || '').localeCompare(a.lastSeen || ''));
+      if (!devices.length) {
+        host.innerHTML = '<div class="empty"><div class="icon">🕹️</div><p>Ninguna consola registrada todavía.</p></div>';
+        return;
+      }
+      host.innerHTML = devices.map((device) => {
+        const linked = !!device.userId;
+        const chips = SW.settingsSummary(device.settings, 6)
+          || '<span class="chip">Sin ajustes sincronizados</span>';
+        return `<div class="device-card">
+          <div style="flex:1 1 340px">
+            <h3>${SW.esc(device.name || 'Stadium')}</h3>
+            <code>${SW.esc(device.id)}</code>
+            <div class="meta" style="color:var(--color-muted);font-size:.8rem;margin-top:.25rem">
+              ${SW.esc(device.model || 'stadium')} · ${linked ? 'vinculada' : (device.linkCode ? 'esperando código' : 'sin cuenta')}
+              · último contacto ${SW.fmtDateTime(device.lastSeen)}
+            </div>
+            <div class="chips">${chips}</div>
+            <div class="meta" style="color:var(--color-muted);font-size:.74rem;margin-top:.35rem">
+              Ajustes: ${device.settingsUpdatedAt ? SW.fmtDateTime(device.settingsUpdatedAt) : 'sin sincronizar'}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch (err) {
+      host.innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>${SW.esc(SW.friendlyError(err))}</p></div>`;
+    }
+  }
+
+  async function loadGames() {
+    list.innerHTML = '<div class="empty"><div class="icon">⏳</div><p>Cargando tus juegos…</p></div>';
+    try {
+      const snap = await SW.db.collection(SW.COL_GAMES)
+        .where('developerId', '==', state.user.uid).get();
+      state.games = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      state.games.sort((a, b) => toMillis(b.updatedAt) - toMillis(a.updatedAt));
+      render();
+    } catch (err) {
+      list.innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>${SW.esc(SW.friendlyError(err))}</p></div>`;
+    }
+  }
+
+  const toMillis = (ts) => (ts && ts.toMillis ? ts.toMillis() : 0);
+
+  function render() {
+    if (!state.games.length) {
+      list.innerHTML = `<div class="empty"><div class="icon">🎮</div>
+        <p>Todavía no tienes juegos. Crea el primero con «Nuevo juego».</p></div>`;
+      return;
+    }
+    list.innerHTML = state.games.map((game) => {
+      const cover = game.coverUrl
+        ? `<img class="cover" src="${SW.esc(game.coverUrl)}" alt="" loading="lazy">`
+        : '<div class="cover"></div>';
+      const canSubmit = game.status === 'draft' || game.status === 'rejected';
+      const canEdit = game.status === 'draft' || game.status === 'rejected';
+      const price = game.type === 'paid' || Number(game.priceEur) > 0
+        ? SW.money(game.priceEur)
+        : (game.priceLabel || 'Gratis');
+      return `
+        <article class="game-row">
+          ${cover}
+          <div>
+            <h3>${SW.esc(game.title)}</h3>
+            <div class="meta">
+              ${SW.statusBadge(game.status)}
+              <span>${SW.esc(price)}</span>
+              <span>${SW.esc(game.version || 'sin versión')}</span>
+              <span>Actualizado ${SW.fmtDate(game.updatedAt)}</span>
+            </div>
+            ${game.status === 'rejected' && game.rejectReason
+              ? `<div class="meta" style="color:var(--color-orange);margin-top:.4rem">Motivo: ${SW.esc(game.rejectReason)}</div>` : ''}
+          </div>
+          <div class="actions">
+            ${canEdit ? `<button class="btn btn-outline btn-sm" data-edit="${SW.esc(game.id)}">Editar</button>` : ''}
+            ${canSubmit ? `<button class="btn btn-primary btn-sm" data-submit="${SW.esc(game.id)}">Enviar a revisión</button>` : ''}
+            ${game.status === 'draft' ? `<button class="btn btn-danger btn-sm" data-delete="${SW.esc(game.id)}">Eliminar</button>` : ''}
+          </div>
+        </article>`;
+    }).join('');
+  }
+
+  list.addEventListener('click', async (event) => {
+    const editId = event.target.getAttribute('data-edit');
+    const submitId = event.target.getAttribute('data-submit');
+    const deleteId = event.target.getAttribute('data-delete');
+    if (editId) return openEditor(state.games.find((g) => g.id === editId));
+    if (submitId) return submitGame(state.games.find((g) => g.id === submitId));
+    if (deleteId) {
+      if (!confirm('¿Eliminar este borrador?')) return;
+      await SW.db.collection(SW.COL_GAMES).doc(deleteId).delete();
+      return loadGames();
+    }
+  });
+
+  function openEditor(game) {
+    state.editing = game || null;
+    document.getElementById('editorTitle').textContent = game ? 'Editar juego' : 'Nuevo juego';
+    document.getElementById('fTitle').value = game?.title || '';
+    document.getElementById('fShort').value = game?.shortDescription || '';
+    document.getElementById('fLongEn').value = game?.description_en || '';
+    document.getElementById('fLong').value = game?.longDescription || '';
+    priceInput.value = Number(game?.priceEur || 0);
+    document.getElementById('fFormat').value = game?.format || 'native';
+    document.getElementById('fVersion').value = game?.version || '';
+    document.getElementById('fLang').value = game?.language || 'Español';
+    document.getElementById('fTags').value = (game?.tags || []).join(', ');
+    document.getElementById('fCover').value = game?.coverUrl || '';
+    document.getElementById('fShots').value = (game?.screenshots || []).join('\n');
+    document.getElementById('fMain').value = game?.mainUrl || '';
+    document.getElementById('fSha').value = game?.sha256 || '';
+    rejectBox.style.display = game?.status === 'rejected' ? 'block' : 'none';
+    rejectBox.textContent = game?.rejectReason ? 'Rechazado: ' + game.rejectReason : '';
+    saveHint.textContent = game ? 'Estado actual: ' + game.status : '';
+    updateCover();
+    updatePriceLabels();
+    modal.classList.add('open');
+    document.getElementById('fTitle').focus();
+  }
+
+  function closeEditor() {
+    modal.classList.remove('open');
+    state.editing = null;
+  }
+
+  function updateCover() {
+    const url = document.getElementById('fCover').value.trim();
+    preview.src = url;
+    preview.style.display = url ? 'block' : 'none';
+  }
+
+  function updatePriceLabels() {
+    const paid = Number(priceInput.value || 0) > 0;
+    mainLabel.innerHTML = paid
+      ? 'URL de compra * <span class="sub">(enlace de pago o ficha de itch.io)</span>'
+      : 'URL de descarga * <span class="sub">(ZIP del juego)</span>';
+    mainHelp.textContent = paid
+      ? 'La consola no descarga juegos de pago: se muestra el precio y se abre la ficha de compra.'
+      : 'La consola descarga y descomprime este ZIP. Debe incluir stadium.json.';
+  }
+
+  document.getElementById('fCover').addEventListener('input', updateCover);
+  priceInput.addEventListener('input', updatePriceLabels);
+  document.getElementById('btnClose').addEventListener('click', closeEditor);
+  document.getElementById('btnNew').addEventListener('click', () => openEditor(null));
+  modal.addEventListener('click', (event) => { if (event.target === modal) closeEditor(); });
+
+  function collect(status) {
+    const price = Math.max(0, Number(String(priceInput.value).replace(',', '.')) || 0);
+    const tags = document.getElementById('fTags').value.split(',')
+      .map((t) => t.trim()).filter(Boolean).slice(0, 8);
+    const shots = document.getElementById('fShots').value.split('\n')
+      .map((s) => s.trim()).filter(Boolean).slice(0, 8);
+    const data = {
+      title: document.getElementById('fTitle').value.trim(),
+      shortDescription: document.getElementById('fShort').value.trim(),
+      description_en: document.getElementById('fLongEn').value.trim(),
+      longDescription: document.getElementById('fLong').value.trim(),
+      priceEur: price,
+      priceLabel: price > 0 ? SW.money(price) : 'Gratis',
+      type: price > 0 ? 'paid' : 'free',
+      format: document.getElementById('fFormat').value,
+      version: document.getElementById('fVersion').value.trim(),
+      language: document.getElementById('fLang').value.trim(),
+      tags,
+      coverUrl: document.getElementById('fCover').value.trim(),
+      screenshots: shots,
+      mainUrl: document.getElementById('fMain').value.trim(),
+      sha256: document.getElementById('fSha').value.trim().toLowerCase(),
+      developerId: state.user.uid,
+      developerName: state.editing?.developerName || SW.displayName(state.user),
+      status,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    };
+    if (status === 'review') data.submittedAt = firebase.firestore.FieldValue.serverTimestamp();
+    return data;
+  }
+
+  function validate(data, status) {
+    if (!data.title || data.title.length < 2) return 'Pon un título al juego.';
+    if (!data.shortDescription) return 'Falta la descripción corta.';
+    if (!data.longDescription) return 'Falta la descripción larga.';
+    if (!data.coverUrl) return 'Falta la URL de portada.';
+    if (!data.mainUrl) return data.type === 'paid' ? 'Falta la URL de compra.' : 'Falta la URL de descarga.';
+    if (!/^https?:\/\//i.test(data.coverUrl)) return 'La portada debe ser una URL http(s).';
+    if (!/^https?:\/\//i.test(data.mainUrl)) return 'El enlace principal debe ser una URL http(s).';
+    if (status === 'review' && !data.version) return 'Indica una versión antes de enviar.';
+    return null;
+  }
+
+  async function persist(status) {
+    const data = collect(status);
+    const problem = validate(data, status);
+    if (problem) {
+      SW.toast(problem, 'error');
+      return;
+    }
+    const ref = state.editing
+      ? SW.db.collection(SW.COL_GAMES).doc(state.editing.id)
+      : SW.db.collection(SW.COL_GAMES).doc();
+    if (!state.editing) data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+    if (status === 'draft') {
+      data.status = 'draft';
+      if (state.editing && state.editing.status === 'published') {
+        SW.toast('Un juego publicado no se edita desde aquí.', 'error');
+        return;
+      }
+    }
+    try {
+      await ref.set(data, { merge: true });
+      SW.toast(status === 'review' ? 'Enviado a revisión' : 'Borrador guardado');
+      closeEditor();
+      await loadGames();
+    } catch (err) {
+      SW.toast(SW.friendlyError(err), 'error');
+    }
+  }
+
+  async function submitGame(game) {
+    if (!game) return;
+    const problem = validate({ ...game, type: game.type || 'free' }, 'review');
+    if (problem) {
+      SW.toast(problem + ' Edítalo antes de enviar.', 'error');
+      return openEditor(game);
+    }
+    try {
+      await SW.db.collection(SW.COL_GAMES).doc(game.id).set({
+        status: 'review',
+        submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        rejectReason: '',
+      }, { merge: true });
+      SW.toast('Enviado a revisión');
+      await loadGames();
+    } catch (err) {
+      SW.toast(SW.friendlyError(err), 'error');
+    }
+  }
+
+  form.addEventListener('submit', (event) => { event.preventDefault(); persist('review'); });
+  document.getElementById('btnDraft').addEventListener('click', () => persist('draft'));
+})();
+</script>
+</body>
+</html>

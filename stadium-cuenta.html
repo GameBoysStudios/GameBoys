@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Stadium | Game Boys Studios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/stadium-ui.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+  .steps { display: grid; gap: .65rem; margin: 0 0 1.4rem; padding: 0; list-style: none; counter-reset: step; }
+  .steps li { display: flex; gap: .8rem; align-items: flex-start; font-size: .9rem; color: var(--color-muted); }
+  .steps li::before {
+    counter-increment: step; content: counter(step);
+    flex: 0 0 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--color-cactus-dim); color: var(--color-cactus); font-weight: 700; font-size: .8rem;
+  }
+  .device-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+    border: 1px solid var(--color-border); border-radius: 10px; padding: .9rem 1rem; background: rgba(5,8,16,.45); }
+  .device-card + .device-card { margin-top: .7rem; }
+  .device-card h3 { margin: 0 0 .2rem; font-size: 1rem; }
+  .device-card code { color: var(--color-muted); font-size: .78rem; }
+  .link-form { display: grid; grid-template-columns: 1fr 200px; gap: 0 1rem; align-items: end; }
+  .chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .55rem; }
+  .chip { border: 1px solid var(--color-border); border-radius: 999px; padding: .18rem .55rem;
+    font-size: .74rem; color: var(--color-muted); }
+  .chip b { color: var(--color-text); font-weight: 600; }
+  .device-side { display: flex; flex-direction: column; align-items: flex-end; gap: .5rem; }
+  .link-state { font-size: .74rem; letter-spacing: .04em; text-transform: uppercase; color: var(--color-cactus); }
+  .link-state.pending { color: #ffb454; }
+  .link-state.off { color: var(--color-muted); }
+  @media (max-width: 640px) { .link-form { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate"></div>
+
+<div id="app" style="display:none">
+  <div id="headerHost"></div>
+  <main class="wrap">
+    <div class="page-head">
+      <div>
+        <h1>Mi Stadium</h1>
+        <p>Vincula tu consola con tu cuenta de Game Boys Studios.</p>
+      </div>
+      <span class="device-pill"><span class="dot" id="statusDot"></span><span id="statusText">Comprobando…</span></span>
+    </div>
+
+    <section class="card">
+      <h2>Vincular una consola</h2>
+      <ol class="steps">
+        <li>Enciende la Stadium y entra en <strong>Cuenta</strong>.</li>
+        <li>La TV mostrará un <strong>código de 6 dígitos</strong> y el identificador del dispositivo.</li>
+        <li>Escribe ambos aquí. El código caduca a los 15 minutos.</li>
+      </ol>
+      <form id="linkForm" class="link-form">
+        <div class="field">
+          <label for="deviceId">Identificador del dispositivo</label>
+          <input id="deviceId" placeholder="stadium-1a2b3c4d5e6f" autocomplete="off" spellcheck="false" required>
+        </div>
+        <div class="field">
+          <label for="linkCode">Código de 6 dígitos</label>
+          <input id="linkCode" class="code-input" inputmode="numeric" pattern="\d{6}" maxlength="6"
+                 placeholder="000000" autocomplete="one-time-code" required>
+        </div>
+        <div></div>
+        <button class="btn btn-primary" type="submit" id="linkBtn" style="height:48px">Vincular consola</button>
+      </form>
+      <div id="linkMsg" class="note" style="display:none;margin-top:1rem"></div>
+    </section>
+
+    <section class="card">
+      <h2>Mis consolas</h2>
+      <p class="hint">Las consolas vinculadas a esta cuenta pueden descargar tu biblioteca.</p>
+      <div id="devices"><div class="empty"><div class="icon">⏳</div><p>Cargando…</p></div></div>
+    </section>
+  </main>
+</div>
+
+<script src="assets/stadium-web.js"></script>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const deviceInput = document.getElementById('deviceId');
+  const codeInput = document.getElementById('linkCode');
+  const msg = document.getElementById('linkMsg');
+
+  deviceInput.value = (params.get('device') || '').trim();
+  codeInput.value = (params.get('code') || '').replace(/\D/g, '').slice(0, 6);
+
+  let user = null;
+
+  SW.mountGate(async (current) => {
+    user = current;
+    document.getElementById('headerHost').innerHTML = SW.header(user, 'MI STADIUM');
+    document.getElementById('swLogout').addEventListener('click', SW.signOut);
+    setStatus(true);
+    await loadDevices();
+    if (deviceInput.value && !codeInput.value) codeInput.focus();
+  }, { title: 'MI STADIUM', subtitle: 'Inicia sesión para vincular tu consola.' });
+
+  function setStatus(online) {
+    document.getElementById('statusDot').classList.toggle('on', online);
+    document.getElementById('statusText').textContent = online ? 'Cuenta conectada' : 'Sin conexión';
+  }
+
+  function showMsg(text, error = false) {
+    msg.textContent = text;
+    msg.className = 'note' + (error ? ' warn' : '');
+    msg.style.display = 'block';
+  }
+
+  codeInput.addEventListener('input', () => {
+    codeInput.value = codeInput.value.replace(/\D/g, '').slice(0, 6);
+  });
+
+  async function loadDevices() {
+    const wrap = document.getElementById('devices');
+    try {
+      const snap = await SW.db.collection(SW.COL_DEVICES)
+        .where('userId', '==', user.uid).get();
+      const devices = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      if (!devices.length) {
+        wrap.innerHTML = `<div class="empty"><div class="icon">🕹️</div>
+          <p>Aún no hay consolas vinculadas.</p></div>`;
+        return;
+      }
+      wrap.innerHTML = devices.map((device) => {
+        const linked = !!device.userId;
+        const pending = !linked && !!device.linkCode;
+        const stateClass = linked ? '' : (pending ? 'pending' : 'off');
+        const stateText = linked ? 'Vinculada' : (pending ? 'Código pendiente' : 'Sin cuenta');
+        const chips = SW.settingsSummary(device.settings, 5);
+        const sync = device.settingsUpdatedAt
+          ? `Ajustes sincronizados el ${SW.fmtDateTime(device.settingsUpdatedAt)}`
+          : 'Esta consola todavía no ha enviado sus ajustes';
+        return `
+        <div class="device-card">
+          <div style="flex:1 1 320px">
+            <h3>${SW.esc(device.name || 'Stadium')}</h3>
+            <code>${SW.esc(device.id)}</code>
+            <div class="meta" style="color:var(--color-muted);font-size:.8rem;margin-top:.25rem">
+              ${SW.esc(device.model || 'stadium')} · vinculada el ${SW.fmtDate(device.linkedAt)}
+            </div>
+            <div class="chips">${chips || '<span class="chip">Sin ajustes sincronizados</span>'}</div>
+            <div class="meta" style="color:var(--color-muted);font-size:.74rem;margin-top:.4rem">${SW.esc(sync)}</div>
+          </div>
+          <div class="device-side">
+            <span class="link-state ${stateClass}">${stateText}</span>
+            ${linked ? `<button class="btn btn-outline btn-sm" data-unlink="${SW.esc(device.id)}">Desvincular</button>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    } catch (err) {
+      wrap.innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>${SW.esc(SW.friendlyError(err))}</p></div>`;
+    }
+  }
+
+  document.getElementById('devices').addEventListener('click', async (event) => {
+    const id = event.target.getAttribute('data-unlink');
+    if (!id || !confirm('¿Desvincular esta consola de tu cuenta?')) return;
+    try {
+      await SW.db.collection(SW.COL_DEVICES).doc(id).update({ userId: null, linkedAt: null });
+      SW.toast('Consola desvinculada');
+      await loadDevices();
+    } catch (err) {
+      SW.toast(SW.friendlyError(err), 'error');
+    }
+  });
+
+  document.getElementById('linkForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const deviceId = deviceInput.value.trim();
+    const code = codeInput.value.trim();
+    const btn = document.getElementById('linkBtn');
+
+    if (!/^stadium-[a-z0-9]{6,20}$/i.test(deviceId)) {
+      return showMsg('El identificador debe tener el formato stadium-xxxxxxxx.', true);
+    }
+    if (!/^\d{6}$/.test(code)) {
+      return showMsg('El código son 6 dígitos.', true);
+    }
+
+    btn.disabled = true;
+    showMsg('Comprobando la consola…');
+    try {
+      const ref = SW.db.collection(SW.COL_DEVICES).doc(deviceId);
+      let snap;
+      try {
+        snap = await ref.get();
+      } catch (err) {
+        throw new Error(err.code === 'permission-denied'
+          ? 'La consola existe pero no deja leer su estado. Revisa las reglas de stadium_devices.'
+          : SW.friendlyError(err));
+      }
+      if (!snap.exists) {
+        throw new Error('No hay ninguna Stadium con ese identificador. Comprueba que la consola está encendida y que el agente está en modo Firestore.');
+      }
+      const data = snap.data() || {};
+      if (data.userId) {
+        throw new Error('Esa consola ya está vinculada a una cuenta. Desvincúlala primero desde aquí o desde la consola.');
+      }
+      if (!data.linkCode) {
+        throw new Error('La consola no tiene un código activo. Pulsa de nuevo "Vincular" en la consola para generar otro.');
+      }
+      if (data.linkCode !== code) {
+        throw new Error('El código no coincide. Revisa los 6 dígitos que muestra la televisión.');
+      }
+      const expires = data.linkCodeExpires && data.linkCodeExpires.toDate
+        ? data.linkCodeExpires.toDate() : null;
+      if (expires && expires.getTime() < Date.now()) {
+        throw new Error('El código ha caducado. Genera uno nuevo desde la consola.');
+      }
+
+      await ref.update({
+        claimCode: code,
+        userId: user.uid,
+        linkedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        linkCode: null,
+        linkCodeExpires: null,
+      });
+      // Limpieza del código de canje (si las reglas lo permiten).
+      ref.update({ claimCode: null }).catch(() => {});
+      showMsg('Consola vinculada. La televisión lo detecta en unos segundos y ya puede sincronizar ajustes.');
+      SW.toast('Consola vinculada');
+      codeInput.value = '';
+      await loadDevices();
+    } catch (err) {
+      showMsg(err.message || SW.friendlyError(err), true);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
